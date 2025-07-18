@@ -15,13 +15,31 @@ spec:
     spec:
       containerConcurrency: 100
       containers:
-      - image: gcr.io/PROJECT_ID/brew-detective-backend
+      - image: us-central1-docker.pkg.dev/brew-detective/brew-detective-repo/brew-detective-backend
         ports:
         - name: http1
           containerPort: 8080
         env:
         - name: GOOGLE_CLOUD_PROJECT
-          value: "PROJECT_ID"
+          value: "brew-detective"
+        - name: FIRESTORE_DATABASE_ID
+          value: "brew-detective"
+        - name: GOOGLE_CLIENT_ID
+          value: "1087966598090-sl8tt327bp6bpfeeb4td1fv2a3chtli5.apps.googleusercontent.com"
+        - name: GOOGLE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: brew-detective-secrets
+              key: google-client-secret
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: brew-detective-secrets
+              key: jwt-secret
+        - name: GOOGLE_REDIRECT_URL
+          value: "https://brew-detective-backend-1087966598090.us-central1.run.app/auth/google/callback"
+        - name: GIN_MODE
+          value: "release"
         resources:
           limits:
             cpu: 1000m

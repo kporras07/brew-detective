@@ -1,10 +1,10 @@
 // API Configuration
 const API_CONFIG = {
-    // Update this URL after deploying to Cloud Run
-    // BASE_URL: 'https://brew-detective-backend-YOUR_HASH-uc.a.run.app',
+    // Production backend URL on Cloud Run
+    BASE_URL: 'https://brew-detective-backend-1087966598090.us-central1.run.app',
     
-    // For local development
-    BASE_URL: 'http://localhost:8888',
+    // For local development (commented out for production)
+    // BASE_URL: 'http://localhost:8888',
     
     ENDPOINTS: {
         // API endpoints

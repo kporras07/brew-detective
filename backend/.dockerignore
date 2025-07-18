@@ -1,0 +1,28 @@
+# Environment files
+.env
+.env.*
+
+# IDE files
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Local development files
+brew-detective-key.json
+
+# Test files
+*_test.go
+
+# Build artifacts
+main
+
+# OS files
+.DS_Store
+Thumbs.db
