@@ -18,9 +18,9 @@ services:
     container_name: web-dev-tools
     working_dir: /app
     volumes:
-      - ./src:/app
+      - .:/app
       - /app/node_modules
-    command: tail -f /dev/null  # Keeps container running for development
+    command: sh -c "npm install && npm run watch:css"
     networks:
       - webnet
     environment:

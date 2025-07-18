@@ -1,0 +1,53 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
+.leaderboard {
+    @include glass-effect;
+    padding: $card-padding;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.leaderboard-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    transition: $transition;
+    
+    &:hover {
+        transform: scale(1.02);
+        background: rgba($primary-gold, 0.1);
+    }
+}
+
+.rank {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: $primary-gold;
+    min-width: 50px;
+}
+
+.detective-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.score {
+    font-size: 1.1rem;
+    color: $primary-gold;
+}
+
+.badge {
+    display: inline-block;
+    background: $primary-gold;
+    color: $background-dark;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin: 0.2rem;
+}

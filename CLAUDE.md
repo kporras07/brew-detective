@@ -12,25 +12,45 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-This is a simple static website built with:
-- **Frontend**: Pure HTML, CSS, and JavaScript (no frameworks)
+This is a static website built with:
+- **Frontend**: HTML, SASS-compiled CSS, and JavaScript (no frameworks)
+- **Build Process**: SASS compilation with npm scripts
 - **Deployment**: Docker containerized with Nginx
 - **Structure**: Single-page application with client-side routing
 
 ### Key Files
-- `src/index.html` - Complete application (HTML, CSS, JavaScript all in one file)
+- `src/index.html` - Main HTML file
+- `src/sass/` - SASS source files organized in partials
+- `src/css/style.css` - Compiled CSS output
+- `package.json` - Build scripts and dependencies
 - `docker-compose.yml` - Container setup with Nginx and development tools
 - `nginx.conf` - Nginx configuration for serving the static site
 
 ## Development Setup
 
+### Prerequisites
+- Docker and Docker Compose
+- Node.js and npm (if developing outside Docker)
+
 ### Running the Application
 ```bash
-# Start the development environment
+# Start the development environment (includes SASS watch)
 docker-compose up -d
 
 # Access the application
 # http://localhost:8080
+```
+
+### SASS Development
+```bash
+# Build CSS once
+npm run build:css
+
+# Watch SASS files for changes (automatic compilation)
+npm run watch:css
+
+# Run full build process
+npm run build
 ```
 
 ### Development Container Access
@@ -87,8 +107,13 @@ Currently all data is mock/simulated:
 
 ## Technical Notes
 
-- No build process required - it's a static HTML file
-- No package.json or npm dependencies
-- Uses modern CSS features (Grid, Flexbox, backdrop-filter)
-- Vanilla JavaScript with modern ES6+ features
-- Docker setup provides consistent development environment
+- **SASS Architecture**: Organized with partials for maintainability
+  - `base/` - Variables, mixins, reset styles
+  - `layout/` - Header, footer, hero, sections
+  - `components/` - Cards, forms, leaderboard
+  - `utilities/` - Animations and helper classes
+- **Build Process**: SASS compilation with npm scripts
+- **Development**: Docker container with automatic SASS watching
+- **CSS Features**: Grid, Flexbox, backdrop-filter, modern CSS
+- **JavaScript**: Vanilla JS with modern ES6+ features
+- **Deployment**: Nginx serves static files with optimized caching

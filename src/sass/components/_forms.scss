@@ -1,0 +1,56 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
+.form-container {
+    @include glass-effect;
+    padding: $card-padding;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: $primary-gold;
+        font-weight: bold;
+    }
+    
+    input, select, textarea {
+        width: 100%;
+        padding: $form-padding;
+        border: 1px solid rgba($primary-gold, 0.3);
+        border-radius: $input-radius;
+        background: rgba(0, 0, 0, 0.3);
+        color: $text-light;
+        font-size: 1rem;
+        
+        &:focus {
+            outline: none;
+            border-color: $primary-gold;
+            box-shadow: 0 0 10px rgba($primary-gold, 0.3);
+        }
+    }
+}
+
+.success-message {
+    background: rgba(39, 174, 96, 0.2);
+    border: 1px solid rgba(39, 174, 96, 0.5);
+    color: $success-green;
+    padding: 1rem;
+    border-radius: $input-radius;
+    margin-bottom: 1rem;
+    display: none;
+}
+
+.error-message {
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid rgba(231, 76, 60, 0.5);
+    color: $error-red;
+    padding: 1rem;
+    border-radius: $input-radius;
+    margin-bottom: 1rem;
+    display: none;
+}

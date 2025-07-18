@@ -1,0 +1,81 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+    align-items: stretch;
+    
+    &.symmetric {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        max-width: 1000px;
+        margin: 2rem auto 0;
+    }
+    
+    @include mobile {
+        grid-template-columns: 1fr;
+        
+        &.symmetric {
+            grid-template-columns: 1fr;
+            max-width: 100%;
+        }
+    }
+}
+
+// Center last item when in 2-column layout for 3-item grids
+.cards-grid.symmetric:has(.card:nth-child(3):last-child) {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    
+    @media (min-width: 769px) and (max-width: 1200px) {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 700px;
+        
+        .card:nth-child(3) {
+            grid-column: 1 / -1;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+    }
+}
+
+.card {
+    @include glass-effect;
+    @include hover-lift;
+    padding: $card-padding;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, transparent, rgba($primary-gold, 0.1), transparent);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    &:hover::before {
+        opacity: 1;
+    }
+    
+    h3 {
+        color: $primary-gold;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+    
+    p {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+    }
+}

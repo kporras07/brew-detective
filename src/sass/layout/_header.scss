@@ -1,0 +1,138 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
+header {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: $z-header;
+    border-bottom: 2px solid $primary-gold;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: $primary-gold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+    
+    a {
+        color: $text-light;
+        text-decoration: none;
+        transition: color 0.3s;
+        position: relative;
+        
+        &:hover {
+            color: $primary-gold;
+        }
+        
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: $primary-gold;
+            transition: width 0.3s;
+        }
+        
+        &:hover::after {
+            width: 100%;
+        }
+    }
+}
+
+// Mobile menu
+.mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    padding: 5px;
+    
+    span {
+        width: 25px;
+        height: 3px;
+        background: $primary-gold;
+        margin: 3px 0;
+        transition: 0.3s;
+        border-radius: 2px;
+    }
+    
+    &.active {
+        span:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+        
+        span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        span:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+    }
+}
+
+.mobile-nav {
+    display: none;
+    position: fixed;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: $z-mobile-nav;
+    padding: 2rem 0;
+    
+    &.active {
+        display: block;
+    }
+    
+    ul {
+        list-style: none;
+        text-align: center;
+        
+        li {
+            margin: 1rem 0;
+            
+            a {
+                color: $text-light;
+                text-decoration: none;
+                font-size: 1.2rem;
+                display: block;
+                padding: 1rem;
+                transition: $transition;
+                
+                &:hover {
+                    color: $primary-gold;
+                    background: rgba($primary-gold, 0.1);
+                }
+            }
+        }
+    }
+}
+
+@include mobile {
+    .nav-links {
+        display: none;
+    }
+    
+    .mobile-menu-toggle {
+        display: flex;
+    }
+}

@@ -1,0 +1,50 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.section {
+    padding: $section-padding;
+    position: relative;
+    
+    @include mobile {
+        padding: 3rem 0;
+    }
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: $primary-gold;
+    position: relative;
+    
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background: $primary-gold;
+    }
+    
+    @include mobile {
+        font-size: 2rem;
+    }
+}
+
+.page {
+    display: none;
+    min-height: 100vh;
+    padding-top: 80px;
+    
+    &.active {
+        display: block;
+    }
+}

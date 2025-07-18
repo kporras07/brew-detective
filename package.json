@@ -1,0 +1,28 @@
+{
+  "name": "brew-detective",
+  "version": "1.0.0",
+  "description": "A coffee tasting detective game focused on Costa Rican coffee",
+  "main": "src/index.html",
+  "scripts": {
+    "build:css": "sass src/sass/main.scss src/css/style.css --style=compressed",
+    "build:css:dev": "sass src/sass/main.scss src/css/style.css --source-map",
+    "watch:css": "sass --watch src/sass/main.scss src/css/style.css --source-map",
+    "build": "npm run build:css",
+    "dev": "npm run watch:css",
+    "start": "docker compose up -d",
+    "stop": "docker compose down",
+    "logs": "docker compose logs -f web-dev"
+  },
+  "keywords": [
+    "coffee",
+    "tasting",
+    "game",
+    "costa-rica",
+    "detective"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "sass": "^1.69.5"
+  }
+}

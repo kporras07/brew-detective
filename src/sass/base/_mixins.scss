@@ -1,0 +1,63 @@
+// Glassmorphism effect
+@mixin glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 15px;
+}
+
+// Hover transform
+@mixin hover-lift {
+    transition: all 0.3s;
+    
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+    }
+}
+
+// Gold gradient text
+@mixin gold-gradient-text {
+    background: linear-gradient(45deg, #d4af37, #f4f1e8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+// Responsive breakpoints
+@mixin mobile {
+    @media (max-width: 768px) {
+        @content;
+    }
+}
+
+@mixin tablet {
+    @media (max-width: 1024px) {
+        @content;
+    }
+}
+
+@mixin desktop {
+    @media (min-width: 1200px) {
+        @content;
+    }
+}
+
+// Button styles
+@mixin button-style {
+    display: inline-block;
+    background: linear-gradient(45deg, #d4af37, #f4d03f);
+    color: #2c1810;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 50px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    font-size: 1.1rem;
+    
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+    }
+}
