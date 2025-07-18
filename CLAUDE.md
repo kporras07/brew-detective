@@ -21,7 +21,9 @@ This is a static website built with:
 ### Key Files
 - `src/index.html` - Main HTML file
 - `src/sass/` - SASS source files organized in partials
-- `src/css/style.css` - Compiled CSS output
+- `src/css/main.css` - Compiled CSS output
+- `src/js/main.js` - JavaScript functionality
+- `src/images/` - Static images (logos, etc.)
 - `package.json` - Build scripts and dependencies
 - `docker-compose.yml` - Container setup with Nginx and development tools
 - `nginx.conf` - Nginx configuration for serving the static site
@@ -74,11 +76,12 @@ The application uses JavaScript-based client-side routing with these main sectio
 - **Profile**: User statistics and badges
 
 ### Key Components
-- Single HTML file architecture with inline CSS and JavaScript
+- Clean separation of HTML, CSS, and JavaScript
 - Mobile-responsive design with hamburger menu
 - Form validation and mock data submission
 - Simulated leaderboard updates and user statistics
 - Local storage for user data (profile information)
+- Intersection Observer for scroll animations
 
 ## Business Logic
 
