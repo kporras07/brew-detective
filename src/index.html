@@ -81,6 +81,74 @@
             width: 100%;
         }
 
+        /* Mobile Menu */
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .mobile-menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: #d4af37;
+            margin: 3px 0;
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+
+        .mobile-menu-toggle.active span:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .mobile-menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-toggle.active span:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            padding: 2rem 0;
+        }
+
+        .mobile-nav.active {
+            display: block;
+        }
+
+        .mobile-nav ul {
+            list-style: none;
+            text-align: center;
+        }
+
+        .mobile-nav ul li {
+            margin: 1rem 0;
+        }
+
+        .mobile-nav ul li a {
+            color: #f4f1e8;
+            text-decoration: none;
+            font-size: 1.2rem;
+            display: block;
+            padding: 1rem;
+            transition: all 0.3s;
+        }
+
+        .mobile-nav ul li a:hover {
+            color: #d4af37;
+            background: rgba(212, 175, 55, 0.1);
+        }
+
         /* Hero Section */
         .hero {
             min-height: 100vh;
@@ -161,9 +229,34 @@
         /* Cards */
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
             margin-top: 2rem;
+            align-items: stretch;
+        }
+
+        .cards-grid.symmetric {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            max-width: 1000px;
+            margin: 2rem auto 0;
+        }
+
+        /* Center last item when in 2-column layout for 3-item grids */
+        .cards-grid.symmetric:has(.card:nth-child(3):last-child) {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        @media (min-width: 769px) and (max-width: 1200px) {
+            .cards-grid.symmetric:has(.card:nth-child(3):last-child) {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 700px;
+            }
+            
+            .cards-grid.symmetric:has(.card:nth-child(3):last-child) .card:nth-child(3) {
+                grid-column: 1 / -1;
+                max-width: 300px;
+                margin: 0 auto;
+            }
         }
 
         .card {
@@ -175,6 +268,9 @@
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
         }
 
         .card::before {
@@ -202,6 +298,13 @@
             color: #d4af37;
             margin-bottom: 1rem;
             font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .card p {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
         }
 
         /* Forms */
@@ -303,6 +406,10 @@
                 display: none;
             }
 
+            .mobile-menu-toggle {
+                display: flex;
+            }
+
             .hero h1 {
                 font-size: 2.5rem;
             }
@@ -313,6 +420,82 @@
 
             .cards-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .cards-grid.symmetric {
+                grid-template-columns: 1fr;
+                max-width: 100%;
+            }
+
+            .section {
+                padding: 3rem 0;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 2px solid #d4af37;
+            padding: 3rem 0 2rem;
+            text-align: center;
+            margin-top: 5rem;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #d4af37;
+        }
+
+        .footer-divider {
+            width: 2px;
+            height: 30px;
+            background: #d4af37;
+            opacity: 0.5;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #f4f1e8;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .footer-brand:hover {
+            color: #d4af37;
+            transform: scale(1.05);
+        }
+
+        .footer-text {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 576px) {
+            .footer-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .footer-divider {
+                width: 50px;
+                height: 2px;
             }
         }
 
@@ -377,7 +560,21 @@
                 <li><a href="#" onclick="showPage('leaderboard')">Ranking</a></li>
                 <li><a href="#" onclick="showPage('profile')">Mi Perfil</a></li>
             </ul>
+            <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </nav>
+        <div class="mobile-nav" id="mobileNav">
+            <ul>
+                <li><a href="#" onclick="showPage('home'); closeMobileMenu()">Inicio</a></li>
+                <li><a href="#" onclick="showPage('order'); closeMobileMenu()">Ordenar Caja</a></li>
+                <li><a href="#" onclick="showPage('submit'); closeMobileMenu()">Enviar Respuestas</a></li>
+                <li><a href="#" onclick="showPage('leaderboard'); closeMobileMenu()">Ranking</a></li>
+                <li><a href="#" onclick="showPage('profile'); closeMobileMenu()">Mi Perfil</a></li>
+            </ul>
+        </div>
     </header>
 
     <!-- Home Page -->
@@ -395,7 +592,7 @@
         <section class="section">
             <div class="container">
                 <h2 class="section-title">¿Cómo Funciona?</h2>
-                <div class="cards-grid">
+                <div class="cards-grid symmetric">
                     <div class="card fade-in">
                         <h3>📦 Ordena tu Caja Misteriosa</h3>
                         <p>Solicita tu caja con 4 cafés costarricenses misteriosos de 80g cada uno. <strong>₡18,000</strong></p>
@@ -416,6 +613,10 @@
                         <h3>🏆 Compite en el Ranking</h3>
                         <p>Sube en el ranking de detectives. Gana insignias, desbloquea logros y conviértete en el mejor detective del café.</p>
                     </div>
+                    <div class="card fade-in">
+                        <h3>🎉 Disfruta el Proceso</h3>
+                        <p>Aprende sobre el café costarricense mientras te diviertes y conectas con otros amantes del café.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -423,7 +624,7 @@
         <section class="section">
             <div class="container">
                 <h2 class="section-title">Tipos de Misterios</h2>
-                <div class="cards-grid">
+                <div class="cards-grid symmetric">
                     <div class="card fade-in">
                         <h3>🌍 Caso Origen</h3>
                         <p>¿De qué región de Costa Rica viene este café? ¿Qué finca? Descifra las pistas en cada sorbo.</p>
@@ -915,7 +1116,54 @@
         </section>
     </div>
 
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">🔍 Brew Detective</div>
+                <div class="footer-divider"></div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span>Una experiencia creada por</span>
+                    <a href="https://instagram.com/sinfonia_cafe_cr" class="footer-brand" target="_blank" rel="noopener noreferrer">
+                        <span>☕</span>
+                        <strong>Sinfonía Café</strong>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-text">
+                <p>© 2025 Brew Detective. Todos los derechos reservados.</p>
+                <p>Síguenos en <a href="https://instagram.com/sinfonia_cafe_cr" style="color: #d4af37; text-decoration: none;" target="_blank" rel="noopener noreferrer">@sinfonia_cafe_cr</a></p>
+            </div>
+        </div>
+    </footer>
+
     <script>
+        // Mobile menu functionality
+        function toggleMobileMenu() {
+            const mobileNav = document.getElementById('mobileNav');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            
+            mobileNav.classList.toggle('active');
+            toggle.classList.toggle('active');
+        }
+
+        function closeMobileMenu() {
+            const mobileNav = document.getElementById('mobileNav');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            
+            mobileNav.classList.remove('active');
+            toggle.classList.remove('active');
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const mobileNav = document.getElementById('mobileNav');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            
+            if (!toggle.contains(event.target) && !mobileNav.contains(event.target)) {
+                closeMobileMenu();
+            }
+        });
         // Navigation functionality
         function showPage(pageId) {
             // Hide all pages
