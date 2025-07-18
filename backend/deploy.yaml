@@ -40,6 +40,8 @@ spec:
           value: "https://brew-detective-backend-1087966598090.us-central1.run.app/auth/google/callback"
         - name: GIN_MODE
           value: "release"
+        - name: FRONTEND_URL
+          value: "https://kporras07.github.io/brew-detective"
         resources:
           limits:
             cpu: 1000m

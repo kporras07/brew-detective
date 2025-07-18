@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"brew-detective-backend/internal/auth"
@@ -40,7 +41,8 @@ func GoogleCallback(c *gin.Context) {
 
 	googleUser, err := auth.GetUserDataFromGoogle(code)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user data"})
+		fmt.Printf("Error getting user data from Google: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user data", "details": err.Error()})
 		return
 	}
 
@@ -98,7 +100,10 @@ func GoogleCallback(c *gin.Context) {
 	}
 
 	// Redirect back to frontend with token in URL fragment
-	frontendURL := "http://localhost:8080"
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:8080" // Default for local development
+	}
 	redirectURL := fmt.Sprintf("%s/#token=%s", frontendURL, token)
 	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
