@@ -1,10 +1,1031 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>My Web Project</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brew Detective - Resuelve el Misterio del Café</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
+            color: #f4f1e8;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 2px solid #d4af37;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #f4f1e8;
+            text-decoration: none;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #d4af37;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #d4af37;
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><pattern id="coffee-beans" patternUnits="userSpaceOnUse" width="100" height="100"><circle cx="20" cy="20" r="3" fill="%23d4af37" opacity="0.1"/><circle cx="60" cy="40" r="2" fill="%23d4af37" opacity="0.1"/><circle cx="80" cy="70" r="3" fill="%23d4af37" opacity="0.1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23coffee-beans)"/></svg>') center/cover;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+            background: linear-gradient(45deg, #d4af37, #f4f1e8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #d4af37, #f4d03f);
+            color: #2c1810;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 50px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            font-size: 1.1rem;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+        }
+
+        /* Sections */
+        .section {
+            padding: 5rem 0;
+            position: relative;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #d4af37;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: #d4af37;
+        }
+
+        /* Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+        }
+
+        .card h3 {
+            color: #d4af37;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        /* Forms */
+        .form-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #f4f1e8;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Leaderboard */
+        .leaderboard {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .leaderboard-entry:hover {
+            transform: scale(1.02);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #d4af37;
+            min-width: 50px;
+        }
+
+        .detective-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .score {
+            font-size: 1.1rem;
+            color: #d4af37;
+        }
+
+        /* Navigation */
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Badge styles */
+        .badge {
+            display: inline-block;
+            background: #d4af37;
+            color: #2c1810;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin: 0.2rem;
+        }
+
+        .success-message {
+            background: rgba(39, 174, 96, 0.2);
+            border: 1px solid rgba(39, 174, 96, 0.5);
+            color: #2ecc71;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.5);
+            color: #e74c3c;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello World!</h1>
-    <p>Your local development server is running!</p>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">🔍 Brew Detective</div>
+            <ul class="nav-links">
+                <li><a href="#" onclick="showPage('home')">Inicio</a></li>
+                <li><a href="#" onclick="showPage('order')">Ordenar Caja</a></li>
+                <li><a href="#" onclick="showPage('submit')">Enviar Respuestas</a></li>
+                <li><a href="#" onclick="showPage('leaderboard')">Ranking</a></li>
+                <li><a href="#" onclick="showPage('profile')">Mi Perfil</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Home Page -->
+    <div id="home" class="page active">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content fade-in">
+                    <h1>Brew Detective</h1>
+                    <p>Conviértete en un detective del café. Resuelve misterios, descifra sabores y compite por el primer lugar en el ranking de catadores más expertos.</p>
+                    <a href="#" class="cta-button" onclick="showPage('order')">Iniciar Investigación</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">¿Cómo Funciona?</h2>
+                <div class="cards-grid">
+                    <div class="card fade-in">
+                        <h3>📦 Ordena tu Caja Misteriosa</h3>
+                        <p>Solicita tu caja con 4 cafés costarricenses misteriosos de 80g cada uno. <strong>₡18,000</strong></p>
+                    </div>
+                    <div class="card fade-in">
+                        <h3>☕ Recibe y Cata</h3>
+                        <p>Sin etiquetas, sin pistas... solo tu paladar y tu intuición para descubrir los secretos.</p>
+                    </div>
+                    <div class="card fade-in">
+                        <h3>🔍 Analiza las Evidencias</h3>
+                        <p>Usa tus sentidos para descubrir la región, variedad, proceso y más. Cada detalle es importante.</p>
+                    </div>
+                    <div class="card fade-in">
+                        <h3>💡 Resuelve el Misterio</h3>
+                        <p>Responde nuestras preguntas detectivescas y envía tus conclusiones. Cada respuesta correcta suma puntos.</p>
+                    </div>
+                    <div class="card fade-in">
+                        <h3>🏆 Compite en el Ranking</h3>
+                        <p>Sube en el ranking de detectives. Gana insignias, desbloquea logros y conviértete en el mejor detective del café.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Tipos de Misterios</h2>
+                <div class="cards-grid">
+                    <div class="card fade-in">
+                        <h3>🌍 Caso Origen</h3>
+                        <p>¿De qué región de Costa Rica viene este café? ¿Qué finca? Descifra las pistas en cada sorbo.</p>
+                    </div>
+                    <div class="card fade-in">
+                        <h3>⚙️ Caso Proceso</h3>
+                        <p>¿Lavado, natural, honey? El proceso de beneficiado deja huellas únicas.</p>
+                    </div>
+                    <div class="card fade-in">
+                        <h3>🌱 Caso Variedad</h3>
+                        <p>¿Caturra, Bourbon, Geisha? Cada variedad tiene su personalidad única.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Order Page -->
+    <div id="order" class="page">
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Ordenar Caja Detective</h2>
+                <div class="form-container">
+                    <h3 style="color: #d4af37; text-align: center; margin-bottom: 1rem;">💰 Precio: ₡18,000</h3>
+                    <p style="text-align: center; margin-bottom: 2rem; opacity: 0.9;">
+                        Incluye 4 cafés costarricenses misteriosos de 80g cada uno + guía de cata + acceso al juego online
+                    </p>
+                    <div style="text-align: center;">
+                        <a href="https://wa.me/50612345678?text=Hola!%20Quiero%20ordenar%20una%20caja%20Brew%20Detective%20por%20₡18,000" 
+                           class="cta-button" 
+                           target="_blank" 
+                           rel="noopener noreferrer">
+                            📱 Ordenar por WhatsApp
+                        </a>
+                    </div>
+                    <p style="text-align: center; margin-top: 1rem; opacity: 0.7; font-size: 0.9rem;">
+                        Te contactaremos para coordinar la entrega y el pago
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Submit Page -->
+    <div id="submit" class="page">
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Enviar Respuestas del Caso</h2>
+                <div class="form-container">
+                    <div class="success-message" id="submitSuccess">
+                        ¡Caso resuelto exitosamente! Tus respuestas han sido enviadas.
+                    </div>
+                    <div class="error-message" id="submitError">
+                        Error al enviar respuestas. Por favor intenta nuevamente.
+                    </div>
+                    <form id="submitForm">
+                        <div class="form-group">
+                            <label for="detectiveName">Nombre del Detective:</label>
+                            <input type="text" id="detectiveName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="caseId">ID del Caso:</label>
+                            <input type="text" id="caseId" placeholder="Ej: CASO001" required>
+                        </div>
+                        
+                        <h3 style="color: #d4af37; margin: 2rem 0 1rem 0;">☕ Café #1 - "El Misterioso"</h3>
+                        <div class="form-group">
+                            <label for="coffee1_region">Región de Costa Rica:</label>
+                            <select id="coffee1_region" required>
+                                <option value="">Selecciona una región</option>
+                                <option value="central_valley">Valle Central</option>
+                                <option value="west_valley">Valle Occidental</option>
+                                <option value="tarrazu">Tarrazú</option>
+                                <option value="tres_rios">Tres Ríos</option>
+                                <option value="brunca">Brunca</option>
+                                <option value="turrialba">Turrialba</option>
+                                <option value="guanacaste">Guanacaste</option>
+                                <option value="orosi">Orosi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee1_variety">Variedad:</label>
+                            <select id="coffee1_variety" required>
+                                <option value="">Selecciona una variedad</option>
+                                <option value="caturra">Caturra</option>
+                                <option value="bourbon">Bourbon</option>
+                                <option value="catuai">Catuaí</option>
+                                <option value="geisha">Geisha</option>
+                                <option value="villa_sarchi">Villa Sarchí</option>
+                                <option value="sl28">SL28</option>
+                                <option value="pacas">Pacas</option>
+                                <option value="typica">Typica</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee1_process">Proceso de Beneficiado:</label>
+                            <select id="coffee1_process" required>
+                                <option value="">Selecciona un proceso</option>
+                                <option value="washed">Lavado</option>
+                                <option value="natural">Natural</option>
+                                <option value="honey">Honey</option>
+                                <option value="semi_washed">Semi-lavado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee1_roast">Nivel de Tueste:</label>
+                            <select id="coffee1_roast" required>
+                                <option value="">Selecciona un nivel</option>
+                                <option value="light">Ligero</option>
+                                <option value="medium_light">Medio-Ligero</option>
+                                <option value="medium">Medio</option>
+                                <option value="medium_dark">Medio-Oscuro</option>
+                                <option value="dark">Oscuro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee1_notes">Notas de Cata Detectadas:</label>
+                            <textarea id="coffee1_notes" rows="3" placeholder="Describe los sabores, aromas y sensaciones que detectaste..."></textarea>
+                        </div>
+
+                        <h3 style="color: #d4af37; margin: 2rem 0 1rem 0;">☕ Café #2 - "El Enigma"</h3>
+                        <div class="form-group">
+                            <label for="coffee2_region">Región de Costa Rica:</label>
+                            <select id="coffee2_region" required>
+                                <option value="">Selecciona una región</option>
+                                <option value="central_valley">Valle Central</option>
+                                <option value="west_valley">Valle Occidental</option>
+                                <option value="tarrazu">Tarrazú</option>
+                                <option value="tres_rios">Tres Ríos</option>
+                                <option value="brunca">Brunca</option>
+                                <option value="turrialba">Turrialba</option>
+                                <option value="guanacaste">Guanacaste</option>
+                                <option value="orosi">Orosi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee2_variety">Variedad:</label>
+                            <select id="coffee2_variety" required>
+                                <option value="">Selecciona una variedad</option>
+                                <option value="caturra">Caturra</option>
+                                <option value="bourbon">Bourbon</option>
+                                <option value="catuai">Catuaí</option>
+                                <option value="geisha">Geisha</option>
+                                <option value="villa_sarchi">Villa Sarchí</option>
+                                <option value="sl28">SL28</option>
+                                <option value="pacas">Pacas</option>
+                                <option value="typica">Typica</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee2_process">Proceso de Beneficiado:</label>
+                            <select id="coffee2_process" required>
+                                <option value="">Selecciona un proceso</option>
+                                <option value="washed">Lavado</option>
+                                <option value="natural">Natural</option>
+                                <option value="honey">Honey</option>
+                                <option value="semi_washed">Semi-lavado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee2_roast">Nivel de Tueste:</label>
+                            <select id="coffee2_roast" required>
+                                <option value="">Selecciona un nivel</option>
+                                <option value="light">Ligero</option>
+                                <option value="medium_light">Medio-Ligero</option>
+                                <option value="medium">Medio</option>
+                                <option value="medium_dark">Medio-Oscuro</option>
+                                <option value="dark">Oscuro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee2_notes">Notas de Cata Detectadas:</label>
+                            <textarea id="coffee2_notes" rows="3" placeholder="Describe los sabores, aromas y sensaciones que detectaste..."></textarea>
+                        </div>
+
+                        <h3 style="color: #d4af37; margin: 2rem 0 1rem 0;">☕ Café #3 - "El Secreto"</h3>
+                        <div class="form-group">
+                            <label for="coffee3_region">Región de Costa Rica:</label>
+                            <select id="coffee3_region" required>
+                                <option value="">Selecciona una región</option>
+                                <option value="central_valley">Valle Central</option>
+                                <option value="west_valley">Valle Occidental</option>
+                                <option value="tarrazu">Tarrazú</option>
+                                <option value="tres_rios">Tres Ríos</option>
+                                <option value="brunca">Brunca</option>
+                                <option value="turrialba">Turrialba</option>
+                                <option value="guanacaste">Guanacaste</option>
+                                <option value="orosi">Orosi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee3_variety">Variedad:</label>
+                            <select id="coffee3_variety" required>
+                                <option value="">Selecciona una variedad</option>
+                                <option value="caturra">Caturra</option>
+                                <option value="bourbon">Bourbon</option>
+                                <option value="catuai">Catuaí</option>
+                                <option value="geisha">Geisha</option>
+                                <option value="villa_sarchi">Villa Sarchí</option>
+                                <option value="sl28">SL28</option>
+                                <option value="pacas">Pacas</option>
+                                <option value="typica">Typica</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee3_process">Proceso de Beneficiado:</label>
+                            <select id="coffee3_process" required>
+                                <option value="">Selecciona un proceso</option>
+                                <option value="washed">Lavado</option>
+                                <option value="natural">Natural</option>
+                                <option value="honey">Honey</option>
+                                <option value="semi_washed">Semi-lavado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee3_roast">Nivel de Tueste:</label>
+                            <select id="coffee3_roast" required>
+                                <option value="">Selecciona un nivel</option>
+                                <option value="light">Ligero</option>
+                                <option value="medium_light">Medio-Ligero</option>
+                                <option value="medium">Medio</option>
+                                <option value="medium_dark">Medio-Oscuro</option>
+                                <option value="dark">Oscuro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee3_notes">Notas de Cata Detectadas:</label>
+                            <textarea id="coffee3_notes" rows="3" placeholder="Describe los sabores, aromas y sensaciones que detectaste..."></textarea>
+                        </div>
+
+                        <h3 style="color: #d4af37; margin: 2rem 0 1rem 0;">☕ Café #4 - "El Desafío"</h3>
+                        <div class="form-group">
+                            <label for="coffee4_region">Región de Costa Rica:</label>
+                            <select id="coffee4_region" required>
+                                <option value="">Selecciona una región</option>
+                                <option value="central_valley">Valle Central</option>
+                                <option value="west_valley">Valle Occidental</option>
+                                <option value="tarrazu">Tarrazú</option>
+                                <option value="tres_rios">Tres Ríos</option>
+                                <option value="brunca">Brunca</option>
+                                <option value="turrialba">Turrialba</option>
+                                <option value="guanacaste">Guanacaste</option>
+                                <option value="orosi">Orosi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee4_variety">Variedad:</label>
+                            <select id="coffee4_variety" required>
+                                <option value="">Selecciona una variedad</option>
+                                <option value="caturra">Caturra</option>
+                                <option value="bourbon">Bourbon</option>
+                                <option value="catuai">Catuaí</option>
+                                <option value="geisha">Geisha</option>
+                                <option value="villa_sarchi">Villa Sarchí</option>
+                                <option value="sl28">SL28</option>
+                                <option value="pacas">Pacas</option>
+                                <option value="typica">Typica</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee4_process">Proceso de Beneficiado:</label>
+                            <select id="coffee4_process" required>
+                                <option value="">Selecciona un proceso</option>
+                                <option value="washed">Lavado</option>
+                                <option value="natural">Natural</option>
+                                <option value="honey">Honey</option>
+                                <option value="semi_washed">Semi-lavado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee4_roast">Nivel de Tueste:</label>
+                            <select id="coffee4_roast" required>
+                                <option value="">Selecciona un nivel</option>
+                                <option value="light">Ligero</option>
+                                <option value="medium_light">Medio-Ligero</option>
+                                <option value="medium">Medio</option>
+                                <option value="medium_dark">Medio-Oscuro</option>
+                                <option value="dark">Oscuro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="coffee4_notes">Notas de Cata Detectadas:</label>
+                            <textarea id="coffee4_notes" rows="3" placeholder="Describe los sabores, aromas y sensaciones que detectaste..."></textarea>
+                        </div>
+
+                        <h3 style="color: #d4af37; margin: 2rem 0 1rem 0;">🔍 Preguntas Bonus</h3>
+                        <div class="form-group">
+                            <label for="favorite_coffee">¿Cuál fue tu café favorito y por qué?</label>
+                            <textarea id="favorite_coffee" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="brewing_method">¿Qué método de preparación usaste?</label>
+                            <select id="brewing_method">
+                                <option value="">Selecciona un método</option>
+                                <option value="v60">V60</option>
+                                <option value="chemex">Chemex</option>
+                                <option value="aeropress">AeroPress</option>
+                                <option value="french_press">Prensa Francesa</option>
+                                <option value="espresso">Espresso</option>
+                                <option value="moka">Moka</option>
+                                <option value="other">Otro</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="cta-button">Enviar Solución del Caso</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Leaderboard Page -->
+    <div id="leaderboard" class="page">
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Ranking de Detectives</h2>
+                <div class="leaderboard">
+                    <div class="leaderboard-entry">
+                        <div class="rank">🥇 1</div>
+                        <div class="detective-name">Ana Cafetera <span class="badge">Detective Maestro</span></div>
+                        <div class="score">2,450 pts</div>
+                    </div>
+                    <div class="leaderboard-entry">
+                        <div class="rank">🥈 2</div>
+                        <div class="detective-name">Carlos Barista <span class="badge">Detective Experto</span></div>
+                        <div class="score">2,280 pts</div>
+                    </div>
+                    <div class="leaderboard-entry">
+                        <div class="rank">🥉 3</div>
+                        <div class="detective-name">María Catadora <span class="badge">Detective Experto</span></div>
+                        <div class="score">2,100 pts</div>
+                    </div>
+                    <div class="leaderboard-entry">
+                        <div class="rank">4</div>
+                        <div class="detective-name">Roberto Tostador <span class="badge">Detective Novato</span></div>
+                        <div class="score">1,850 pts</div>
+                    </div>
+                    <div class="leaderboard-entry">
+                        <div class="rank">5</div>
+                        <div class="detective-name">Sofía Aromática <span class="badge">Detective Experto</span></div>
+                        <div class="score">1,720 pts</div>
+                    </div>
+                    <div class="leaderboard-entry">
+                        <div class="rank">6</div>
+                        <div class="detective-name">Diego Gourmet <span class="badge">Detective Novato</span></div>
+                        <div class="score">1,650 pts</div>
+                    </div>
+                    <div class="leaderboard-entry">
+                        <div class="rank">7</div>
+                        <div class="detective-name">Lucia Sabores <span class="badge">Detective Novato</span></div>
+                        <div class="score">1,520 pts</div>
+                    </div>
+                    <div class="leaderboard-entry">
+                        <div class="rank">8</div>
+                        <div class="detective-name">Pablo Granos <span class="badge">Detective Experto</span></div>
+                        <div class="score">1,480 pts</div>
+                    </div>
+                    <div class="leaderboard-entry">
+                        <div class="rank">9</div>
+                        <div class="detective-name">Elena Molinos <span class="badge">Detective Novato</span></div>
+                        <div class="score">1,380 pts</div>
+                    </div>
+                    <div class="leaderboard-entry">
+                        <div class="rank">10</div>
+                        <div class="detective-name">Fernando Café <span class="badge">Detective Novato</span></div>
+                        <div class="score">1,200 pts</div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <p style="color: #d4af37; font-size: 1.1rem;">🏆 Próxima actualización: en 2 días</p>
+                    <p style="margin-top: 1rem; opacity: 0.8;">El ranking se actualiza cada domingo con los nuevos casos resueltos</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Profile Page -->
+    <div id="profile" class="page">
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Mi Perfil de Detective</h2>
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3>👤 Información Personal</h3>
+                        <div class="form-container" style="background: transparent; border: none; padding: 0;">
+                            <div class="form-group">
+                                <label for="profileName">Nombre del Detective:</label>
+                                <input type="text" id="profileName" placeholder="Ingresa tu nombre">
+                            </div>
+                            <div class="form-group">
+                                <label for="profileEmail">Email:</label>
+                                <input type="email" id="profileEmail" placeholder="tu@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="profileLevel">Nivel de Experiencia:</label>
+                                <select id="profileLevel">
+                                    <option value="beginner">Principiante</option>
+                                    <option value="intermediate">Intermedio</option>
+                                    <option value="expert">Experto</option>
+                                </select>
+                            </div>
+                            <button type="button" class="cta-button" onclick="saveProfile()">Actualizar Perfil</button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>📊 Mis Estadísticas</h3>
+                        <div style="text-align: center;">
+                            <div style="margin: 1rem 0;">
+                                <div style="font-size: 2rem; color: #d4af37; font-weight: bold;">1,650</div>
+                                <div>Puntos Totales</div>
+                            </div>
+                            <div style="margin: 1rem 0;">
+                                <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;"># 6</div>
+                                <div>Posición en el Ranking</div>
+                            </div>
+                            <div style="margin: 1rem 0;">
+                                <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;">3</div>
+                                <div>Casos Resueltos</div>
+                            </div>
+                            <div style="margin: 1rem 0;">
+                                <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;">75%</div>
+                                <div>Precisión</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <h3>🏅 Mis Insignias</h3>
+                    <div style="text-align: center; margin: 1rem 0;">
+                        <span class="badge">🔍 Primer Caso</span>
+                        <span class="badge">🌍 Experto en Orígenes</span>
+                        <span class="badge">☕ Catador Nivel 1</span>
+                        <span class="badge">🎯 Precisión 70%</span>
+                    </div>
+                    <div style="margin-top: 1rem; opacity: 0.8; text-align: center;">
+                        <p>Próximas insignias por desbloquear:</p>
+                        <div style="margin: 0.5rem 0;">
+                            <span style="opacity: 0.5;">🏆 Detective Maestro (necesitas 2,000 pts)</span><br>
+                            <span style="opacity: 0.5;">🔥 Experto en Tuestes (necesitas 5 casos)</span><br>
+                            <span style="opacity: 0.5;">💎 Catador Nivel 2 (necesitas 80% precisión)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 2rem;">
+                    <h3>📋 Historial de Casos</h3>
+                    <div style="margin: 1rem 0;">
+                        <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>CASO001 - El Misterio Centroamericano</strong><br>
+                                    <span style="opacity: 0.8;">Completado: 15 de Julio, 2025</span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: #d4af37; font-weight: bold;">650 pts</div>
+                                    <div style="color: #2ecc71;">✓ Resuelto</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>CASO002 - El Enigma Africano</strong><br>
+                                    <span style="opacity: 0.8;">Completado: 10 de Julio, 2025</span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: #d4af37; font-weight: bold;">580 pts</div>
+                                    <div style="color: #2ecc71;">✓ Resuelto</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>CASO003 - El Secreto Sudamericano</strong><br>
+                                    <span style="opacity: 0.8;">Completado: 5 de Julio, 2025</span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: #d4af37; font-weight: bold;">420 pts</div>
+                                    <div style="color: #2ecc71;">✓ Resuelto</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Navigation functionality
+        function showPage(pageId) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // Submit form functionality
+        document.getElementById('submitForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Hide previous messages
+            document.getElementById('submitSuccess').style.display = 'none';
+            document.getElementById('submitError').style.display = 'none';
+            
+            // Collect form data
+            const formData = {
+                detectiveName: document.getElementById('detectiveName').value,
+                caseId: document.getElementById('caseId').value,
+                coffee1: {
+                    region: document.getElementById('coffee1_region').value,
+                    variety: document.getElementById('coffee1_variety').value,
+                    process: document.getElementById('coffee1_process').value,
+                    roast: document.getElementById('coffee1_roast').value,
+                    notes: document.getElementById('coffee1_notes').value
+                },
+                coffee2: {
+                    region: document.getElementById('coffee2_region').value,
+                    variety: document.getElementById('coffee2_variety').value,
+                    process: document.getElementById('coffee2_process').value,
+                    roast: document.getElementById('coffee2_roast').value,
+                    notes: document.getElementById('coffee2_notes').value
+                },
+                coffee3: {
+                    region: document.getElementById('coffee3_region').value,
+                    variety: document.getElementById('coffee3_variety').value,
+                    process: document.getElementById('coffee3_process').value,
+                    roast: document.getElementById('coffee3_roast').value,
+                    notes: document.getElementById('coffee3_notes').value
+                },
+                coffee4: {
+                    region: document.getElementById('coffee4_region').value,
+                    variety: document.getElementById('coffee4_variety').value,
+                    process: document.getElementById('coffee4_process').value,
+                    roast: document.getElementById('coffee4_roast').value,
+                    notes: document.getElementById('coffee4_notes').value
+                },
+                favoriteCoffe: document.getElementById('favorite_coffee').value,
+                brewingMethod: document.getElementById('brewing_method').value
+            };
+            
+            // Simulate submission processing
+            setTimeout(() => {
+                const random = Math.random();
+                if (random > 0.1) { // 90% success rate
+                    document.getElementById('submitSuccess').style.display = 'block';
+                    document.getElementById('submitForm').reset();
+                    
+                    // Simulate adding to leaderboard
+                    setTimeout(() => {
+                        showPage('leaderboard');
+                    }, 2000);
+                } else {
+                    document.getElementById('submitError').style.display = 'block';
+                }
+            }, 1000);
+        });
+
+        // Profile functionality
+        function saveProfile() {
+            const name = document.getElementById('profileName').value;
+            const email = document.getElementById('profileEmail').value;
+            const level = document.getElementById('profileLevel').value;
+            
+            if (name && email) {
+                alert('¡Perfil actualizado exitosamente, Detective ' + name + '!');
+            } else {
+                alert('Por favor completa todos los campos obligatorios.');
+            }
+        }
+
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate cards on scroll
+            const cards = document.querySelectorAll('.card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            });
+            
+            cards.forEach(card => {
+                observer.observe(card);
+            });
+        });
+
+        // Simulate dynamic leaderboard updates
+        setInterval(() => {
+            const entries = document.querySelectorAll('.leaderboard-entry');
+            const randomEntry = entries[Math.floor(Math.random() * entries.length)];
+            randomEntry.style.background = 'rgba(212, 175, 55, 0.1)';
+            setTimeout(() => {
+                randomEntry.style.background = 'rgba(0, 0, 0, 0.3)';
+            }, 1000);
+        }, 10000);
+    </script>
 </body>
 </html>
