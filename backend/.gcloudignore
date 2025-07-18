@@ -1,0 +1,28 @@
+# Ignore git files
+.git
+.gitignore
+
+# Ignore Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# Ignore development files
+.env
+.env.local
+*.log
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
