@@ -29,6 +29,7 @@ nav {
     display: flex;
     list-style: none;
     gap: 2rem;
+    align-items: center;
     
     a {
         color: $text-light;
@@ -53,6 +54,100 @@ nav {
         
         &:hover::after {
             width: 100%;
+        }
+    }
+}
+
+// User dropdown styles
+.user-dropdown {
+    position: relative;
+    
+    .user-menu-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba($primary-gold, 0.1);
+        border-radius: 25px;
+        border: 1px solid rgba($primary-gold, 0.3);
+        cursor: pointer;
+        transition: all 0.3s;
+        
+        &:hover {
+            background: rgba($primary-gold, 0.2);
+            border-color: rgba($primary-gold, 0.5);
+        }
+        
+        &::after {
+            display: none; // Remove the underline effect for dropdown
+        }
+        
+        .dropdown-arrow {
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+        
+        &.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+    }
+    
+    .user-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba($primary-gold, 0.3);
+        border-radius: 10px;
+        padding: 0.5rem 0;
+        min-width: 160px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s;
+        z-index: 1000;
+        
+        &.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: $text-light;
+            text-decoration: none;
+            transition: all 0.3s;
+            
+            &:hover {
+                background: rgba($primary-gold, 0.1);
+                color: $primary-gold;
+            }
+            
+            &::after {
+                display: none; // Remove underline effect
+            }
+        }
+    }
+}
+
+// Mobile user dropdown
+.user-dropdown-mobile {
+    a {
+        display: block;
+        margin: 1rem 0;
+        color: $text-light;
+        text-decoration: none;
+        font-size: 1.5rem;
+        padding: 1.5rem 2rem;
+        transition: $transition;
+        border-radius: 10px;
+        
+        &:hover {
+            color: $primary-gold;
+            background: rgba($primary-gold, 0.1);
         }
     }
 }

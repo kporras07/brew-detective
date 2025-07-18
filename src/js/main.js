@@ -1,3 +1,30 @@
+// User dropdown functionality
+function toggleUserMenu() {
+    const userMenu = document.getElementById('userMenu');
+    const userMenuToggle = document.getElementById('userMenuToggle');
+    
+    userMenu.classList.toggle('active');
+    userMenuToggle.classList.toggle('active');
+}
+
+function closeUserMenu() {
+    const userMenu = document.getElementById('userMenu');
+    const userMenuToggle = document.getElementById('userMenuToggle');
+    
+    userMenu.classList.remove('active');
+    userMenuToggle.classList.remove('active');
+}
+
+// Close user menu when clicking outside
+document.addEventListener('click', function(event) {
+    const userDropdown = document.getElementById('userDropdown');
+    const userMenu = document.getElementById('userMenu');
+    
+    if (userDropdown && !userDropdown.contains(event.target)) {
+        closeUserMenu();
+    }
+});
+
 // Mobile menu functionality
 function toggleMobileMenu() {
     const mobileNav = document.getElementById('mobileNav');
@@ -47,12 +74,59 @@ function showPage(pageId) {
     // Load data for specific pages
     if (pageId === 'leaderboard') {
         loadLeaderboard();
+    } else if (pageId === 'profile') {
+        loadProfile();
+    } else if (pageId === 'submit') {
+        checkAuthForSubmit();
     }
+}
+
+// Check authentication for submit page
+function checkAuthForSubmit() {
+    if (!Auth.isAuthenticated()) {
+        showNotification('Debes iniciar sesión para enviar respuestas', 'error');
+        setTimeout(() => {
+            showPage('home');
+        }, 2000);
+        return;
+    }
+}
+
+// Load profile data
+function loadProfile() {
+    if (!Auth.isAuthenticated()) {
+        showNotification('Debes iniciar sesión para ver tu perfil', 'error');
+        setTimeout(() => {
+            showPage('home');
+        }, 2000);
+        return;
+    }
+
+    const user = Auth.getUser();
+    if (user) {
+        updateProfilePage(user);
+    }
+
+    // Load real profile data from API
+    API.get(API_CONFIG.ENDPOINTS.PROFILE)
+        .then(userData => {
+            Auth.setUser(userData);
+            updateProfilePage(userData);
+        })
+        .catch(error => {
+            console.error('Failed to load profile:', error);
+        });
 }
 
 // Submit form functionality
 document.getElementById('submitForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    
+    // Check authentication
+    if (!Auth.isAuthenticated()) {
+        showNotification('Debes iniciar sesión para enviar respuestas', 'error');
+        return;
+    }
     
     // Hide previous messages
     document.getElementById('submitSuccess').style.display = 'none';

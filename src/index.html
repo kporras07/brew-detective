@@ -16,7 +16,19 @@
                 <li><a href="#" onclick="showPage('order')">Ordenar Caja</a></li>
                 <li><a href="#" onclick="showPage('submit')">Enviar Respuestas</a></li>
                 <li><a href="#" onclick="showPage('leaderboard')">Ranking</a></li>
-                <li><a href="#" onclick="showPage('profile')">Mi Perfil</a></li>
+                <li class="auth-nav" id="authNav">
+                    <a href="#" onclick="Auth.login()" id="loginBtn">Iniciar Sesión</a>
+                    <div class="user-dropdown" id="userDropdown" style="display: none;">
+                        <a href="#" class="user-menu-toggle" id="userMenuToggle" onclick="toggleUserMenu()">
+                            <span id="userName">Usuario</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </a>
+                        <div class="user-menu" id="userMenu">
+                            <a href="#" onclick="showPage('profile'); closeUserMenu()">Mi Perfil</a>
+                            <a href="#" onclick="Auth.logout()">Cerrar Sesión</a>
+                        </div>
+                    </div>
+                </li>
             </ul>
             <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
                 <span></span>
@@ -31,7 +43,13 @@
                 <li><a href="#" onclick="showPage('order'); closeMobileMenu()">Ordenar Caja</a></li>
                 <li><a href="#" onclick="showPage('submit'); closeMobileMenu()">Enviar Respuestas</a></li>
                 <li><a href="#" onclick="showPage('leaderboard'); closeMobileMenu()">Ranking</a></li>
-                <li><a href="#" onclick="showPage('profile'); closeMobileMenu()">Mi Perfil</a></li>
+                <li class="auth-nav-mobile" id="authNavMobile">
+                    <a href="#" onclick="Auth.login(); closeMobileMenu()" id="loginBtnMobile">Iniciar Sesión</a>
+                    <div class="user-dropdown-mobile" id="userDropdownMobile" style="display: none;">
+                        <a href="#" onclick="showPage('profile'); closeMobileMenu()" id="profileBtnMobile">Mi Perfil</a>
+                        <a href="#" onclick="Auth.logout(); closeMobileMenu()" id="logoutBtnMobile">Cerrar Sesión</a>
+                    </div>
+                </li>
             </ul>
         </div>
     </header>
@@ -501,19 +519,19 @@
                         <h3>📊 Mis Estadísticas</h3>
                         <div style="text-align: center;">
                             <div style="margin: 1rem 0;">
-                                <div style="font-size: 2rem; color: #d4af37; font-weight: bold;">1,650</div>
+                                <div style="font-size: 2rem; color: #d4af37; font-weight: bold;" data-stat="points">0</div>
                                 <div>Puntos Totales</div>
                             </div>
                             <div style="margin: 1rem 0;">
-                                <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;"># 6</div>
+                                <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="rank"># --</div>
                                 <div>Posición en el Ranking</div>
                             </div>
                             <div style="margin: 1rem 0;">
-                                <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;">3</div>
+                                <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="cases">0</div>
                                 <div>Casos Resueltos</div>
                             </div>
                             <div style="margin: 1rem 0;">
-                                <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;">75%</div>
+                                <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="accuracy">0%</div>
                                 <div>Precisión</div>
                             </div>
                         </div>
@@ -605,6 +623,7 @@
     </footer>
 
     <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

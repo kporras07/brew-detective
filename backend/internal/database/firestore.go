@@ -22,15 +22,21 @@ func InitFirestore() error {
 		return fmt.Errorf("GOOGLE_CLOUD_PROJECT environment variable not set")
 	}
 
+	// Get database name (defaults to "(default)" if not set)
+	databaseID := os.Getenv("FIRESTORE_DATABASE_ID")
+	if databaseID == "" {
+		databaseID = "(default)"
+	}
+
 	var client *firestore.Client
 	var err error
 
 	// Check if we're running in a local environment
 	if credentialsPath := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"); credentialsPath != "" {
-		client, err = firestore.NewClient(ctx, projectID, option.WithCredentialsFile(credentialsPath))
+		client, err = firestore.NewClientWithDatabase(ctx, projectID, databaseID, option.WithCredentialsFile(credentialsPath))
 	} else {
 		// Use default credentials in Cloud Run
-		client, err = firestore.NewClient(ctx, projectID)
+		client, err = firestore.NewClientWithDatabase(ctx, projectID, databaseID)
 	}
 
 	if err != nil {
@@ -38,7 +44,7 @@ func InitFirestore() error {
 	}
 
 	FirestoreClient = client
-	log.Printf("Firestore client initialized for project: %s", projectID)
+	log.Printf("Firestore client initialized for project: %s, database: %s", projectID, databaseID)
 	return nil
 }
 

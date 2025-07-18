@@ -6,16 +6,20 @@ import (
 
 // User represents a coffee detective user
 type User struct {
-	ID          string    `firestore:"id" json:"id"`
-	Name        string    `firestore:"name" json:"name"`
-	Email       string    `firestore:"email" json:"email"`
-	Level       string    `firestore:"level" json:"level"` // beginner, intermediate, expert
-	Points      int       `firestore:"points" json:"points"`
-	CasesCount  int       `firestore:"cases_count" json:"cases_count"`
-	Accuracy    float64   `firestore:"accuracy" json:"accuracy"`
-	Badges      []string  `firestore:"badges" json:"badges"`
-	CreatedAt   time.Time `firestore:"created_at" json:"created_at"`
-	UpdatedAt   time.Time `firestore:"updated_at" json:"updated_at"`
+	ID             string    `firestore:"id" json:"id"`
+	Name           string    `firestore:"name" json:"name"`
+	Email          string    `firestore:"email" json:"email"`
+	Picture        string    `firestore:"picture" json:"picture"`
+	Level          string    `firestore:"level" json:"level"` // beginner, intermediate, expert
+	Score          int       `firestore:"score" json:"score"`
+	Points         int       `firestore:"points" json:"points"`
+	CasesAttempted int       `firestore:"cases_attempted" json:"cases_attempted"`
+	CasesSolved    int       `firestore:"cases_solved" json:"cases_solved"`
+	CasesCount     int       `firestore:"cases_count" json:"cases_count"`
+	Accuracy       float64   `firestore:"accuracy" json:"accuracy"`
+	Badges         []string  `firestore:"badges" json:"badges"`
+	CreatedAt      time.Time `firestore:"created_at" json:"created_at"`
+	UpdatedAt      time.Time `firestore:"updated_at" json:"updated_at"`
 }
 
 // CoffeeCase represents a coffee mystery case

@@ -1,17 +1,86 @@
 // API Configuration
 const API_CONFIG = {
     // Update this URL after deploying to Cloud Run
-    BASE_URL: 'https://brew-detective-backend-YOUR_HASH-uc.a.run.app/api/v1',
+    // BASE_URL: 'https://brew-detective-backend-YOUR_HASH-uc.a.run.app',
     
     // For local development
-    // BASE_URL: 'http://localhost:8080/api/v1',
+    BASE_URL: 'http://localhost:8888',
     
     ENDPOINTS: {
-        CASES: '/cases',
-        SUBMISSIONS: '/submissions',
-        LEADERBOARD: '/leaderboard',
-        USERS: '/users',
-        ORDERS: '/orders'
+        // API endpoints
+        CASES: '/api/v1/cases',
+        SUBMISSIONS: '/api/v1/submissions',
+        LEADERBOARD: '/api/v1/leaderboard',
+        USERS: '/api/v1/users',
+        ORDERS: '/api/v1/orders',
+        PROFILE: '/api/v1/profile',
+        
+        // Auth endpoints
+        AUTH_GOOGLE: '/auth/google',
+        AUTH_CALLBACK: '/auth/google/callback',
+        AUTH_LOGOUT: '/auth/logout'
+    }
+};
+
+// Authentication helper (global)
+window.Auth = {
+    getToken() {
+        return localStorage.getItem('auth_token');
+    },
+
+    setToken(token) {
+        localStorage.setItem('auth_token', token);
+    },
+
+    removeToken() {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_data');
+    },
+
+    getUser() {
+        const userData = localStorage.getItem('user_data');
+        return userData ? JSON.parse(userData) : null;
+    },
+
+    setUser(user) {
+        localStorage.setItem('user_data', JSON.stringify(user));
+    },
+
+    isAuthenticated() {
+        const token = this.getToken();
+        if (!token) return false;
+        
+        try {
+            // Basic JWT validation (check if token is expired)
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.exp * 1000 > Date.now();
+        } catch {
+            return false;
+        }
+    },
+
+    async login() {
+        try {
+            const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH_GOOGLE}`);
+            const data = await response.json();
+            window.location.href = data.auth_url;
+        } catch (error) {
+            console.error('Login failed:', error);
+            throw error;
+        }
+    },
+
+    async logout() {
+        try {
+            if (this.isAuthenticated()) {
+                await API.post(API_CONFIG.ENDPOINTS.AUTH_LOGOUT);
+            }
+        } catch (error) {
+            console.error('Logout request failed:', error);
+        } finally {
+            this.removeToken();
+            window.location.reload();
+        }
     }
 };
 
@@ -19,16 +88,30 @@ const API_CONFIG = {
 const API = {
     async request(endpoint, options = {}) {
         const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers
+        };
+
+        // Add auth token if available
+        const token = Auth.getToken();
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
         const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            },
+            headers,
             ...options
         };
         
         try {
             const response = await fetch(url, config);
+            
+            if (response.status === 401) {
+                // Token expired or invalid
+                Auth.removeToken();
+                throw new Error('Authentication required');
+            }
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
