@@ -91,16 +91,20 @@ nav {
 .mobile-nav {
     display: none;
     position: fixed;
-    top: 80px;
+    top: 0;
     left: 0;
     width: 100%;
+    height: 100vh;
     background: rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(10px);
     z-index: $z-mobile-nav;
-    padding: 2rem 0;
+    padding-top: 80px;
     
     &.active {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     
     ul {
@@ -108,15 +112,16 @@ nav {
         text-align: center;
         
         li {
-            margin: 1rem 0;
+            margin: 1.5rem 0;
             
             a {
                 color: $text-light;
                 text-decoration: none;
-                font-size: 1.2rem;
+                font-size: 1.5rem;
                 display: block;
-                padding: 1rem;
+                padding: 1.5rem 2rem;
                 transition: $transition;
+                border-radius: 10px;
                 
                 &:hover {
                     color: $primary-gold;
@@ -127,7 +132,31 @@ nav {
     }
 }
 
-@include mobile {
+.mobile-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: $text-light;
+    font-size: 3rem;
+    cursor: pointer;
+    padding: 1rem;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    transition: $transition;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+        color: $primary-gold;
+        background: rgba($primary-gold, 0.1);
+    }
+}
+
+@media (max-width: 810px) {
     .nav-links {
         display: none;
     }

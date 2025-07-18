@@ -25,6 +25,7 @@
             </div>
         </nav>
         <div class="mobile-nav" id="mobileNav">
+            <button class="mobile-close" onclick="closeMobileMenu()">&times;</button>
             <ul>
                 <li><a href="#" onclick="showPage('home'); closeMobileMenu()">Inicio</a></li>
                 <li><a href="#" onclick="showPage('order'); closeMobileMenu()">Ordenar Caja</a></li>
@@ -608,17 +609,27 @@
         function toggleMobileMenu() {
             const mobileNav = document.getElementById('mobileNav');
             const toggle = document.querySelector('.mobile-menu-toggle');
+            const body = document.body;
             
             mobileNav.classList.toggle('active');
             toggle.classList.toggle('active');
+            
+            // Prevent background scrolling when menu is open
+            if (mobileNav.classList.contains('active')) {
+                body.style.overflow = 'hidden';
+            } else {
+                body.style.overflow = '';
+            }
         }
 
         function closeMobileMenu() {
             const mobileNav = document.getElementById('mobileNav');
             const toggle = document.querySelector('.mobile-menu-toggle');
+            const body = document.body;
             
             mobileNav.classList.remove('active');
             toggle.classList.remove('active');
+            body.style.overflow = '';
         }
 
         // Close mobile menu when clicking outside
