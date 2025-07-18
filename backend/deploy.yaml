@@ -13,6 +13,7 @@ spec:
         run.googleapis.com/memory: "512Mi"
         run.googleapis.com/cpu: "1000m"
     spec:
+      serviceAccountName: brew-detective@brew-detective.iam.gserviceaccount.com
       containerConcurrency: 100
       containers:
       - image: us-central1-docker.pkg.dev/brew-detective/brew-detective-repo/brew-detective-backend
@@ -29,13 +30,13 @@ spec:
         - name: GOOGLE_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
-              name: brew-detective-secrets
-              key: google-client-secret
+              name: google-client-secret
+              key: latest
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
-              name: brew-detective-secrets
-              key: jwt-secret
+              name: jwt-secret
+              key: latest
         - name: GOOGLE_REDIRECT_URL
           value: "https://brew-detective-backend-1087966598090.us-central1.run.app/auth/google/callback"
         - name: GIN_MODE
