@@ -14,6 +14,14 @@
     @include mobile {
         padding: 3rem 0;
     }
+    
+    &--reduced-top {
+        padding-top: 2rem;
+        
+        @include mobile {
+            padding-top: 1.5rem;
+        }
+    }
 }
 
 .section-title {
