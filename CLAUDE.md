@@ -12,21 +12,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-This is a static website built with:
+This is a full-stack application with:
 - **Frontend**: HTML, SASS-compiled CSS, and JavaScript (no frameworks)
+- **Backend**: Golang REST API with Gin framework
+- **Database**: Google Cloud Firestore (NoSQL)
 - **Build Process**: SASS compilation with npm scripts
-- **Deployment**: Docker containerized with Nginx
+- **Deployment**: 
+  - Frontend: GitHub Pages
+  - Backend: Google Cloud Run
 - **Structure**: Single-page application with client-side routing
 
 ### Key Files
+
+**Frontend:**
 - `src/index.html` - Main HTML file
 - `src/sass/` - SASS source files organized in partials
 - `src/css/main.css` - Compiled CSS output
 - `src/js/main.js` - JavaScript functionality
+- `src/js/config.js` - API configuration and helper functions
 - `src/images/` - Static images (logos, etc.)
 - `package.json` - Build scripts and dependencies
 - `docker-compose.yml` - Container setup with Nginx and development tools
 - `nginx.conf` - Nginx configuration for serving the static site
+
+**Backend:**
+- `backend/cmd/server/main.go` - Main server entry point
+- `backend/internal/models/models.go` - Data models
+- `backend/internal/handlers/` - API endpoint handlers
+- `backend/internal/database/firestore.go` - Firestore client setup
+- `backend/Dockerfile` - Container configuration for Cloud Run
+- `backend/deploy.yaml` - Cloud Run deployment configuration
 
 ## Development Setup
 
@@ -103,6 +118,63 @@ npm run build:css
 # Build with source maps for debugging
 npm run build:css:dev
 ```
+
+## Backend Setup
+
+### Prerequisites
+- Go 1.21 or higher
+- Google Cloud SDK
+- Docker (optional, for local development)
+
+### Local Development
+```bash
+# Navigate to backend directory
+cd backend
+
+# Install dependencies
+go mod download
+
+# Set environment variables
+export GOOGLE_CLOUD_PROJECT="your-project-id"
+export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account.json"
+
+# Run the server
+go run cmd/server/main.go
+```
+
+### Cloud Run Deployment
+
+1. **Setup Google Cloud Project**:
+   ```bash
+   gcloud config set project YOUR_PROJECT_ID
+   gcloud services enable run.googleapis.com
+   gcloud services enable firestore.googleapis.com
+   ```
+
+2. **Build and Deploy**:
+   ```bash
+   cd backend
+   gcloud run deploy brew-detective-backend \
+     --source . \
+     --region us-central1 \
+     --allow-unauthenticated \
+     --set-env-vars GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
+   ```
+
+3. **Update Frontend Config**:
+   - Update `src/js/config.js` with your Cloud Run URL
+   - Update CORS configuration in `backend/cmd/server/main.go`
+
+### API Endpoints
+
+- `GET /api/v1/cases` - Get all coffee cases
+- `GET /api/v1/cases/:id` - Get specific case
+- `POST /api/v1/submissions` - Submit case solution
+- `GET /api/v1/leaderboard` - Get leaderboard
+- `GET /api/v1/users/:id` - Get user profile
+- `PUT /api/v1/users/:id` - Update user profile
+- `POST /api/v1/orders` - Create order
+- `GET /api/v1/orders/:id` - Get order details
 
 ## Application Structure
 
