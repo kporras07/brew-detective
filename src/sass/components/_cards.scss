@@ -20,6 +20,13 @@
         &.symmetric {
             grid-template-columns: 1fr;
             max-width: 100%;
+
+            // Center the last card when there are 3 items
+            &:has(.card:nth-child(3):last-child) {
+                .card:nth-child(3) {
+                    grid-column: 1 / -1;
+                }
+            }
         }
     }
 }
