@@ -66,6 +66,44 @@ docker-compose exec web-dev sh
 docker-compose down
 ```
 
+## Deployment
+
+### GitHub Pages via GitHub Actions
+
+The project is set up for automatic deployment to GitHub Pages using GitHub Actions:
+
+1. **Push to main branch** - Triggers automatic deployment
+2. **Build process** - Compiles SASS to CSS automatically
+3. **Deploy to GitHub Pages** - Serves the `src/` directory
+
+### Manual Deployment Steps
+
+1. **Enable GitHub Pages** in your repository settings:
+   - Go to Settings → Pages
+   - Source: GitHub Actions
+
+2. **Push your code** to the main branch:
+   ```bash
+   git add .
+   git commit -m "Initial deployment"
+   git push origin main
+   ```
+
+3. **GitHub Actions will**:
+   - Install Node.js dependencies
+   - Compile SASS to CSS
+   - Deploy to GitHub Pages
+   - Provide a live URL
+
+### Build for Production
+```bash
+# Build compressed CSS for production
+npm run build:css
+
+# Build with source maps for debugging
+npm run build:css:dev
+```
+
 ## Application Structure
 
 The application uses JavaScript-based client-side routing with these main sections:

@@ -1,2 +1,37 @@
-node_modules
-src/css
+# Dependencies
+node_modules/
+
+# CSS
+src/css/
+
+# Build outputs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# CSS source maps (optional - comment out if you want to include them)
+src/css/*.map

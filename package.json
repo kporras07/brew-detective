@@ -4,8 +4,8 @@
   "description": "A coffee tasting detective game focused on Costa Rican coffee",
   "main": "src/index.html",
   "scripts": {
-    "build:css": "sass src/sass/main.scss src/css/style.css --style=compressed",
-    "build:css:dev": "sass src/sass/main.scss src/css/style.css --source-map",
+    "build:css": "sass src/sass/main.scss src/css/main.css --style=compressed",
+    "build:css:dev": "sass src/sass/main.scss src/css/main.css --source-map",
     "watch:css": "sass --watch src/sass:src/css --source-map",
     "build": "npm run build:css",
     "dev": "npm run watch:css",
