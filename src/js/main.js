@@ -171,7 +171,6 @@ document.getElementById('submitForm').addEventListener('submit', async function(
                 region: document.getElementById('coffee1_region').value,
                 variety: document.getElementById('coffee1_variety').value,
                 process: document.getElementById('coffee1_process').value,
-                roast_level: document.getElementById('coffee1_roast').value,
                 tasting_notes: document.getElementById('coffee1_notes').value
             },
             {
@@ -179,7 +178,6 @@ document.getElementById('submitForm').addEventListener('submit', async function(
                 region: document.getElementById('coffee2_region').value,
                 variety: document.getElementById('coffee2_variety').value,
                 process: document.getElementById('coffee2_process').value,
-                roast_level: document.getElementById('coffee2_roast').value,
                 tasting_notes: document.getElementById('coffee2_notes').value
             },
             {
@@ -187,7 +185,6 @@ document.getElementById('submitForm').addEventListener('submit', async function(
                 region: document.getElementById('coffee3_region').value,
                 variety: document.getElementById('coffee3_variety').value,
                 process: document.getElementById('coffee3_process').value,
-                roast_level: document.getElementById('coffee3_roast').value,
                 tasting_notes: document.getElementById('coffee3_notes').value
             },
             {
@@ -195,7 +192,6 @@ document.getElementById('submitForm').addEventListener('submit', async function(
                 region: document.getElementById('coffee4_region').value,
                 variety: document.getElementById('coffee4_variety').value,
                 process: document.getElementById('coffee4_process').value,
-                roast_level: document.getElementById('coffee4_roast').value,
                 tasting_notes: document.getElementById('coffee4_notes').value
             }
         ],

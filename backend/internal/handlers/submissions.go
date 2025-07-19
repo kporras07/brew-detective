@@ -89,7 +89,7 @@ func calculateScore(submission *models.Submission) (int, float64) {
 	// This is a simplified scoring system
 	// In a real implementation, you'd fetch the correct answers from the case
 	
-	totalQuestions := len(submission.CoffeeAnswers) * 4 // 4 questions per coffee
+	totalQuestions := len(submission.CoffeeAnswers) * 3 // 3 questions per coffee: region, variety, process
 	if totalQuestions == 0 {
 		return 0, 0.0
 	}
@@ -99,7 +99,7 @@ func calculateScore(submission *models.Submission) (int, float64) {
 	
 	for _, answer := range submission.CoffeeAnswers {
 		// Simulate scoring - in reality, you'd compare with correct answers
-		// Each coffee has 4 attributes: region, variety, process, roast_level
+		// Each coffee has 3 attributes: region, variety, process
 		if answer.Region != "" {
 			correctAnswers++
 		}
@@ -107,9 +107,6 @@ func calculateScore(submission *models.Submission) (int, float64) {
 			correctAnswers++
 		}
 		if answer.Process != "" {
-			correctAnswers++
-		}
-		if answer.RoastLevel != "" {
 			correctAnswers++
 		}
 	}

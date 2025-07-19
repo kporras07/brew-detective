@@ -40,7 +40,6 @@ type CoffeeItem struct {
 	Region      string `firestore:"region" json:"region"`
 	Variety     string `firestore:"variety" json:"variety"`
 	Process     string `firestore:"process" json:"process"`
-	RoastLevel  string `firestore:"roast_level" json:"roast_level"`
 	TastingNotes string `firestore:"tasting_notes" json:"tasting_notes"`
 	Farm        string `firestore:"farm" json:"farm"`
 	Altitude    int    `firestore:"altitude" json:"altitude"`
@@ -67,7 +66,6 @@ type CoffeeAnswer struct {
 	Region       string `firestore:"region" json:"region"`
 	Variety      string `firestore:"variety" json:"variety"`
 	Process      string `firestore:"process" json:"process"`
-	RoastLevel   string `firestore:"roast_level" json:"roast_level"`
 	TastingNotes string `firestore:"tasting_notes" json:"tasting_notes"`
 	Points       int    `firestore:"points" json:"points"`
 }
