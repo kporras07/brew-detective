@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"google.golang.org/api/iterator"
 )
 
 // SubmitCase handles case submission
@@ -26,6 +27,14 @@ func SubmitCase(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Order ID is required"})
 		return
 	}
+
+	// Get the current active case
+	activeCase, err := getActiveCase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No active case available", "details": err.Error()})
+		return
+	}
+	submission.CaseID = activeCase.ID
 
 	// Validate order ID
 	if !validateOrderID(submission.OrderID) {
@@ -251,4 +260,27 @@ func markOrderIDAsUsed(orderID string, userID string) {
 	}
 
 	docs[0].Ref.Update(ctx, updates)
+}
+
+// getActiveCase gets the current active case
+func getActiveCase() (*models.CoffeeCase, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	iter := database.FirestoreClient.Collection(database.CasesCollection).
+		Where("is_active", "==", true).
+		Limit(1).
+		Documents(ctx)
+
+	doc, err := iter.Next()
+	if err != nil {
+		return nil, err
+	}
+
+	var coffeeCase models.CoffeeCase
+	if err := doc.DataTo(&coffeeCase); err != nil {
+		return nil, err
+	}
+
+	return &coffeeCase, nil
 }

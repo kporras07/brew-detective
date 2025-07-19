@@ -78,6 +78,7 @@ function showPage(pageId) {
         loadProfile();
     } else if (pageId === 'submit') {
         checkAuthForSubmit();
+        loadActiveCase();
     }
 }
 
@@ -118,6 +119,35 @@ function loadProfile() {
         });
 }
 
+// Load active case information
+async function loadActiveCase() {
+    const activeCaseName = document.getElementById('activeCaseName');
+    const activeCaseDescription = document.getElementById('activeCaseDescription');
+    
+    if (!activeCaseName) return;
+    
+    try {
+        // Show loading state
+        activeCaseName.textContent = 'Cargando caso activo...';
+        activeCaseDescription.textContent = '';
+        
+        const response = await API.get(API_CONFIG.ENDPOINTS.ACTIVE_CASE);
+        const activeCase = response.case;
+        
+        if (activeCase) {
+            activeCaseName.textContent = activeCase.name;
+            activeCaseDescription.textContent = activeCase.description;
+        } else {
+            activeCaseName.textContent = 'No hay caso activo';
+            activeCaseDescription.textContent = 'Por favor contacta al administrador.';
+        }
+    } catch (error) {
+        console.error('Failed to load active case:', error);
+        activeCaseName.textContent = 'Error al cargar caso';
+        activeCaseDescription.textContent = 'No se pudo obtener la información del caso activo.';
+    }
+}
+
 // Submit form functionality
 document.getElementById('submitForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -134,7 +164,6 @@ document.getElementById('submitForm').addEventListener('submit', async function(
     
     // Collect form data
     const submission = {
-        case_id: document.getElementById('caseId').value,
         order_id: document.getElementById('orderId').value.toUpperCase(),
         coffee_answers: [
             {

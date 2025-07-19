@@ -9,6 +9,7 @@ const API_CONFIG = {
     ENDPOINTS: {
         // API endpoints
         CASES: '/api/v1/cases',
+        ACTIVE_CASE: '/api/v1/cases/active',
         SUBMISSIONS: '/api/v1/submissions',
         LEADERBOARD: '/api/v1/leaderboard',
         USERS: '/api/v1/users',

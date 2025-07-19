@@ -166,11 +166,18 @@
                     <div class="error-message" id="submitError">
                         Error al enviar respuestas. Por favor intenta nuevamente.
                     </div>
-                    <form id="submitForm">
-                        <div class="form-group">
-                            <label for="caseId">ID del Caso:</label>
-                            <input type="text" id="caseId" placeholder="Ej: CASO001" required>
+                    <div class="form-group">
+                        <label>Caso Activo:</label>
+                        <div id="activeCaseDisplay" style="background: rgba(212, 175, 55, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.3); margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="font-size: 1.2rem;">📦</span>
+                                <span id="activeCaseName" style="font-weight: bold; color: #d4af37;">Cargando caso activo...</span>
+                            </div>
+                            <div id="activeCaseDescription" style="margin-top: 0.5rem; opacity: 0.8; font-size: 0.9rem;"></div>
                         </div>
+                    </div>
+                    
+                    <form id="submitForm">
                         <div class="form-group">
                             <label for="orderId">ID de Orden (6 caracteres):</label>
                             <input type="text" id="orderId" placeholder="Ej: ABC123" maxlength="6" required style="text-transform: uppercase;">

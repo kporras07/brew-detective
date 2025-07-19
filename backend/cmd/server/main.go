@@ -60,6 +60,7 @@ func main() {
 	{
 		// Public routes
 		api.GET("/cases", handlers.GetCases)
+		api.GET("/cases/active", handlers.GetActiveCase)
 		api.GET("/cases/:id", handlers.GetCaseByID)
 		api.GET("/leaderboard", handlers.GetLeaderboard)
 
