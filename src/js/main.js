@@ -260,26 +260,38 @@ async function saveProfile() {
     const email = document.getElementById('profileEmail').value;
     const level = document.getElementById('profileLevel').value;
     
-    if (!name || !email) {
-        alert('Por favor completa todos los campos obligatorios.');
+    if (!name) {
+        alert('Por favor completa el nombre.');
+        return;
+    }
+    
+    // Check if user is authenticated
+    if (!Auth.isAuthenticated()) {
+        alert('Debes iniciar sesión para actualizar tu perfil.');
+        return;
+    }
+    
+    const user = Auth.getUser();
+    if (!user || !user.id) {
+        alert('Error: No se pudo obtener la información del usuario.');
         return;
     }
     
     try {
-        // Generate a simple user ID based on email
-        const userId = btoa(email).replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
-        
         const profileData = {
             name: name,
-            email: email,
             level: level
         };
         
-        await API.put(`${API_CONFIG.ENDPOINTS.USERS}/${userId}`, profileData);
+        await API.put(`${API_CONFIG.ENDPOINTS.USERS}/${user.id}`, profileData);
         alert('¡Perfil actualizado exitosamente, Detective ' + name + '!');
         
-        // Store user ID in local storage for future use
-        localStorage.setItem('brew_detective_user_id', userId);
+        // Update local user data
+        const updatedUser = { ...user, name: name, level: level };
+        Auth.setUser(updatedUser);
+        
+        // Update UI
+        await updateAuthUI();
         
     } catch (error) {
         console.error('Failed to save profile:', error);
