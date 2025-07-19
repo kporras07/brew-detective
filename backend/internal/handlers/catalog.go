@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"sort"
 	"strconv"
@@ -19,15 +20,15 @@ import (
 // GetCatalogByCategory returns catalog items for a specific category
 func GetCatalogByCategory(c *gin.Context) {
 	category := c.Param("category")
-	
+
 	// Validate category
 	validCategories := map[string]bool{
-		"region":        true,
-		"variety":       true,
-		"process":       true,
+		"region":         true,
+		"variety":        true,
+		"process":        true,
 		"brewing_method": true,
 	}
-	
+
 	if !validCategories[category] {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category. Must be region, variety, process, or brewing_method"})
 		return
@@ -48,7 +49,8 @@ func GetCatalogByCategory(c *gin.Context) {
 			break
 		}
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch catalog items"})
+			log.Printf("Error fetching catalog items: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch catalog items", "details": err.Error()})
 			return
 		}
 
@@ -79,15 +81,15 @@ func GetAllCatalog(c *gin.Context) {
 		Documents(ctx)
 
 	catalogMap := make(map[string][]models.CatalogItem)
-	
+
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch catalog items"})
-			return
+			log.Printf("Error fetching catalog items: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch catalog items", "details": err.Error()})
 		}
 
 		var item models.CatalogItem
@@ -126,12 +128,12 @@ func CreateCatalogItem(c *gin.Context) {
 
 	// Validate category
 	validCategories := map[string]bool{
-		"region":        true,
-		"variety":       true,
-		"process":       true,
+		"region":         true,
+		"variety":        true,
+		"process":        true,
 		"brewing_method": true,
 	}
-	
+
 	if !validCategories[item.Category] {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category"})
 		return
@@ -161,7 +163,7 @@ func CreateCatalogItem(c *gin.Context) {
 // UpdateCatalogItem updates an existing catalog item (admin only)
 func UpdateCatalogItem(c *gin.Context) {
 	itemID := c.Param("id")
-	
+
 	var updates map[string]interface{}
 	if err := c.ShouldBindJSON(&updates); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid update data"})
@@ -255,7 +257,7 @@ func GetAllCatalogItems(c *gin.Context) {
 	}
 
 	iter := query.Documents(ctx)
-	
+
 	var items []models.CatalogItem
 	for {
 		doc, err := iter.Next()
@@ -263,7 +265,8 @@ func GetAllCatalogItems(c *gin.Context) {
 			break
 		}
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch catalog items"})
+			log.Printf("Error fetching catalog items: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch catalog items", "details": err.Error()})
 			return
 		}
 
