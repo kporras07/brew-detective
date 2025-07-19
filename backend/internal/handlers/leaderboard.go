@@ -24,7 +24,7 @@ func GetLeaderboard(c *gin.Context) {
 	// First, try to get all users (remove the where clause since fields might not exist yet)
 	iter := database.FirestoreClient.Collection(database.UsersCollection).Documents(ctx)
 
-	var entries []models.LeaderboardEntry
+	var entries []models.LeaderboardEntryWithUser
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -50,9 +50,9 @@ func GetLeaderboard(c *gin.Context) {
 
 		// Only include users who have attempted at least one case
 		if user.CasesAttempted > 0 || user.CasesSolved > 0 || user.Score > 0 {
-			entry := models.LeaderboardEntry{
+			entry := models.LeaderboardEntryWithUser{
 				UserID:        user.ID,
-				DetectiveName: user.Name,
+				DetectiveName: user.Name, // Get name from User model
 				Points:        user.Score, // Use Score instead of Points
 				Accuracy:      user.Accuracy,
 				CasesCount:    user.CasesAttempted, // Use CasesAttempted

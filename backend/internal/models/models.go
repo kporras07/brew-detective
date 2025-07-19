@@ -52,7 +52,6 @@ type Submission struct {
 	UserID          string           `firestore:"user_id" json:"user_id"`
 	CaseID          string           `firestore:"case_id" json:"case_id"`
 	OrderID         string           `firestore:"order_id" json:"order_id"` // 6-character order ID provided to customers
-	DetectiveName   string           `firestore:"detective_name" json:"detective_name"`
 	CoffeeAnswers   []CoffeeAnswer   `firestore:"coffee_answers" json:"coffee_answers"`
 	FavoriteCoffee  string           `firestore:"favorite_coffee" json:"favorite_coffee"`
 	BrewingMethod   string           `firestore:"brewing_method" json:"brewing_method"`
@@ -79,7 +78,6 @@ type Order struct {
 	OrderID         string     `firestore:"order_id" json:"order_id"`         // 6-character unique order ID
 	UserID          string     `firestore:"user_id" json:"user_id"`
 	CaseID          string     `firestore:"case_id" json:"case_id"`
-	CustomerName    string     `firestore:"customer_name" json:"customer_name"`
 	ContactInfo     string     `firestore:"contact_info" json:"contact_info"`
 	Status          string     `firestore:"status" json:"status"` // pending, confirmed, shipped, delivered
 	TotalAmount     int        `firestore:"total_amount" json:"total_amount"`
@@ -93,10 +91,20 @@ type Order struct {
 // LeaderboardEntry represents a leaderboard entry
 type LeaderboardEntry struct {
 	UserID        string  `firestore:"user_id" json:"user_id"`
-	DetectiveName string  `firestore:"detective_name" json:"detective_name"`
 	Points        int     `firestore:"points" json:"points"`
 	Accuracy      float64 `firestore:"accuracy" json:"accuracy"`
 	CasesCount    int     `firestore:"cases_count" json:"cases_count"`
 	Badges        []string `firestore:"badges" json:"badges"`
+	Rank          int     `json:"rank"`
+}
+
+// LeaderboardEntryWithUser represents a leaderboard entry with user information
+type LeaderboardEntryWithUser struct {
+	UserID        string  `json:"user_id"`
+	DetectiveName string  `json:"detective_name"` // Populated from User.Name
+	Points        int     `json:"points"`
+	Accuracy      float64 `json:"accuracy"`
+	CasesCount    int     `json:"cases_count"`
+	Badges        []string `json:"badges"`
 	Rank          int     `json:"rank"`
 }
