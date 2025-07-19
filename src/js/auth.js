@@ -16,7 +16,7 @@ async function handleOAuthCallback() {
         // Send the code to our backend
         fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH_CALLBACK}?code=${code}&state=${state}`)
             .then(response => response.json())
-            .then(data => {
+            .then(async data => {
                 if (data.token && data.user) {
                     Auth.setToken(data.token);
                     Auth.setUser(data.user);

@@ -64,17 +64,23 @@ func InitAuth() {
 }
 
 func GenerateStateOauthCookie(c *gin.Context) string {
-	b := make([]byte, 16)
+	b := make([]byte, 32) // Increased from 16 to 32 bytes for better security
 	// Fill with cryptographically secure random data
 	if _, err := rand.Read(b); err != nil {
-		// Fallback to simple generation if crypto/rand fails
+		// Fallback to time-based generation if crypto/rand fails
+		timestamp := time.Now().UnixNano()
 		for i := range b {
-			b[i] = byte(i + 65)
+			b[i] = byte((timestamp + int64(i)) % 256)
 		}
 	}
 	state := fmt.Sprintf("%x", b)
 	
-	c.SetCookie("oauthstate", state, 3600, "/", "", false, true)
+	// Determine if we're in production (check if GIN_MODE is release)
+	isProduction := os.Getenv("GIN_MODE") == "release"
+	
+	// Set cookie with environment-appropriate security flags
+	// Production: Secure=true (HTTPS only), Development: Secure=false (allows HTTP)
+	c.SetCookie("oauthstate", state, 600, "/", "", isProduction, true) // HttpOnly=true always
 	return state
 }
 

@@ -14,15 +14,24 @@ import (
 )
 
 func GoogleLogin(c *gin.Context) {
-	// Use a simple fixed state for now (in production, use proper state management)
-	state := "brew-detective-state"
+	// Generate a cryptographically secure random state
+	state := auth.GenerateStateOauthCookie(c)
 	url := auth.GetGoogleOauthConfig().AuthCodeURL(state)
 	c.JSON(http.StatusOK, gin.H{"auth_url": url})
 }
 
 func GoogleCallback(c *gin.Context) {
 	queryState := c.Query("state")
-	expectedState := "brew-detective-state"
+	
+	// Get the state from the cookie
+	expectedState, err := c.Cookie("oauthstate")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "OAuth state cookie not found"})
+		return
+	}
+	
+	// Clear the state cookie immediately after use
+	c.SetCookie("oauthstate", "", -1, "/", "", false, true)
 	
 	if queryState != expectedState {
 		c.JSON(http.StatusBadRequest, gin.H{
