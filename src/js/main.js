@@ -171,28 +171,32 @@ document.getElementById('submitForm').addEventListener('submit', async function(
                 region: document.getElementById('coffee1_region').value,
                 variety: document.getElementById('coffee1_variety').value,
                 process: document.getElementById('coffee1_process').value,
-                tasting_notes: document.getElementById('coffee1_notes').value
+                taste_note_1: document.getElementById('coffee1_note1').value,
+                taste_note_2: document.getElementById('coffee1_note2').value
             },
             {
                 coffee_id: '2',
                 region: document.getElementById('coffee2_region').value,
                 variety: document.getElementById('coffee2_variety').value,
                 process: document.getElementById('coffee2_process').value,
-                tasting_notes: document.getElementById('coffee2_notes').value
+                taste_note_1: document.getElementById('coffee2_note1').value,
+                taste_note_2: document.getElementById('coffee2_note2').value
             },
             {
                 coffee_id: '3',
                 region: document.getElementById('coffee3_region').value,
                 variety: document.getElementById('coffee3_variety').value,
                 process: document.getElementById('coffee3_process').value,
-                tasting_notes: document.getElementById('coffee3_notes').value
+                taste_note_1: document.getElementById('coffee3_note1').value,
+                taste_note_2: document.getElementById('coffee3_note2').value
             },
             {
                 coffee_id: '4',
                 region: document.getElementById('coffee4_region').value,
                 variety: document.getElementById('coffee4_variety').value,
                 process: document.getElementById('coffee4_process').value,
-                tasting_notes: document.getElementById('coffee4_notes').value
+                taste_note_1: document.getElementById('coffee4_note1').value,
+                taste_note_2: document.getElementById('coffee4_note2').value
             }
         ],
         favorite_coffee: document.getElementById('favorite_coffee').value,

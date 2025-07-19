@@ -66,7 +66,8 @@ type CoffeeAnswer struct {
 	Region       string `firestore:"region" json:"region"`
 	Variety      string `firestore:"variety" json:"variety"`
 	Process      string `firestore:"process" json:"process"`
-	TastingNotes string `firestore:"tasting_notes" json:"tasting_notes"`
+	TasteNote1   string `firestore:"taste_note_1" json:"taste_note_1"`
+	TasteNote2   string `firestore:"taste_note_2" json:"taste_note_2"`
 	Points       int    `firestore:"points" json:"points"`
 }
 
