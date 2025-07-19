@@ -62,4 +62,5 @@ const (
 	CasesCollection       = "cases"
 	SubmissionsCollection = "submissions"
 	OrdersCollection      = "orders"
+	CatalogCollection     = "catalog"
 )

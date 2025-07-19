@@ -107,3 +107,14 @@ type LeaderboardEntryWithUser struct {
 	Badges        []string `json:"badges"`
 	Rank          int     `json:"rank"`
 }
+
+// CatalogItem represents a catalog entry for dropdowns
+type CatalogItem struct {
+	ID          string `firestore:"id" json:"id"`
+	Value       string `firestore:"value" json:"value"`         // The option value (e.g., "central_valley")
+	Label       string `firestore:"label" json:"label"`         // The display name (e.g., "Valle Central")
+	Category    string `firestore:"category" json:"category"`   // "region", "variety", or "process"
+	IsActive    bool   `firestore:"is_active" json:"is_active"`
+	DisplayOrder int   `firestore:"display_order" json:"display_order"`
+	CreatedAt   time.Time `firestore:"created_at" json:"created_at"`
+}

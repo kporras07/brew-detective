@@ -1,10 +1,10 @@
 // API Configuration
 const API_CONFIG = {
     // Production backend URL on Cloud Run
-    BASE_URL: 'https://brew-detective-backend-1087966598090.us-central1.run.app',
+    //BASE_URL: 'https://brew-detective-backend-1087966598090.us-central1.run.app',
     
     // For local development
-    // BASE_URL: 'http://localhost:8888',
+    BASE_URL: 'http://localhost:8888',
     
     ENDPOINTS: {
         // API endpoints
@@ -15,6 +15,7 @@ const API_CONFIG = {
         USERS: '/api/v1/users',
         ORDERS: '/api/v1/orders',
         PROFILE: '/api/v1/profile',
+        CATALOG: '/api/v1/catalog',
         
         // Auth endpoints
         AUTH_GOOGLE: '/auth/google',

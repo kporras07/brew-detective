@@ -79,6 +79,7 @@ function showPage(pageId) {
     } else if (pageId === 'submit') {
         checkAuthForSubmit();
         loadActiveCase();
+        loadCatalogData();
     }
 }
 
@@ -328,8 +329,75 @@ async function saveProfile() {
     }
 }
 
+// Load catalog data for dropdowns
+async function loadCatalogData() {
+    try {
+        const data = await API.get(API_CONFIG.ENDPOINTS.CATALOG);
+        const catalog = data.catalog;
+        
+        // Populate region dropdowns
+        populateDropdown('region', catalog.region || []);
+        
+        // Populate variety dropdowns  
+        populateDropdown('variety', catalog.variety || []);
+        
+        // Populate process dropdowns
+        populateDropdown('process', catalog.process || []);
+        
+        // Populate brewing method dropdown
+        populateBrewingMethodDropdown(catalog.brewing_method || []);
+        
+    } catch (error) {
+        console.error('Failed to load catalog data:', error);
+        // Keep the existing hardcoded options as fallback
+    }
+}
+
+// Helper function to populate dropdown options
+function populateDropdown(category, items) {
+    // Find all dropdowns for this category (coffee1_region, coffee2_region, etc.)
+    const selects = document.querySelectorAll(`select[id*="_${category}"]`);
+    
+    selects.forEach(select => {
+        // Keep the first "Select" option
+        const firstOption = select.firstElementChild;
+        select.innerHTML = '';
+        select.appendChild(firstOption);
+        
+        // Add catalog items
+        items.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.value;
+            option.textContent = item.label;
+            select.appendChild(option);
+        });
+    });
+}
+
+// Helper function to populate brewing method dropdown
+function populateBrewingMethodDropdown(items) {
+    const select = document.getElementById('brewing_method');
+    if (!select) return;
+    
+    // Keep the first "Select" option
+    const firstOption = select.firstElementChild;
+    select.innerHTML = '';
+    select.appendChild(firstOption);
+    
+    // Add catalog items
+    items.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.value;
+        option.textContent = item.label;
+        select.appendChild(option);
+    });
+}
+
 // Add some interactive animations
 document.addEventListener('DOMContentLoaded', function() {
+    // Load catalog data on page load
+    loadCatalogData();
+    
     // Animate cards on scroll
     const cards = document.querySelectorAll('.card');
     const observer = new IntersectionObserver((entries) => {

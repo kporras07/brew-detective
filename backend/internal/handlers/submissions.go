@@ -8,6 +8,7 @@ import (
 	"brew-detective-backend/internal/database"
 	"brew-detective-backend/internal/models"
 
+	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
@@ -16,7 +17,7 @@ import (
 // SubmitCase handles case submission
 func SubmitCase(c *gin.Context) {
 	var submission models.Submission
-	
+
 	if err := c.ShouldBindJSON(&submission); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid submission data"})
 		return
@@ -53,7 +54,7 @@ func SubmitCase(c *gin.Context) {
 	// Generate submission ID and set timestamps
 	submission.ID = uuid.New().String()
 	submission.SubmittedAt = time.Now()
-	
+
 	// Calculate score and accuracy
 	score, accuracy := calculateScore(&submission)
 	submission.Score = score
@@ -63,7 +64,7 @@ func SubmitCase(c *gin.Context) {
 	defer cancel()
 
 	// Save submission to Firestore
-	_, err := database.FirestoreClient.Collection(database.SubmissionsCollection).
+	_, err = database.FirestoreClient.Collection(database.SubmissionsCollection).
 		Doc(submission.ID).Set(ctx, submission)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save submission"})
@@ -77,10 +78,10 @@ func SubmitCase(c *gin.Context) {
 	go updateUserStats(submission.UserID, score, accuracy)
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "Submission successful",
+		"message":       "Submission successful",
 		"submission_id": submission.ID,
-		"score": score,
-		"accuracy": accuracy,
+		"score":         score,
+		"accuracy":      accuracy,
 	})
 }
 
@@ -88,15 +89,15 @@ func SubmitCase(c *gin.Context) {
 func calculateScore(submission *models.Submission) (int, float64) {
 	// This is a simplified scoring system
 	// In a real implementation, you'd fetch the correct answers from the case
-	
+
 	totalQuestions := len(submission.CoffeeAnswers) * 3 // 3 questions per coffee: region, variety, process
 	if totalQuestions == 0 {
 		return 0, 0.0
 	}
-	
+
 	correctAnswers := 0
 	basePoints := 100
-	
+
 	for _, answer := range submission.CoffeeAnswers {
 		// Simulate scoring - in reality, you'd compare with correct answers
 		// Each coffee has 3 attributes: region, variety, process
@@ -110,10 +111,10 @@ func calculateScore(submission *models.Submission) (int, float64) {
 			correctAnswers++
 		}
 	}
-	
+
 	accuracy := float64(correctAnswers) / float64(totalQuestions)
 	score := int(float64(basePoints) * accuracy * float64(len(submission.CoffeeAnswers)))
-	
+
 	return score, accuracy
 }
 
@@ -127,7 +128,7 @@ func updateUserStats(userID string, score int, accuracy float64) {
 	defer cancel()
 
 	userRef := database.FirestoreClient.Collection(database.UsersCollection).Doc(userID)
-	
+
 	// Get current user data
 	doc, err := userRef.Get(ctx)
 	if err != nil {
@@ -164,7 +165,7 @@ func updateUserStats(userID string, score int, accuracy float64) {
 // updateBadges updates user badges based on achievements
 func updateBadges(user *models.User) {
 	badges := make(map[string]bool)
-	
+
 	// Convert existing badges to map for easy lookup
 	for _, badge := range user.Badges {
 		badges[badge] = true
@@ -209,7 +210,7 @@ func validateOrderID(orderID string) bool {
 	query := database.FirestoreClient.Collection(database.OrdersCollection).
 		Where("order_id", "==", orderID).
 		Limit(1)
-	
+
 	docs, err := query.Documents(ctx).GetAll()
 	if err != nil || len(docs) == 0 {
 		return false // Order ID doesn't exist
@@ -242,18 +243,18 @@ func markOrderIDAsUsed(orderID string, userID string) {
 	query := database.FirestoreClient.Collection(database.OrdersCollection).
 		Where("order_id", "==", orderID).
 		Limit(1)
-	
+
 	docs, err := query.Documents(ctx).GetAll()
 	if err != nil || len(docs) == 0 {
 		return // Order not found
 	}
 
 	now := time.Now()
-	updates := map[string]interface{}{
-		"is_submission_used":  true,
-		"submission_used_by":  userID,
-		"submission_used_at":  now,
-		"updated_at":         now,
+	updates := []firestore.Update{
+		{Path: "is_submission_used", Value: true},
+		{Path: "submission_used_by", Value: userID},
+		{Path: "submission_used_at", Value: now},
+		{Path: "updated_at", Value: now},
 	}
 
 	docs[0].Ref.Update(ctx, updates)
@@ -270,6 +271,9 @@ func getActiveCase() (*models.CoffeeCase, error) {
 		Documents(ctx)
 
 	doc, err := iter.Next()
+	if err == iterator.Done {
+		return nil, err
+	}
 	if err != nil {
 		return nil, err
 	}

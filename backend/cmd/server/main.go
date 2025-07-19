@@ -63,6 +63,8 @@ func main() {
 		api.GET("/cases/active", handlers.GetActiveCase)
 		api.GET("/cases/:id", handlers.GetCaseByID)
 		api.GET("/leaderboard", handlers.GetLeaderboard)
+		api.GET("/catalog", handlers.GetAllCatalog)
+		api.GET("/catalog/:category", handlers.GetCatalogByCategory)
 
 		// Protected routes
 		protected := api.Group("/")
