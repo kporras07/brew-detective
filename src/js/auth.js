@@ -1,5 +1,5 @@
 // OAuth callback handler
-function handleOAuthCallback() {
+async function handleOAuthCallback() {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const state = urlParams.get('state');
@@ -20,7 +20,7 @@ function handleOAuthCallback() {
                 if (data.token && data.user) {
                     Auth.setToken(data.token);
                     Auth.setUser(data.user);
-                    updateAuthUI();
+                    await updateAuthUI();
                     showNotification('¡Sesión iniciada exitosamente!', 'success');
                     // Redirect to home
                     window.location.href = '/';
@@ -37,7 +37,7 @@ function handleOAuthCallback() {
 }
 
 // Update authentication UI elements
-function updateAuthUI() {
+async function updateAuthUI() {
     const isAuthenticated = Auth.isAuthenticated();
     const user = Auth.getUser();
 
@@ -79,7 +79,7 @@ function updateAuthUI() {
         }
 
         // Update profile page with user data
-        updateProfilePage(user);
+        await updateProfilePage(user);
     } else {
         console.log('User not authenticated, showing login button'); // Debug
         
@@ -102,7 +102,7 @@ function updateAuthUI() {
 }
 
 // Update profile page with user data
-function updateProfilePage(user) {
+async function updateProfilePage(user) {
     // Update profile form fields
     const profileName = document.getElementById('profileName');
     const profileEmail = document.getElementById('profileEmail');
@@ -115,38 +115,52 @@ function updateProfilePage(user) {
         profileEmail.disabled = true; // Email from Google shouldn't be editable
     }
 
-    // Update statistics (you can fetch real data from API)
-    updateUserStats(user);
+    // Update statistics with real data from API
+    await updateUserStats(user);
 }
 
 // Update user statistics
-function updateUserStats(user) {
-    // These could be real API calls in the future
-    const stats = {
-        points: user.score || 0,
-        rank: calculateRank(user.score || 0),
-        casesSolved: user.cases_solved || 0,
-        accuracy: Math.round((user.accuracy || 0) * 100)
-    };
-
-    // Update UI elements if they exist
+async function updateUserStats(user) {
+    // Show loading state for stats
     const pointsDisplay = document.querySelector('[data-stat="points"]');
     const rankDisplay = document.querySelector('[data-stat="rank"]');
     const casesDisplay = document.querySelector('[data-stat="cases"]');
     const accuracyDisplay = document.querySelector('[data-stat="accuracy"]');
 
-    if (pointsDisplay) pointsDisplay.textContent = stats.points.toLocaleString();
-    if (rankDisplay) rankDisplay.textContent = `# ${stats.rank}`;
-    if (casesDisplay) casesDisplay.textContent = stats.casesSolved;
-    if (accuracyDisplay) accuracyDisplay.textContent = `${stats.accuracy}%`;
-}
+    // Set loading state
+    if (pointsDisplay) pointsDisplay.textContent = '...';
+    if (rankDisplay) rankDisplay.textContent = '...';
+    if (casesDisplay) casesDisplay.textContent = '...';
+    if (accuracyDisplay) accuracyDisplay.textContent = '...';
+    
+    try {
+        // Fetch real user rank from API
+        const leaderboardResponse = await API.get(API_CONFIG.ENDPOINTS.LEADERBOARD);
+        const leaderboard = leaderboardResponse.leaderboard || [];
+        
+        // Find user's actual rank in leaderboard
+        const userRank = leaderboard.findIndex(entry => entry.user_id === user.id) + 1;
+        
+        const stats = {
+            points: user.score || 0,
+            rank: userRank > 0 ? userRank : '---',
+            casesSolved: user.cases_solved || 0,
+            accuracy: Math.round((user.accuracy || 0) * 100)
+        };
 
-// Simple rank calculation (replace with real API call)
-function calculateRank(score) {
-    if (score >= 2000) return Math.floor(Math.random() * 5) + 1;
-    if (score >= 1500) return Math.floor(Math.random() * 10) + 5;
-    if (score >= 1000) return Math.floor(Math.random() * 20) + 15;
-    return Math.floor(Math.random() * 50) + 35;
+        // Update UI elements with actual data
+        if (pointsDisplay) pointsDisplay.textContent = stats.points.toLocaleString();
+        if (rankDisplay) rankDisplay.textContent = stats.rank !== '---' ? `# ${stats.rank}` : 'Sin ranking';
+        if (casesDisplay) casesDisplay.textContent = stats.casesSolved;
+        if (accuracyDisplay) accuracyDisplay.textContent = `${stats.accuracy}%`;
+    } catch (error) {
+        console.error('Failed to load user stats:', error);
+        // Show error state instead of fake data
+        if (pointsDisplay) pointsDisplay.textContent = 'Error';
+        if (rankDisplay) rankDisplay.textContent = 'Error';
+        if (casesDisplay) casesDisplay.textContent = 'Error';
+        if (accuracyDisplay) accuracyDisplay.textContent = 'Error';
+    }
 }
 
 // Show notification
@@ -195,14 +209,16 @@ function showNotification(message, type = 'info') {
 }
 
 // Check if we're on the OAuth callback or have a token in the URL
-if (window.location.pathname === '/auth/callback' || window.location.search.includes('code=')) {
-    handleOAuthCallback();
-} else if (window.location.hash.includes('token=')) {
-    handleTokenFromURL();
-}
+(async () => {
+    if (window.location.pathname === '/auth/callback' || window.location.search.includes('code=')) {
+        await handleOAuthCallback();
+    } else if (window.location.hash.includes('token=')) {
+        await handleTokenFromURL();
+    }
+})();
 
 // Handle token received from backend redirect
-function handleTokenFromURL() {
+async function handleTokenFromURL() {
     const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
     const token = params.get('token');
@@ -223,7 +239,7 @@ function handleTokenFromURL() {
             console.error('Failed to parse token:', error);
         }
 
-        updateAuthUI();
+        await updateAuthUI();
         showNotification('¡Sesión iniciada exitosamente!', 'success');
         
         // Clean up the URL
@@ -235,8 +251,8 @@ function handleTokenFromURL() {
 }
 
 // Initialize auth UI when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    updateAuthUI();
+document.addEventListener('DOMContentLoaded', async function() {
+    await updateAuthUI();
 });
 
 // Manual test function for debugging

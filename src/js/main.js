@@ -203,14 +203,22 @@ document.getElementById('submitForm').addEventListener('submit', async function(
 
 // Load leaderboard from API
 async function loadLeaderboard() {
+    const leaderboardContainer = document.querySelector('.leaderboard');
+    if (!leaderboardContainer) return;
+    
+    // Show loading spinner
+    leaderboardContainer.innerHTML = `
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Cargando ranking de detectives...</p>
+        </div>
+    `;
+    
     try {
         const response = await API.get(API_CONFIG.ENDPOINTS.LEADERBOARD);
         const leaderboard = response.leaderboard || [];
         
-        const leaderboardContainer = document.querySelector('.leaderboard');
-        if (!leaderboardContainer) return;
-        
-        // Clear existing entries
+        // Clear loading spinner
         leaderboardContainer.innerHTML = '';
         
         // Add entries
@@ -235,15 +243,14 @@ async function loadLeaderboard() {
             leaderboardContainer.appendChild(entryElement);
         });
         
-        // Add loading success message
+        // Show empty state if no data
         if (leaderboard.length === 0) {
             leaderboardContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">No hay detectives en el ranking aún. ¡Sé el primero!</p>';
         }
         
     } catch (error) {
         console.error('Failed to load leaderboard:', error);
-        // Fallback to static leaderboard if API fails
-        console.log('Using static leaderboard as fallback');
+        leaderboardContainer.innerHTML = '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Error al cargar el ranking. Por favor intenta nuevamente más tarde.</p>';
     }
 }
 
