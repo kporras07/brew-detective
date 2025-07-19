@@ -12,6 +12,8 @@ spec:
         run.googleapis.com/cpu-throttling: "false"
         run.googleapis.com/memory: "512Mi"
         run.googleapis.com/cpu: "1000m"
+        run.googleapis.com/startup-cpu-boost: "true"
+        run.googleapis.com/timeout: "300s"
     spec:
       serviceAccountName: brew-detective@brew-detective.iam.gserviceaccount.com
       containerConcurrency: 100
