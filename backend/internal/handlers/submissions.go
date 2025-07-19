@@ -21,6 +21,26 @@ func SubmitCase(c *gin.Context) {
 		return
 	}
 
+	// Validate required fields
+	if submission.OrderID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Order ID is required"})
+		return
+	}
+
+	// Validate order ID
+	if !validateOrderID(submission.OrderID) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or already used order ID"})
+		return
+	}
+
+	// Get user ID from auth context
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User authentication required"})
+		return
+	}
+	submission.UserID = userID.(string)
+
 	// Generate submission ID and set timestamps
 	submission.ID = uuid.New().String()
 	submission.SubmittedAt = time.Now()
@@ -40,6 +60,9 @@ func SubmitCase(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save submission"})
 		return
 	}
+
+	// Mark order ID as used
+	markOrderIDAsUsed(submission.OrderID, submission.UserID)
 
 	// Update user stats if user exists
 	go updateUserStats(submission.UserID, score, accuracy)
@@ -169,4 +192,63 @@ func updateBadges(user *models.User) {
 	for badge := range badges {
 		user.Badges = append(user.Badges, badge)
 	}
+}
+
+// validateOrderID validates if an order ID is valid and unused
+func validateOrderID(orderID string) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Query orders collection to find order with this order ID
+	query := database.FirestoreClient.Collection(database.OrdersCollection).
+		Where("order_id", "==", orderID).
+		Limit(1)
+	
+	docs, err := query.Documents(ctx).GetAll()
+	if err != nil || len(docs) == 0 {
+		return false // Order ID doesn't exist
+	}
+
+	var order models.Order
+	if err := docs[0].DataTo(&order); err != nil {
+		return false
+	}
+
+	// Check if already used for submission
+	if order.IsSubmissionUsed {
+		return false
+	}
+
+	// Order must be in delivered status to allow submission
+	if order.Status != "delivered" {
+		return false
+	}
+
+	return true
+}
+
+// markOrderIDAsUsed marks an order ID as used for submission
+func markOrderIDAsUsed(orderID string, userID string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Query orders collection to find order with this order ID
+	query := database.FirestoreClient.Collection(database.OrdersCollection).
+		Where("order_id", "==", orderID).
+		Limit(1)
+	
+	docs, err := query.Documents(ctx).GetAll()
+	if err != nil || len(docs) == 0 {
+		return // Order not found
+	}
+
+	now := time.Now()
+	updates := map[string]interface{}{
+		"is_submission_used":  true,
+		"submission_used_by":  userID,
+		"submission_used_at":  now,
+		"updated_at":         now,
+	}
+
+	docs[0].Ref.Update(ctx, updates)
 }

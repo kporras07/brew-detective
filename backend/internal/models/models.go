@@ -51,6 +51,7 @@ type Submission struct {
 	ID              string           `firestore:"id" json:"id"`
 	UserID          string           `firestore:"user_id" json:"user_id"`
 	CaseID          string           `firestore:"case_id" json:"case_id"`
+	OrderID         string           `firestore:"order_id" json:"order_id"` // 6-character order ID provided to customers
 	DetectiveName   string           `firestore:"detective_name" json:"detective_name"`
 	CoffeeAnswers   []CoffeeAnswer   `firestore:"coffee_answers" json:"coffee_answers"`
 	FavoriteCoffee  string           `firestore:"favorite_coffee" json:"favorite_coffee"`
@@ -74,15 +75,19 @@ type CoffeeAnswer struct {
 
 // Order represents a coffee case order
 type Order struct {
-	ID            string    `firestore:"id" json:"id"`
-	UserID        string    `firestore:"user_id" json:"user_id"`
-	CaseID        string    `firestore:"case_id" json:"case_id"`
-	CustomerName  string    `firestore:"customer_name" json:"customer_name"`
-	ContactInfo   string    `firestore:"contact_info" json:"contact_info"`
-	Status        string    `firestore:"status" json:"status"` // pending, confirmed, shipped, delivered
-	TotalAmount   int       `firestore:"total_amount" json:"total_amount"`
-	CreatedAt     time.Time `firestore:"created_at" json:"created_at"`
-	UpdatedAt     time.Time `firestore:"updated_at" json:"updated_at"`
+	ID              string     `firestore:"id" json:"id"`
+	OrderID         string     `firestore:"order_id" json:"order_id"`         // 6-character unique order ID
+	UserID          string     `firestore:"user_id" json:"user_id"`
+	CaseID          string     `firestore:"case_id" json:"case_id"`
+	CustomerName    string     `firestore:"customer_name" json:"customer_name"`
+	ContactInfo     string     `firestore:"contact_info" json:"contact_info"`
+	Status          string     `firestore:"status" json:"status"` // pending, confirmed, shipped, delivered
+	TotalAmount     int        `firestore:"total_amount" json:"total_amount"`
+	IsSubmissionUsed bool      `firestore:"is_submission_used" json:"is_submission_used"` // Whether order ID was used for submission
+	SubmissionUsedBy string    `firestore:"submission_used_by" json:"submission_used_by"` // User ID who used the order for submission
+	SubmissionUsedAt *time.Time `firestore:"submission_used_at" json:"submission_used_at"` // When the order ID was used
+	CreatedAt       time.Time  `firestore:"created_at" json:"created_at"`
+	UpdatedAt       time.Time  `firestore:"updated_at" json:"updated_at"`
 }
 
 // LeaderboardEntry represents a leaderboard entry

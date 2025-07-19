@@ -136,6 +136,7 @@ document.getElementById('submitForm').addEventListener('submit', async function(
     const submission = {
         detective_name: document.getElementById('detectiveName').value,
         case_id: document.getElementById('caseId').value,
+        order_id: document.getElementById('orderId').value.toUpperCase(),
         coffee_answers: [
             {
                 coffee_id: '1',

@@ -7,6 +7,7 @@ import (
 
 	"brew-detective-backend/internal/database"
 	"brew-detective-backend/internal/models"
+	"brew-detective-backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -23,7 +24,9 @@ func CreateOrder(c *gin.Context) {
 
 	// Generate order ID and set timestamps
 	order.ID = uuid.New().String()
+	order.OrderID = utils.GenerateOrderID() // Generate 6-character order ID
 	order.Status = "pending"
+	order.IsSubmissionUsed = false
 	order.CreatedAt = time.Now()
 	order.UpdatedAt = time.Now()
 
@@ -41,6 +44,7 @@ func CreateOrder(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Order created successfully",
 		"order_id": order.ID,
+		"customer_order_id": order.OrderID, // This is the 6-character ID for customers
 		"status": order.Status,
 	})
 }
