@@ -39,10 +39,19 @@ type Claims struct {
 }
 
 func InitAuth() {
+	clientID := os.Getenv("GOOGLE_CLIENT_ID")
+	clientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
+	redirectURL := os.Getenv("GOOGLE_REDIRECT_URL")
+	
+	// Debug logging (don't log secrets in production!)
+	fmt.Printf("OAuth Config - ClientID: %s\n", clientID)
+	fmt.Printf("OAuth Config - RedirectURL: %s\n", redirectURL)
+	fmt.Printf("OAuth Config - ClientSecret present: %v\n", clientSecret != "")
+	
 	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  os.Getenv("GOOGLE_REDIRECT_URL"),
-		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
-		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+		RedirectURL:  redirectURL,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 		Endpoint:     google.Endpoint,
 	}
