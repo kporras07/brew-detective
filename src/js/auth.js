@@ -47,10 +47,12 @@ async function updateAuthUI() {
     const loginBtn = document.getElementById('loginBtn');
     const userDropdown = document.getElementById('userDropdown');
     const userName = document.getElementById('userName');
+    const submitMenuItem = document.getElementById('submitMenuItem');
     
     // Mobile navigation
     const loginBtnMobile = document.getElementById('loginBtnMobile');
     const userDropdownMobile = document.getElementById('userDropdownMobile');
+    const submitMenuItemMobile = document.getElementById('submitMenuItemMobile');
 
     console.log('Elements found:', { loginBtn, userDropdown, userName }); // Debug
 
@@ -78,6 +80,14 @@ async function updateAuthUI() {
             userDropdownMobile.style.display = 'block';
         }
 
+        // Show submit menu items for authenticated users
+        if (submitMenuItem) {
+            submitMenuItem.style.display = 'block';
+        }
+        if (submitMenuItemMobile) {
+            submitMenuItemMobile.style.display = 'block';
+        }
+
         // Update profile page with user data
         await updateProfilePage(user);
     } else {
@@ -97,6 +107,14 @@ async function updateAuthUI() {
         }
         if (userDropdownMobile) {
             userDropdownMobile.style.display = 'none';
+        }
+
+        // Hide submit menu items for unauthenticated users
+        if (submitMenuItem) {
+            submitMenuItem.style.display = 'none';
+        }
+        if (submitMenuItemMobile) {
+            submitMenuItemMobile.style.display = 'none';
         }
     }
 }

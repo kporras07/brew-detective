@@ -14,7 +14,7 @@
             <ul class="nav-links">
                 <li><a href="#" onclick="showPage('home')">Inicio</a></li>
                 <li><a href="#" onclick="showPage('order')">Ordenar Caja</a></li>
-                <li><a href="#" onclick="showPage('submit')">Enviar Respuestas</a></li>
+                <li id="submitMenuItem" style="display: none;"><a href="#" onclick="showPage('submit')">Enviar Respuestas</a></li>
                 <li><a href="#" onclick="showPage('leaderboard')">Ranking</a></li>
                 <li class="auth-nav" id="authNav">
                     <a href="#" onclick="Auth.login()" id="loginBtn">Iniciar Sesión</a>
@@ -41,7 +41,7 @@
             <ul>
                 <li><a href="#" onclick="showPage('home'); closeMobileMenu()">Inicio</a></li>
                 <li><a href="#" onclick="showPage('order'); closeMobileMenu()">Ordenar Caja</a></li>
-                <li><a href="#" onclick="showPage('submit'); closeMobileMenu()">Enviar Respuestas</a></li>
+                <li id="submitMenuItemMobile" style="display: none;"><a href="#" onclick="showPage('submit'); closeMobileMenu()">Enviar Respuestas</a></li>
                 <li><a href="#" onclick="showPage('leaderboard'); closeMobileMenu()">Ranking</a></li>
                 <li class="auth-nav-mobile" id="authNavMobile">
                     <a href="#" onclick="Auth.login(); closeMobileMenu()" id="loginBtnMobile">Iniciar Sesión</a>
