@@ -135,6 +135,7 @@ func updateUserStats(userID string, score int, accuracy float64) {
 		// User doesn't exist, create new user
 		newUser := models.User{
 			ID:         userID,
+			Type:       "regular", // Default to regular user
 			Points:     score,
 			CasesCount: 1,
 			Accuracy:   accuracy,

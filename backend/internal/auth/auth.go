@@ -9,6 +9,9 @@ import (
 	"os"
 	"time"
 
+	"brew-detective-backend/internal/database"
+	"brew-detective-backend/internal/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/oauth2"
@@ -176,6 +179,64 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Set("userID", claims.UserID)
 		c.Set("email", claims.Email)
 		c.Set("name", claims.Name)
+		c.Next()
+	}
+}
+
+// AdminMiddleware ensures the user is authenticated and has admin privileges
+func AdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// First check if user is authenticated
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			c.Abort()
+			return
+		}
+
+		// Extract token from "Bearer <token>"
+		if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization header format"})
+			c.Abort()
+			return
+		}
+
+		tokenString := authHeader[7:]
+		claims, err := ValidateJWT(tokenString)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		// Check if user has admin privileges
+		userRef := database.FirestoreClient.Collection(database.UsersCollection).Doc(claims.UserID)
+		doc, err := userRef.Get(c.Request.Context())
+		
+		if err != nil || !doc.Exists() {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+			c.Abort()
+			return
+		}
+
+		var user models.User
+		if err := doc.DataTo(&user); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse user data"})
+			c.Abort()
+			return
+		}
+
+		if user.Type != "admin" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Admin privileges required"})
+			c.Abort()
+			return
+		}
+
+		// Add claims to context
+		c.Set("userID", claims.UserID)
+		c.Set("email", claims.Email)
+		c.Set("name", claims.Name)
+		c.Set("userType", user.Type)
 		c.Next()
 	}
 }

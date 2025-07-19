@@ -61,6 +61,7 @@ func GoogleCallback(c *gin.Context) {
 			Email:          googleUser.Email,
 			Name:           googleUser.Name,
 			Picture:        googleUser.Picture,
+			Type:           "regular", // Default to regular user
 			CreatedAt:      time.Now(),
 			UpdatedAt:      time.Now(),
 			Score:          0,
