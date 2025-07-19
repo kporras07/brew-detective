@@ -71,6 +71,14 @@ async function updateAuthUI() {
             userName.textContent = user.name || user.email;
             console.log('User name set to:', user.name || user.email); // Debug
         }
+        
+        // Update user avatar
+        const userAvatar = document.getElementById('userAvatar');
+        if (userAvatar && user.picture) {
+            userAvatar.src = user.picture;
+            userAvatar.style.display = 'inline-block';
+            console.log('User avatar set to:', user.picture); // Debug
+        }
 
         // Mobile: Hide login button, show user dropdown
         if (loginBtnMobile) {
@@ -246,15 +254,23 @@ async function handleTokenFromURL() {
         
         // Get user data from the token
         try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const userData = {
-                id: payload.user_id,
-                email: payload.email,
-                name: payload.name
-            };
-            Auth.setUser(userData);
+            // Get full user data from API
+            const userResponse = await API.get(API_CONFIG.ENDPOINTS.PROFILE);
+            Auth.setUser(userResponse);
         } catch (error) {
-            console.error('Failed to parse token:', error);
+            console.error('Failed to get user data:', error);
+            // Fallback to token data if API call fails
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const userData = {
+                    id: payload.user_id,
+                    email: payload.email,
+                    name: payload.name
+                };
+                Auth.setUser(userData);
+            } catch (tokenError) {
+                console.error('Failed to parse token:', tokenError);
+            }
         }
 
         await updateAuthUI();
