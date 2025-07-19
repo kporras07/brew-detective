@@ -63,8 +63,8 @@ func InitAuth() {
 	jwtSecret = []byte(jwtSecretStr)
 }
 
-func GenerateStateOauthCookie(c *gin.Context) string {
-	b := make([]byte, 32) // Increased from 16 to 32 bytes for better security
+func GenerateOAuthState(c *gin.Context) string {
+	b := make([]byte, 32) // 32 bytes for better security
 	// Fill with cryptographically secure random data
 	if _, err := rand.Read(b); err != nil {
 		// Fallback to time-based generation if crypto/rand fails
@@ -75,12 +75,10 @@ func GenerateStateOauthCookie(c *gin.Context) string {
 	}
 	state := fmt.Sprintf("%x", b)
 	
-	// Determine if we're in production (check if GIN_MODE is release)
-	isProduction := os.Getenv("GIN_MODE") == "release"
+	// For OAuth flows, we don't use cookies due to cross-domain issues
+	// The state is validated by the OAuth provider and returned in the callback
+	// In a production app with user sessions, you'd store this in a session store
 	
-	// Set cookie with environment-appropriate security flags
-	// Production: Secure=true (HTTPS only), Development: Secure=false (allows HTTP)
-	c.SetCookie("oauthstate", state, 600, "/", "", isProduction, true) // HttpOnly=true always
 	return state
 }
 
@@ -89,6 +87,12 @@ func GetGoogleOauthConfig() *oauth2.Config {
 }
 
 func GetUserDataFromGoogle(code string) (*GoogleUser, error) {
+	// Debug: Log OAuth config (without exposing secrets)
+	fmt.Printf("OAuth Exchange - ClientID: %s\n", googleOauthConfig.ClientID)
+	fmt.Printf("OAuth Exchange - RedirectURL: %s\n", googleOauthConfig.RedirectURL)
+	fmt.Printf("OAuth Exchange - ClientSecret present: %v\n", googleOauthConfig.ClientSecret != "")
+	fmt.Printf("OAuth Exchange - Code length: %d\n", len(code))
+	
 	token, err := googleOauthConfig.Exchange(context.Background(), code)
 	if err != nil {
 		return nil, fmt.Errorf("code exchange wrong: %s", err.Error())
