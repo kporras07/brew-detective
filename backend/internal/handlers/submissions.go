@@ -132,17 +132,12 @@ func updateUserStats(userID string, score int, accuracy float64) {
 	// Get current user data
 	doc, err := userRef.Get(ctx)
 	if err != nil {
-		// User doesn't exist, create new user
-		newUser := models.User{
-			ID:         userID,
-			Type:       "regular", // Default to regular user
-			Points:     score,
-			CasesCount: 1,
-			Accuracy:   accuracy,
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
-		}
-		userRef.Set(ctx, newUser)
+		// User doesn't exist - submissions should only work for existing users
+		return
+	}
+	
+	if !doc.Exists() {
+		// User doesn't exist - submissions should only work for existing users
 		return
 	}
 
