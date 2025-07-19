@@ -80,6 +80,8 @@ function showPage(pageId) {
         checkAuthForSubmit();
         loadActiveCase();
         loadCatalogData();
+    } else if (pageId === 'admin') {
+        checkAdminAccess();
     }
 }
 
@@ -391,6 +393,187 @@ function populateBrewingMethodDropdown(items) {
         option.textContent = item.label;
         select.appendChild(option);
     });
+}
+
+// Admin functions
+function checkAdminAccess() {
+    if (!Auth.isAuthenticated()) {
+        showNotification('Debes iniciar sesión para acceder al panel de administración', 'error');
+        setTimeout(() => {
+            showPage('home');
+        }, 2000);
+        return;
+    }
+    
+    const user = Auth.getUser();
+    if (!user || user.type !== 'admin') {
+        showNotification('Acceso denegado: Se requieren privilegios de administrador', 'error');
+        setTimeout(() => {
+            showPage('home');
+        }, 2000);
+        return;
+    }
+}
+
+function loadCatalogItems() {
+    const category = document.getElementById('adminCategorySelect').value;
+    
+    if (!category) {
+        document.getElementById('catalogItemsList').innerHTML = '';
+        document.getElementById('addItemBtn').style.display = 'none';
+        document.getElementById('refreshBtn').style.display = 'none';
+        return;
+    }
+    
+    document.getElementById('addItemBtn').style.display = 'inline-block';
+    document.getElementById('refreshBtn').style.display = 'inline-block';
+    
+    // Show loading
+    document.getElementById('catalogItemsList').innerHTML = '<p>Cargando items...</p>';
+    
+    API.get(`${API_CONFIG.ENDPOINTS.ADMIN_CATALOG}?category=${category}`)
+        .then(data => {
+            displayCatalogItems(data.items || []);
+        })
+        .catch(error => {
+            console.error('Error loading catalog items:', error);
+            showAdminNotification('Error al cargar los items del catálogo', 'error');
+            document.getElementById('catalogItemsList').innerHTML = '<p>Error al cargar los items</p>';
+        });
+}
+
+function displayCatalogItems(items) {
+    const container = document.getElementById('catalogItemsList');
+    
+    if (items.length === 0) {
+        container.innerHTML = '<p>No hay items en esta categoría</p>';
+        return;
+    }
+    
+    let html = '<div style="display: grid; gap: 1rem;">';
+    
+    items.forEach(item => {
+        html += `
+            <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 5;">
+                <div>
+                    <strong>${item.label}</strong> (${item.value})
+                    <br>
+                    <small>Orden: ${item.display_order} | ${item.is_active ? 'Activo' : 'Inactivo'}</small>
+                </div>
+                <div>
+                    <button onclick="editCatalogItem('${item.id}')" class="cta-button" style="background: #d4af37; margin-right: 0.5rem; padding: 0.5rem 1rem; position: relative; z-index: 10; pointer-events: auto;">
+                        Editar
+                    </button>
+                    <button onclick="deleteCatalogItem('${item.id}')" class="cta-button" style="background: #e74c3c; padding: 0.5rem 1rem; position: relative; z-index: 10; pointer-events: auto;">
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function showAddItemForm() {
+    document.getElementById('addItemForm').style.display = 'block';
+    document.getElementById('newItemValue').value = '';
+    document.getElementById('newItemLabel').value = '';
+    document.getElementById('newItemOrder').value = '0';
+    document.getElementById('newItemActive').checked = true;
+}
+
+function cancelAddItem() {
+    document.getElementById('addItemForm').style.display = 'none';
+}
+
+function createCatalogItem() {
+    const category = document.getElementById('adminCategorySelect').value;
+    const value = document.getElementById('newItemValue').value.trim();
+    const label = document.getElementById('newItemLabel').value.trim();
+    const order = parseInt(document.getElementById('newItemOrder').value) || 0;
+    const isActive = document.getElementById('newItemActive').checked;
+    
+    if (!value || !label) {
+        showAdminNotification('Valor y etiqueta son requeridos', 'error');
+        return;
+    }
+    
+    const newItem = {
+        category: category,
+        value: value,
+        label: label,
+        display_order: order,
+        is_active: isActive
+    };
+    
+    API.post(API_CONFIG.ENDPOINTS.ADMIN_CATALOG, newItem)
+        .then(data => {
+            showAdminNotification('Item creado exitosamente', 'success');
+            cancelAddItem();
+            loadCatalogItems();
+        })
+        .catch(error => {
+            console.error('Error creating catalog item:', error);
+            showAdminNotification('Error al crear el item', 'error');
+        });
+}
+
+function editCatalogItem(itemId) {
+    // For now, just show a simple prompt
+    const newLabel = prompt('Nuevo nombre para mostrar:');
+    if (newLabel && newLabel.trim()) {
+        const updates = { label: newLabel.trim() };
+        
+        API.put(`${API_CONFIG.ENDPOINTS.ADMIN_CATALOG}/${itemId}`, updates)
+            .then(() => {
+                showAdminNotification('Item actualizado exitosamente', 'success');
+                loadCatalogItems();
+            })
+            .catch(error => {
+                console.error('Error updating catalog item:', error);
+                showAdminNotification('Error al actualizar el item', 'error');
+            });
+    }
+}
+
+function deleteCatalogItem(itemId) {
+    if (confirm('¿Estás seguro de que quieres eliminar este item?')) {
+        API.delete(`${API_CONFIG.ENDPOINTS.ADMIN_CATALOG}/${itemId}`)
+            .then(() => {
+                showAdminNotification('Item eliminado exitosamente', 'success');
+                loadCatalogItems();
+            })
+            .catch(error => {
+                console.error('Error deleting catalog item:', error);
+                showAdminNotification('Error al eliminar el item', 'error');
+            });
+    }
+}
+
+function showAdminNotification(message, type) {
+    const successElement = document.getElementById('adminSuccess');
+    const errorElement = document.getElementById('adminError');
+    
+    // Hide both first
+    successElement.style.display = 'none';
+    errorElement.style.display = 'none';
+    
+    // Show the appropriate one
+    if (type === 'success') {
+        successElement.textContent = message;
+        successElement.style.display = 'block';
+        setTimeout(() => {
+            successElement.style.display = 'none';
+        }, 3000);
+    } else {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        setTimeout(() => {
+            errorElement.style.display = 'none';
+        }, 3000);
+    }
 }
 
 // Add some interactive animations

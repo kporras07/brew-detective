@@ -26,6 +26,7 @@
                         </a>
                         <div class="user-menu" id="userMenu">
                             <a href="#" onclick="showPage('profile'); closeUserMenu()">Mi Perfil</a>
+                            <a href="#" onclick="showPage('admin'); closeUserMenu()" id="adminMenuItem" style="display: none;">Administración</a>
                             <a href="#" onclick="Auth.logout()">Cerrar Sesión</a>
                         </div>
                     </div>
@@ -443,6 +444,75 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Admin Page -->
+    <div id="admin" class="page">
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Panel de Administración</h2>
+                
+                <!-- Catalog Management -->
+                <div class="card">
+                    <h3>🗂️ Gestión de Catálogos</h3>
+                    
+                    <!-- Category Selector -->
+                    <div class="form-group">
+                        <label for="adminCategorySelect">Categoría:</label>
+                        <select id="adminCategorySelect" onchange="loadCatalogItems()" style="position: relative; z-index: 10; pointer-events: auto;">
+                            <option value="">Selecciona una categoría</option>
+                            <option value="region">Regiones</option>
+                            <option value="variety">Variedades</option>
+                            <option value="process">Procesos de Beneficiado</option>
+                            <option value="brewing_method">Métodos de Preparación</option>
+                        </select>
+                    </div>
+
+                    <!-- Add New Item Form -->
+                    <div id="addItemForm" style="display: none; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin: 1rem 0; position: relative; z-index: 10;">
+                        <h4>Agregar Nuevo Item</h4>
+                        <div class="form-group">
+                            <label for="newItemValue">Valor (ID interno):</label>
+                            <input type="text" id="newItemValue" placeholder="ej: central_valley" style="position: relative; z-index: 15; pointer-events: auto;">
+                        </div>
+                        <div class="form-group">
+                            <label for="newItemLabel">Etiqueta (Nombre mostrado):</label>
+                            <input type="text" id="newItemLabel" placeholder="ej: Valle Central" style="position: relative; z-index: 15; pointer-events: auto;">
+                        </div>
+                        <div class="form-group">
+                            <label for="newItemOrder">Orden de Visualización:</label>
+                            <input type="number" id="newItemOrder" value="0" min="0" style="position: relative; z-index: 15; pointer-events: auto;">
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="newItemActive" checked style="position: relative; z-index: 15; pointer-events: auto;"> Activo
+                            </label>
+                        </div>
+                        <button type="button" onclick="createCatalogItem()" class="cta-button" style="margin-right: 1rem; position: relative; z-index: 15; pointer-events: auto;">Crear Item</button>
+                        <button type="button" onclick="cancelAddItem()" class="cta-button" style="background: #666; position: relative; z-index: 15; pointer-events: auto;">Cancelar</button>
+                    </div>
+
+                    <!-- Actions -->
+                    <div style="margin: 1rem 0; position: relative; z-index: 5;">
+                        <button type="button" onclick="showAddItemForm()" class="cta-button" id="addItemBtn" style="display: none; position: relative; z-index: 10; pointer-events: auto;">Agregar Nuevo Item</button>
+                        <button type="button" onclick="loadCatalogItems()" class="cta-button" style="background: #666; margin-left: 1rem; position: relative; z-index: 10; pointer-events: auto; display: none;" id="refreshBtn">Actualizar Lista</button>
+                    </div>
+
+                    <!-- Catalog Items List -->
+                    <div id="catalogItemsList" style="margin-top: 2rem;">
+                        <!-- Items will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div id="adminSuccess" class="success-message" style="margin-top: 1rem;">
+                    Operación completada exitosamente
+                </div>
+                <div id="adminError" class="error-message" style="margin-top: 1rem;">
+                    Error en la operación
                 </div>
             </div>
         </section>

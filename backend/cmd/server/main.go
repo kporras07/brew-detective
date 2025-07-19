@@ -83,6 +83,17 @@ func main() {
 			protected.GET("/orders/:id", handlers.GetOrder)
 			protected.PUT("/orders/:id/status", handlers.UpdateOrderStatus)
 		}
+
+		// Admin routes
+		admin := api.Group("/admin")
+		admin.Use(auth.AdminMiddleware())
+		{
+			// Catalog management
+			admin.GET("/catalog", handlers.GetAllCatalogItems)
+			admin.POST("/catalog", handlers.CreateCatalogItem)
+			admin.PUT("/catalog/:id", handlers.UpdateCatalogItem)
+			admin.DELETE("/catalog/:id", handlers.DeleteCatalogItem)
+		}
 	}
 
 	// Start server

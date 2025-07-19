@@ -39,7 +39,20 @@ async function handleOAuthCallback() {
 // Update authentication UI elements
 async function updateAuthUI() {
     const isAuthenticated = Auth.isAuthenticated();
-    const user = Auth.getUser();
+    let user = Auth.getUser();
+
+    // If user is authenticated, fetch fresh user data from API to get latest type
+    if (isAuthenticated && user) {
+        try {
+            const freshUserData = await API.get(API_CONFIG.ENDPOINTS.PROFILE);
+            user = freshUserData;
+            Auth.setUser(user); // Update cached user data
+            console.log('Fetched fresh user data:', user); // Debug
+        } catch (error) {
+            console.error('Failed to fetch fresh user data:', error);
+            // Continue with cached user data
+        }
+    }
 
     console.log('Updating auth UI:', { isAuthenticated, user }); // Debug
 
@@ -96,6 +109,20 @@ async function updateAuthUI() {
             submitMenuItemMobile.style.display = 'block';
         }
 
+        // Show admin menu item for admin users
+        const adminMenuItem = document.getElementById('adminMenuItem');
+        if (adminMenuItem) {
+            console.log('Checking admin access for user:', user); // Debug
+            console.log('User type:', user.type); // Debug
+            if (user.type === 'admin') {
+                console.log('User is admin, showing admin menu'); // Debug
+                adminMenuItem.style.display = 'block';
+            } else {
+                console.log('User is not admin, hiding admin menu'); // Debug
+                adminMenuItem.style.display = 'none';
+            }
+        }
+
         // Update profile page with user data
         await updateProfilePage(user);
     } else {
@@ -123,6 +150,12 @@ async function updateAuthUI() {
         }
         if (submitMenuItemMobile) {
             submitMenuItemMobile.style.display = 'none';
+        }
+
+        // Hide admin menu item for unauthenticated users
+        const adminMenuItem = document.getElementById('adminMenuItem');
+        if (adminMenuItem) {
+            adminMenuItem.style.display = 'none';
         }
     }
 }
@@ -300,6 +333,7 @@ window.testAuthUI = function() {
         loginBtn: document.getElementById('loginBtn'),
         userDropdown: document.getElementById('userDropdown'),
         userName: document.getElementById('userName'),
+        adminMenuItem: document.getElementById('adminMenuItem'),
         loginBtnMobile: document.getElementById('loginBtnMobile'),
         userDropdownMobile: document.getElementById('userDropdownMobile')
     };
@@ -318,4 +352,60 @@ window.testAuthUI = function() {
     });
     
     console.log('=== END TEST ===');
+};
+
+// Manual refresh function to update user data and UI
+window.refreshUserData = async function() {
+    console.log('=== REFRESHING USER DATA ===');
+    await updateAuthUI();
+    console.log('=== REFRESH COMPLETE ===');
+};
+
+// Debug function for admin dropdown
+window.testAdminDropdown = function() {
+    const dropdown = document.getElementById('adminCategorySelect');
+    console.log('Admin dropdown element:', dropdown);
+    console.log('Admin dropdown value:', dropdown ? dropdown.value : 'Not found');
+    console.log('Admin dropdown styles:', dropdown ? {
+        display: dropdown.style.display,
+        pointerEvents: dropdown.style.pointerEvents,
+        zIndex: dropdown.style.zIndex,
+        position: dropdown.style.position
+    } : 'Not found');
+    
+    if (dropdown) {
+        console.log('Attempting to programmatically change value...');
+        dropdown.value = 'region';
+        dropdown.dispatchEvent(new Event('change'));
+        console.log('Value changed to:', dropdown.value);
+    }
+};
+
+// Debug function for admin buttons
+window.testAdminButtons = function() {
+    const addBtn = document.getElementById('addItemBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    
+    console.log('Add Item Button:', addBtn);
+    console.log('Add Item Button styles:', addBtn ? {
+        display: addBtn.style.display,
+        pointerEvents: addBtn.style.pointerEvents,
+        zIndex: addBtn.style.zIndex,
+        position: addBtn.style.position,
+        visibility: addBtn.style.visibility
+    } : 'Not found');
+    
+    console.log('Refresh Button:', refreshBtn);
+    console.log('Refresh Button styles:', refreshBtn ? {
+        display: refreshBtn.style.display,
+        pointerEvents: refreshBtn.style.pointerEvents,
+        zIndex: refreshBtn.style.zIndex,
+        position: refreshBtn.style.position,
+        visibility: refreshBtn.style.visibility
+    } : 'Not found');
+    
+    if (addBtn) {
+        console.log('Attempting to programmatically click Add Item button...');
+        addBtn.click();
+    }
 };
