@@ -4,7 +4,7 @@ const API_CONFIG = {
     BASE_URL: 'https://brew-detective-backend-1087966598090.us-central1.run.app',
     
     // For local development
-    //BASE_URL: 'http://localhost:8888',
+    // BASE_URL: 'http://localhost:8888',
     
     ENDPOINTS: {
         // API endpoints
