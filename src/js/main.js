@@ -83,6 +83,7 @@ function showPage(pageId) {
     } else if (pageId === 'admin') {
         checkAdminAccess();
         loadCaseFormDropdowns();
+        loadOrderFormDropdowns();
     }
 }
 
@@ -1060,6 +1061,208 @@ async function deleteCase(caseId) {
             showAdminNotification('Error al eliminar el caso', 'error');
         }
     }
+}
+
+// Order Management Functions
+
+function showCreateOrderForm() {
+    document.getElementById('createOrderForm').style.display = 'block';
+    clearOrderForm();
+}
+
+function cancelCreateOrder() {
+    document.getElementById('createOrderForm').style.display = 'none';
+}
+
+function clearOrderForm() {
+    document.getElementById('orderUserSelect').value = '';
+    document.getElementById('orderCaseSelect').value = '';
+    document.getElementById('orderContactInfo').value = '';
+    document.getElementById('orderAmount').value = '';
+    document.getElementById('orderStatus').value = 'pending';
+}
+
+async function loadOrderFormDropdowns() {
+    try {
+        // Load users
+        const usersData = await API.get(API_CONFIG.ENDPOINTS.ADMIN_USERS);
+        populateOrderDropdown('orderUserSelect', usersData.users || [], 'name', 'id');
+        
+        // Load cases
+        const casesData = await API.get(API_CONFIG.ENDPOINTS.ADMIN_CASES);
+        populateOrderDropdown('orderCaseSelect', casesData.cases || [], 'name', 'id');
+        
+    } catch (error) {
+        console.error('Failed to load order form dropdowns:', error);
+    }
+}
+
+function populateOrderDropdown(selectId, items, labelField, valueField) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    
+    // Keep the first "Select" option
+    const firstOption = select.firstElementChild;
+    select.innerHTML = '';
+    select.appendChild(firstOption);
+    
+    // Add items
+    items.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item[valueField];
+        option.textContent = item[labelField];
+        select.appendChild(option);
+    });
+}
+
+async function createOrder() {
+    const userId = document.getElementById('orderUserSelect').value;
+    const caseId = document.getElementById('orderCaseSelect').value;
+    const contactInfo = document.getElementById('orderContactInfo').value.trim();
+    const amount = parseInt(document.getElementById('orderAmount').value) || 0;
+    const status = document.getElementById('orderStatus').value;
+    
+    if (!userId || !caseId) {
+        showAdminNotification('Usuario y caso son requeridos', 'error');
+        return;
+    }
+    
+    const newOrder = {
+        user_id: userId,
+        case_id: caseId,
+        contact_info: contactInfo,
+        total_amount: amount,
+        status: status
+    };
+    
+    try {
+        const response = await API.post(API_CONFIG.ENDPOINTS.ADMIN_ORDERS, newOrder);
+        showAdminNotification(`Orden creada exitosamente. ID de orden: ${response.customer_order_id}`, 'success');
+        cancelCreateOrder();
+        loadAllOrders();
+    } catch (error) {
+        console.error('Error creating order:', error);
+        showAdminNotification('Error al crear la orden', 'error');
+    }
+}
+
+async function loadAllOrders() {
+    const container = document.getElementById('ordersList');
+    
+    // Show loading
+    container.innerHTML = '<p>Cargando órdenes...</p>';
+    
+    try {
+        const data = await API.get(`${API_CONFIG.ENDPOINTS.ADMIN_ORDERS}?limit=50`);
+        displayOrders(data.orders || []);
+    } catch (error) {
+        console.error('Error loading orders:', error);
+        showAdminNotification('Error al cargar las órdenes', 'error');
+        container.innerHTML = '<p>Error al cargar las órdenes</p>';
+    }
+}
+
+function displayOrders(orders) {
+    const container = document.getElementById('ordersList');
+    
+    if (orders.length === 0) {
+        container.innerHTML = '<p>No hay órdenes creadas</p>';
+        return;
+    }
+    
+    let html = '<div style="display: grid; gap: 1rem;">';
+    
+    orders.forEach(order => {
+        const createdDate = new Date(order.created_at).toLocaleDateString('es-ES');
+        const statusColor = getStatusColor(order.status);
+        const usedBadge = order.is_submission_used ? 
+            '<span style="background: #e74c3c; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">USADO</span>' :
+            '<span style="background: #2ecc71; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">DISPONIBLE</span>';
+        
+        html += `
+            <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; position: relative; z-index: 5;">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <strong style="color: #d4af37;">ID: ${order.order_id}</strong>
+                            <span style="background: ${statusColor}; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">${order.status.toUpperCase()}</span>
+                            ${usedBadge}
+                        </div>
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>Usuario:</strong> ${order.user_name || 'Sin nombre'} (${order.user_id})<br>
+                            <strong>Caso:</strong> ${order.case_name || 'Sin nombre'}<br>
+                            <strong>Monto:</strong> ₡${order.total_amount?.toLocaleString() || '0'}
+                        </div>
+                        ${order.contact_info ? `
+                            <div style="background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">
+                                <small><strong>Contacto:</strong> ${order.contact_info}</small>
+                            </div>
+                        ` : ''}
+                        ${order.is_submission_used && order.submission_used_at ? `
+                            <div style="margin-top: 0.5rem; opacity: 0.8; font-size: 0.9rem;">
+                                <small>Usado el: ${new Date(order.submission_used_at).toLocaleDateString('es-ES')}</small>
+                            </div>
+                        ` : ''}
+                        <small style="opacity: 0.6;">Creado: ${createdDate}</small>
+                    </div>
+                    <div style="margin-left: 1rem;">
+                        <select onchange="updateOrderStatus('${order.id}', this.value)" style="margin-bottom: 0.5rem; position: relative; z-index: 10; pointer-events: auto;">
+                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pendiente</option>
+                            <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmada</option>
+                            <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Enviada</option>
+                            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Entregada</option>
+                        </select><br>
+                        <button onclick="copyOrderId('${order.order_id}')" class="cta-button" 
+                                style="background: #3498db; padding: 0.5rem 1rem; position: relative; z-index: 10; pointer-events: auto;">
+                            Copiar ID
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function getStatusColor(status) {
+    switch (status) {
+        case 'pending': return '#f39c12';
+        case 'confirmed': return '#3498db';
+        case 'shipped': return '#9b59b6';
+        case 'delivered': return '#2ecc71';
+        default: return '#666';
+    }
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+    try {
+        await API.put(`${API_CONFIG.ENDPOINTS.ADMIN_ORDERS}/${orderId}/status`, {
+            status: newStatus
+        });
+        showAdminNotification(`Estado actualizado a: ${newStatus}`, 'success');
+        loadAllOrders();
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        showAdminNotification('Error al actualizar el estado', 'error');
+        loadAllOrders(); // Reload to reset the dropdown
+    }
+}
+
+function copyOrderId(orderId) {
+    navigator.clipboard.writeText(orderId).then(() => {
+        showAdminNotification(`ID copiado: ${orderId}`, 'success');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = orderId;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showAdminNotification(`ID copiado: ${orderId}`, 'success');
+    });
 }
 
 // Add some interactive animations

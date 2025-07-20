@@ -12,6 +12,7 @@ import (
 	"brew-detective-backend/internal/database"
 	"brew-detective-backend/internal/models"
 
+	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/api/iterator"
 )
@@ -237,4 +238,48 @@ func UpdateUserProfile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Profile updated successfully", "user": user})
+}
+
+// GetAllUsers returns all users for admin purposes
+func GetAllUsers(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Query all users ordered by name
+	query := database.FirestoreClient.Collection(database.UsersCollection).
+		OrderBy("name", firestore.Asc)
+
+	iter := query.Documents(ctx)
+
+	var users []map[string]interface{}
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users", "details": err.Error()})
+			return
+		}
+
+		var user models.User
+		if err := doc.DataTo(&user); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse user data"})
+			return
+		}
+
+		// Create response object with basic user info
+		userResponse := map[string]interface{}{
+			"id":    user.ID,
+			"name":  user.Name,
+			"email": user.Email,
+		}
+
+		users = append(users, userResponse)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"users": users,
+		"count": len(users),
+	})
 }

@@ -101,6 +101,14 @@ func main() {
 			admin.POST("/cases", handlers.CreateCase)
 			admin.PUT("/cases/:id", handlers.UpdateCase)
 			admin.DELETE("/cases/:id", handlers.DeleteCase)
+
+			// Order management
+			admin.GET("/orders", handlers.GetAllOrders)
+			admin.POST("/orders", handlers.CreateOrder)
+			admin.PUT("/orders/:id/status", handlers.UpdateOrderStatus)
+
+			// User management
+			admin.GET("/users", handlers.GetAllUsers)
 		}
 	}
 
