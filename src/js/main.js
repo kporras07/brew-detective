@@ -752,6 +752,7 @@ function clearCaseForm() {
         document.getElementById(`coffee${i}Region`).value = '';
         document.getElementById(`coffee${i}Variety`).value = '';
         document.getElementById(`coffee${i}Process`).value = '';
+        document.getElementById(`coffee${i}Notes`).value = '';
     }
     
     // Reset question checkboxes to default (all checked)
@@ -769,6 +770,8 @@ async function loadCaseFormDropdowns() {
         const data = await API.get(API_CONFIG.ENDPOINTS.CATALOG);
         const catalog = data.catalog;
         
+        console.log('Catalog data loaded:', catalog);
+        
         // Populate dropdowns for each coffee
         for (let i = 1; i <= 4; i++) {
             populateCaseDropdown(`coffee${i}Region`, catalog.region || []);
@@ -776,8 +779,16 @@ async function loadCaseFormDropdowns() {
             populateCaseDropdown(`coffee${i}Process`, catalog.process || []);
         }
         
+        // Also populate edit form dropdowns if they exist
+        for (let i = 1; i <= 4; i++) {
+            populateCaseDropdown(`editCoffee${i}Region`, catalog.region || []);
+            populateCaseDropdown(`editCoffee${i}Variety`, catalog.variety || []);
+            populateCaseDropdown(`editCoffee${i}Process`, catalog.process || []);
+        }
+        
     } catch (error) {
         console.error('Failed to load catalog data for case form:', error);
+        showAdminNotification('Error al cargar datos del catálogo. Verifica que existan elementos en el catálogo.', 'error');
     }
 }
 
@@ -816,9 +827,15 @@ async function createCase() {
         const region = document.getElementById(`coffee${i}Region`).value;
         const variety = document.getElementById(`coffee${i}Variety`).value;
         const process = document.getElementById(`coffee${i}Process`).value;
+        const notes = document.getElementById(`coffee${i}Notes`).value.trim();
         
         if (!coffeeName || !region || !variety || !process) {
             showAdminNotification(`Todos los campos del Café #${i} son requeridos`, 'error');
+            return;
+        }
+        
+        if (!notes) {
+            showAdminNotification(`Las notas de cata del Café #${i} son requeridas`, 'error');
             return;
         }
         
@@ -827,7 +844,8 @@ async function createCase() {
             name: coffeeName,
             region: region,
             variety: variety,
-            process: process
+            process: process,
+            tasting_notes: notes
         });
     }
     
@@ -997,14 +1015,16 @@ function populateEditForm(caseData) {
     document.getElementById('editCaseDescription').value = caseData.description || '';
     document.getElementById('editCaseIsActive').checked = caseData.is_active || false;
     
-    // Coffee details (names only, dropdowns will be set after loading)
+    // Coffee details (names and notes, dropdowns will be set after loading)
     for (let i = 1; i <= 4; i++) {
         const coffee = caseData.coffees && caseData.coffees[i-1];
         if (coffee) {
             document.getElementById(`editCoffee${i}Name`).value = coffee.name || '';
+            document.getElementById(`editCoffee${i}Notes`).value = coffee.tasting_notes || '';
         } else {
             // Clear fields if no coffee data
             document.getElementById(`editCoffee${i}Name`).value = '';
+            document.getElementById(`editCoffee${i}Notes`).value = '';
         }
     }
     
