@@ -278,6 +278,42 @@ go test ./...
 docker build -t brew-detective-backend .
 ```
 
+## 🎯 Scoring System
+
+The game uses a dynamic scoring system based on enabled questions for each case:
+
+### Base Scoring Formula
+```
+Final Score = (Base Points × Accuracy × Number of Coffees) + Bonus Points
+```
+
+### Points Breakdown
+- **Base Points**: 100 per perfect coffee analysis
+- **Coffee Questions**: Each correct answer contributes to accuracy
+  - Region identification
+  - Coffee variety
+  - Processing method  
+  - Tasting note 1
+  - Tasting note 2
+
+### Example Scoring (4 coffees, all questions enabled)
+- **Total Questions**: 20 (5 questions × 4 coffees)
+- **Points per Coffee Question**: 20 points (100 ÷ 5 questions)
+- **Perfect Coffee Score**: 100 points (20 × 5 correct answers)
+- **Maximum Base Score**: 400 points (100 × 4 coffees)
+
+### Bonus Points
+- **Favorite Coffee**: +50 points
+- **Brewing Method**: +50 points
+- **Maximum Total Score**: 500 points
+
+### Accuracy Calculation
+```
+Accuracy = Correct Answers ÷ Total Enabled Questions
+```
+
+The scoring adapts automatically when admins enable/disable questions for different cases, ensuring fair competition regardless of case complexity.
+
 ## 🔒 Security Features
 
 - **Google OAuth 2.0** authentication
