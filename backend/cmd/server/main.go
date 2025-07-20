@@ -97,6 +97,7 @@ func main() {
 
 			// Case management
 			admin.GET("/cases", handlers.GetAllCases)
+			admin.GET("/cases/:id", handlers.GetCaseByID)
 			admin.POST("/cases", handlers.CreateCase)
 			admin.PUT("/cases/:id", handlers.UpdateCase)
 			admin.DELETE("/cases/:id", handlers.DeleteCase)

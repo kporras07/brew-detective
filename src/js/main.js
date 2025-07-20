@@ -884,9 +884,169 @@ async function toggleCaseStatus(caseId, newStatus) {
     }
 }
 
-function editCase(caseId) {
-    // For now, just show a simple alert
-    showAdminNotification('Función de edición en desarrollo', 'info');
+async function editCase(caseId) {
+    try {
+        // Fetch case data
+        const response = await API.get(`${API_CONFIG.ENDPOINTS.ADMIN_CASES}/${caseId}`);
+        const caseData = response.case;
+        
+        // Hide other forms
+        document.getElementById('createCaseForm').style.display = 'none';
+        
+        // Show edit form
+        document.getElementById('editCaseForm').style.display = 'block';
+        
+        // Populate form with existing data
+        populateEditForm(caseData);
+        
+        // Load dropdowns for edit form first
+        await loadEditFormDropdowns();
+        
+        // Set dropdown values after dropdowns are populated
+        setEditFormDropdownValues(caseData);
+        
+    } catch (error) {
+        console.error('Error loading case for edit:', error);
+        showAdminNotification('Error al cargar el caso para editar', 'error');
+    }
+}
+
+function populateEditForm(caseData) {
+    // Basic case info
+    document.getElementById('editCaseId').value = caseData.id;
+    document.getElementById('editCaseName').value = caseData.name || '';
+    document.getElementById('editCaseDescription').value = caseData.description || '';
+    document.getElementById('editCaseIsActive').checked = caseData.is_active || false;
+    
+    // Coffee details (names only, dropdowns will be set after loading)
+    for (let i = 1; i <= 4; i++) {
+        const coffee = caseData.coffees && caseData.coffees[i-1];
+        if (coffee) {
+            document.getElementById(`editCoffee${i}Name`).value = coffee.name || '';
+        } else {
+            // Clear fields if no coffee data
+            document.getElementById(`editCoffee${i}Name`).value = '';
+        }
+    }
+    
+    // Question configuration
+    const questions = caseData.enabled_questions || {
+        region: true,
+        variety: true,
+        process: true,
+        taste_note_1: true,
+        taste_note_2: true,
+        favorite_coffee: true,
+        brewing_method: true
+    };
+    
+    document.getElementById('editQuestionRegion').checked = questions.region;
+    document.getElementById('editQuestionVariety').checked = questions.variety;
+    document.getElementById('editQuestionProcess').checked = questions.process;
+    document.getElementById('editQuestionTasteNote1').checked = questions.taste_note_1;
+    document.getElementById('editQuestionTasteNote2').checked = questions.taste_note_2;
+    document.getElementById('editQuestionFavoriteCoffee').checked = questions.favorite_coffee;
+    document.getElementById('editQuestionBrewingMethod').checked = questions.brewing_method;
+}
+
+function setEditFormDropdownValues(caseData) {
+    // Set coffee dropdown values after dropdowns are populated
+    for (let i = 1; i <= 4; i++) {
+        const coffee = caseData.coffees && caseData.coffees[i-1];
+        if (coffee) {
+            const regionSelect = document.getElementById(`editCoffee${i}Region`);
+            const varietySelect = document.getElementById(`editCoffee${i}Variety`);
+            const processSelect = document.getElementById(`editCoffee${i}Process`);
+            
+            if (regionSelect) regionSelect.value = coffee.region || '';
+            if (varietySelect) varietySelect.value = coffee.variety || '';
+            if (processSelect) processSelect.value = coffee.process || '';
+        }
+    }
+}
+
+async function loadEditFormDropdowns() {
+    try {
+        const data = await API.get(API_CONFIG.ENDPOINTS.CATALOG);
+        const catalog = data.catalog;
+        
+        // Populate dropdowns for each coffee in edit form
+        for (let i = 1; i <= 4; i++) {
+            populateCaseDropdown(`editCoffee${i}Region`, catalog.region || []);
+            populateCaseDropdown(`editCoffee${i}Variety`, catalog.variety || []);
+            populateCaseDropdown(`editCoffee${i}Process`, catalog.process || []);
+        }
+        
+    } catch (error) {
+        console.error('Failed to load catalog data for edit form:', error);
+    }
+}
+
+function cancelEditCase() {
+    document.getElementById('editCaseForm').style.display = 'none';
+}
+
+async function updateCase() {
+    const caseId = document.getElementById('editCaseId').value;
+    const name = document.getElementById('editCaseName').value.trim();
+    const description = document.getElementById('editCaseDescription').value.trim();
+    const isActive = document.getElementById('editCaseIsActive').checked;
+    
+    if (!name || !description) {
+        showAdminNotification('Nombre y descripción son requeridos', 'error');
+        return;
+    }
+    
+    // Collect coffee data
+    const coffees = [];
+    for (let i = 1; i <= 4; i++) {
+        const coffeeName = document.getElementById(`editCoffee${i}Name`).value.trim();
+        const region = document.getElementById(`editCoffee${i}Region`).value;
+        const variety = document.getElementById(`editCoffee${i}Variety`).value;
+        const process = document.getElementById(`editCoffee${i}Process`).value;
+        
+        if (!coffeeName || !region || !variety || !process) {
+            showAdminNotification(`Todos los campos del Café #${i} son requeridos`, 'error');
+            return;
+        }
+        
+        coffees.push({
+            id: `coffee_${i}`,
+            name: coffeeName,
+            region: region,
+            variety: variety,
+            process: process
+        });
+    }
+    
+    // Collect enabled questions
+    const enabledQuestions = {
+        region: document.getElementById('editQuestionRegion').checked,
+        variety: document.getElementById('editQuestionVariety').checked,
+        process: document.getElementById('editQuestionProcess').checked,
+        taste_note_1: document.getElementById('editQuestionTasteNote1').checked,
+        taste_note_2: document.getElementById('editQuestionTasteNote2').checked,
+        favorite_coffee: document.getElementById('editQuestionFavoriteCoffee').checked,
+        brewing_method: document.getElementById('editQuestionBrewingMethod').checked
+    };
+
+    const updatedCase = {
+        name: name,
+        description: description,
+        is_active: isActive,
+        coffees: coffees,
+        enabled_questions: enabledQuestions
+    };
+    
+    try {
+        await API.put(`${API_CONFIG.ENDPOINTS.ADMIN_CASES}/${caseId}`, updatedCase);
+        showAdminNotification('Caso actualizado exitosamente', 'success');
+        cancelEditCase();
+        loadAllCases();
+    } catch (error) {
+        console.error('Error updating case:', error);
+        showAdminNotification('Error al actualizar el caso', 'error');
+    }
 }
 
 async function deleteCase(caseId) {

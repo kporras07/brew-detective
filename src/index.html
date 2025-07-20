@@ -590,6 +590,164 @@
                             <button type="button" onclick="cancelCreateCase()" class="cta-button" style="background: #666; position: relative; z-index: 15; pointer-events: auto;">Cancelar</button>
                         </div>
 
+                        <!-- Edit Case Form -->
+                        <div id="editCaseForm" style="display: none; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin: 1rem 0; position: relative; z-index: 10;">
+                            <h4>Editar Caso</h4>
+                            <input type="hidden" id="editCaseId">
+                            <div class="form-group">
+                                <label for="editCaseName">Nombre del Caso:</label>
+                                <input type="text" id="editCaseName" placeholder="ej: Misterio del Valle Central" style="position: relative; z-index: 15; pointer-events: auto;">
+                            </div>
+                            <div class="form-group">
+                                <label for="editCaseDescription">Descripción:</label>
+                                <textarea id="editCaseDescription" rows="3" placeholder="Descripción del caso de café..." style="position: relative; z-index: 15; pointer-events: auto;"></textarea>
+                            </div>
+
+                            <!-- Coffee 1 -->
+                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">☕ Café #1</h5>
+                            <div class="form-group">
+                                <label for="editCoffee1Name">Nombre del Café:</label>
+                                <input type="text" id="editCoffee1Name" placeholder="ej: Finca La Esperanza" style="position: relative; z-index: 15; pointer-events: auto;">
+                            </div>
+                            <div class="form-group">
+                                <label for="editCoffee1Region">Región:</label>
+                                <select id="editCoffee1Region" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <option value="">Selecciona una región</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editCoffee1Variety">Variedad:</label>
+                                <select id="editCoffee1Variety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <option value="">Selecciona una variedad</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editCoffee1Process">Proceso:</label>
+                                <select id="editCoffee1Process" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <option value="">Selecciona un proceso</option>
+                                </select>
+                            </div>
+
+                            <!-- Coffee 2 -->
+                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">☕ Café #2</h5>
+                            <div class="form-group">
+                                <label for="editCoffee2Name">Nombre del Café:</label>
+                                <input type="text" id="editCoffee2Name" placeholder="ej: Finca El Mirador" style="position: relative; z-index: 15; pointer-events: auto;">
+                            </div>
+                            <div class="form-group">
+                                <label for="editCoffee2Region">Región:</label>
+                                <select id="editCoffee2Region" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <option value="">Selecciona una región</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editCoffee2Variety">Variedad:</label>
+                                <select id="editCoffee2Variety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <option value="">Selecciona una variedad</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editCoffee2Process">Proceso:</label>
+                                <select id="editCoffee2Process" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <option value="">Selecciona un proceso</option>
+                                </select>
+                            </div>
+
+                            <!-- Coffee 3 -->
+                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">☕ Café #3</h5>
+                            <div class="form-group">
+                                <label for="editCoffee3Name">Nombre del Café:</label>
+                                <input type="text" id="editCoffee3Name" placeholder="ej: Finca Las Nubes" style="position: relative; z-index: 15; pointer-events: auto;">
+                            </div>
+                            <div class="form-group">
+                                <label for="editCoffee3Region">Región:</label>
+                                <select id="editCoffee3Region" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <option value="">Selecciona una región</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editCoffee3Variety">Variedad:</label>
+                                <select id="editCoffee3Variety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <option value="">Selecciona una variedad</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editCoffee3Process">Proceso:</label>
+                                <select id="editCoffee3Process" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <option value="">Selecciona un proceso</option>
+                                </select>
+                            </div>
+
+                            <!-- Coffee 4 -->
+                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">☕ Café #4</h5>
+                            <div class="form-group">
+                                <label for="editCoffee4Name">Nombre del Café:</label>
+                                <input type="text" id="editCoffee4Name" placeholder="ej: Finca El Volcán" style="position: relative; z-index: 15; pointer-events: auto;">
+                            </div>
+                            <div class="form-group">
+                                <label for="editCoffee4Region">Región:</label>
+                                <select id="editCoffee4Region" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <option value="">Selecciona una región</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editCoffee4Variety">Variedad:</label>
+                                <select id="editCoffee4Variety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <option value="">Selecciona una variedad</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editCoffee4Process">Proceso:</label>
+                                <select id="editCoffee4Process" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <option value="">Selecciona un proceso</option>
+                                </select>
+                            </div>
+
+                            <!-- Question Configuration -->
+                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">❓ Configuración de Preguntas</h5>
+                            <p style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona qué preguntas hacer a los usuarios durante la evaluación:</p>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin-bottom: 1rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
+                                    <input type="checkbox" id="editQuestionRegion" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <span>Región</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
+                                    <input type="checkbox" id="editQuestionVariety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <span>Variedad</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
+                                    <input type="checkbox" id="editQuestionProcess" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <span>Proceso</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
+                                    <input type="checkbox" id="editQuestionTasteNote1" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <span>Primera Nota de Sabor</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
+                                    <input type="checkbox" id="editQuestionTasteNote2" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <span>Segunda Nota de Sabor</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
+                                    <input type="checkbox" id="editQuestionFavoriteCoffee" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <span>Café Favorito</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
+                                    <input type="checkbox" id="editQuestionBrewingMethod" style="position: relative; z-index: 15; pointer-events: auto;">
+                                    <span>Método de Preparación</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="editCaseIsActive" style="position: relative; z-index: 15; pointer-events: auto;"> Caso activo
+                                </label>
+                            </div>
+
+                            <button type="button" onclick="updateCase()" class="cta-button" style="margin-right: 1rem; position: relative; z-index: 15; pointer-events: auto;">Actualizar Caso</button>
+                            <button type="button" onclick="cancelEditCase()" class="cta-button" style="background: #666; position: relative; z-index: 15; pointer-events: auto;">Cancelar</button>
+                        </div>
+
                         <!-- Cases List -->
                         <div id="casesList" style="margin-top: 2rem;">
                             <!-- Cases will be loaded here -->
