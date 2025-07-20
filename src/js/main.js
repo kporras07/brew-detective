@@ -245,23 +245,23 @@ function updateScoringInfo() {
     const coffeeQuestionsHtml = [];
     
     if (questions.region) {
-        coffeeQuestionsHtml.push('<div>• Region: <strong>20 points</strong></div>');
+        coffeeQuestionsHtml.push('<div>• Región: <strong>20 puntos</strong></div>');
         enabledCoffeeQuestions++;
     }
     if (questions.variety) {
-        coffeeQuestionsHtml.push('<div>• Variety: <strong>20 points</strong></div>');
+        coffeeQuestionsHtml.push('<div>• Variedad: <strong>20 puntos</strong></div>');
         enabledCoffeeQuestions++;
     }
     if (questions.process) {
-        coffeeQuestionsHtml.push('<div>• Process: <strong>20 points</strong></div>');
+        coffeeQuestionsHtml.push('<div>• Proceso: <strong>20 puntos</strong></div>');
         enabledCoffeeQuestions++;
     }
     if (questions.taste_note_1) {
-        coffeeQuestionsHtml.push('<div>• Tasting note 1: <strong>20 points</strong></div>');
+        coffeeQuestionsHtml.push('<div>• Nota de cata 1: <strong>20 puntos</strong></div>');
         enabledCoffeeQuestions++;
     }
     if (questions.taste_note_2) {
-        coffeeQuestionsHtml.push('<div>• Tasting note 2: <strong>20 points</strong></div>');
+        coffeeQuestionsHtml.push('<div>• Nota de cata 2: <strong>20 puntos</strong></div>');
         enabledCoffeeQuestions++;
     }
     
@@ -269,11 +269,11 @@ function updateScoringInfo() {
     if (enabledCoffeeQuestions > 0) {
         const pointsPerQuestion = Math.round(100 / enabledCoffeeQuestions);
         const adjustedHtml = coffeeQuestionsHtml.map(html => 
-            html.replace('20 points', `${pointsPerQuestion} points`)
+            html.replace('20 puntos', `${pointsPerQuestion} puntos`)
         );
         coffeeQuestionsList.innerHTML = adjustedHtml.join('');
     } else {
-        coffeeQuestionsList.innerHTML = '<div style="opacity: 0.7; font-style: italic;">No coffee questions enabled</div>';
+        coffeeQuestionsList.innerHTML = '<div style="opacity: 0.7; font-style: italic;">No hay preguntas de café habilitadas</div>';
     }
     
     // Count enabled bonus questions and update display
@@ -281,18 +281,18 @@ function updateScoringInfo() {
     let bonusPoints = 0;
     
     if (questions.favorite_coffee) {
-        bonusQuestionsHtml.push('<div>• Favorite coffee: <strong>+50 points</strong></div>');
+        bonusQuestionsHtml.push('<div>• Café favorito: <strong>+50 puntos</strong></div>');
         bonusPoints += 50;
     }
     if (questions.brewing_method) {
-        bonusQuestionsHtml.push('<div>• Brewing method: <strong>+50 points</strong></div>');
+        bonusQuestionsHtml.push('<div>• Método de preparación: <strong>+50 puntos</strong></div>');
         bonusPoints += 50;
     }
     
     if (bonusQuestionsHtml.length > 0) {
         bonusQuestionsList.innerHTML = bonusQuestionsHtml.join('');
     } else {
-        bonusQuestionsList.innerHTML = '<div style="opacity: 0.7; font-style: italic;">No bonus questions enabled</div>';
+        bonusQuestionsList.innerHTML = '<div style="opacity: 0.7; font-style: italic;">No hay preguntas bonus habilitadas</div>';
     }
     
     // Calculate and display maximum score
@@ -301,7 +301,7 @@ function updateScoringInfo() {
     const maxBaseScore = basePointsPerCoffee * 4; // 4 coffees
     const maxTotalScore = maxBaseScore + bonusPoints;
     
-    maxScoreDisplay.innerHTML = `<strong style="color: #d4af37; font-size: 1rem;">🏆 Maximum: ${maxTotalScore} points</strong>`;
+    maxScoreDisplay.innerHTML = `<strong style="color: #d4af37; font-size: 1rem;">🏆 Máximo: ${maxTotalScore} puntos</strong>`;
 }
 
 // Submit form functionality
