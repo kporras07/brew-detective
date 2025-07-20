@@ -94,6 +94,12 @@ func main() {
 			admin.POST("/catalog", handlers.CreateCatalogItem)
 			admin.PUT("/catalog/:id", handlers.UpdateCatalogItem)
 			admin.DELETE("/catalog/:id", handlers.DeleteCatalogItem)
+
+			// Case management
+			admin.GET("/cases", handlers.GetAllCases)
+			admin.POST("/cases", handlers.CreateCase)
+			admin.PUT("/cases/:id", handlers.UpdateCase)
+			admin.DELETE("/cases/:id", handlers.DeleteCase)
 		}
 	}
 

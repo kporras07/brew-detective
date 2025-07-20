@@ -25,13 +25,26 @@ type User struct {
 
 // CoffeeCase represents a coffee mystery case
 type CoffeeCase struct {
-	ID          string       `firestore:"id" json:"id"`
-	Name        string       `firestore:"name" json:"name"`
-	Description string       `firestore:"description" json:"description"`
-	Price       int          `firestore:"price" json:"price"`
-	Coffees     []CoffeeItem `firestore:"coffees" json:"coffees"`
-	CreatedAt   time.Time    `firestore:"created_at" json:"created_at"`
-	IsActive    bool         `firestore:"is_active" json:"is_active"`
+	ID               string            `firestore:"id" json:"id"`
+	Name             string            `firestore:"name" json:"name"`
+	Description      string            `firestore:"description" json:"description"`
+	Price            int               `firestore:"price" json:"price"`
+	Coffees          []CoffeeItem      `firestore:"coffees" json:"coffees"`
+	EnabledQuestions EnabledQuestions  `firestore:"enabled_questions" json:"enabled_questions"`
+	CreatedAt        time.Time         `firestore:"created_at" json:"created_at"`
+	UpdatedAt        time.Time         `firestore:"updated_at" json:"updated_at"`
+	IsActive         bool              `firestore:"is_active" json:"is_active"`
+}
+
+// EnabledQuestions defines which questions are enabled for this case
+type EnabledQuestions struct {
+	Region         bool `firestore:"region" json:"region"`
+	Variety        bool `firestore:"variety" json:"variety"`
+	Process        bool `firestore:"process" json:"process"`
+	TasteNote1     bool `firestore:"taste_note_1" json:"taste_note_1"`
+	TasteNote2     bool `firestore:"taste_note_2" json:"taste_note_2"`
+	FavoriteCoffee bool `firestore:"favorite_coffee" json:"favorite_coffee"`
+	BrewingMethod  bool `firestore:"brewing_method" json:"brewing_method"`
 }
 
 // CoffeeItem represents a single coffee in a case

@@ -88,10 +88,32 @@ func SubmitCase(c *gin.Context) {
 
 // calculateScore calculates the score and accuracy for a submission
 func calculateScore(submission *models.Submission) (int, float64) {
-	// This is a simplified scoring system
-	// In a real implementation, you'd fetch the correct answers from the case
+	// Get the active case to determine enabled questions
+	activeCase, err := getActiveCase()
+	if err != nil {
+		// Fallback to default scoring if case not found
+		return calculateScoreDefault(submission)
+	}
 
-	totalQuestions := len(submission.CoffeeAnswers) * 3 // 3 questions per coffee: region, variety, process
+	// Count enabled questions per coffee
+	enabledQuestionsPerCoffee := 0
+	if activeCase.EnabledQuestions.Region {
+		enabledQuestionsPerCoffee++
+	}
+	if activeCase.EnabledQuestions.Variety {
+		enabledQuestionsPerCoffee++
+	}
+	if activeCase.EnabledQuestions.Process {
+		enabledQuestionsPerCoffee++
+	}
+	if activeCase.EnabledQuestions.TasteNote1 {
+		enabledQuestionsPerCoffee++
+	}
+	if activeCase.EnabledQuestions.TasteNote2 {
+		enabledQuestionsPerCoffee++
+	}
+
+	totalQuestions := len(submission.CoffeeAnswers) * enabledQuestionsPerCoffee
 	if totalQuestions == 0 {
 		return 0, 0.0
 	}
@@ -100,8 +122,51 @@ func calculateScore(submission *models.Submission) (int, float64) {
 	basePoints := 100
 
 	for _, answer := range submission.CoffeeAnswers {
-		// Simulate scoring - in reality, you'd compare with correct answers
-		// Each coffee has 3 attributes: region, variety, process
+		// Simulate scoring based on enabled questions only
+		// In reality, you'd compare with correct answers from the case
+		if activeCase.EnabledQuestions.Region && answer.Region != "" {
+			correctAnswers++
+		}
+		if activeCase.EnabledQuestions.Variety && answer.Variety != "" {
+			correctAnswers++
+		}
+		if activeCase.EnabledQuestions.Process && answer.Process != "" {
+			correctAnswers++
+		}
+		if activeCase.EnabledQuestions.TasteNote1 && answer.TasteNote1 != "" {
+			correctAnswers++
+		}
+		if activeCase.EnabledQuestions.TasteNote2 && answer.TasteNote2 != "" {
+			correctAnswers++
+		}
+	}
+
+	// Add bonus points for non-coffee questions
+	bonusPoints := 0
+	if activeCase.EnabledQuestions.FavoriteCoffee && submission.FavoriteCoffee != "" {
+		bonusPoints += 50
+	}
+	if activeCase.EnabledQuestions.BrewingMethod && submission.BrewingMethod != "" {
+		bonusPoints += 50
+	}
+
+	accuracy := float64(correctAnswers) / float64(totalQuestions)
+	score := int(float64(basePoints) * accuracy * float64(len(submission.CoffeeAnswers))) + bonusPoints
+
+	return score, accuracy
+}
+
+// calculateScoreDefault provides fallback scoring when case info is not available
+func calculateScoreDefault(submission *models.Submission) (int, float64) {
+	totalQuestions := len(submission.CoffeeAnswers) * 3 // region, variety, process
+	if totalQuestions == 0 {
+		return 0, 0.0
+	}
+
+	correctAnswers := 0
+	basePoints := 100
+
+	for _, answer := range submission.CoffeeAnswers {
 		if answer.Region != "" {
 			correctAnswers++
 		}

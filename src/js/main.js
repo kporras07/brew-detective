@@ -82,6 +82,7 @@ function showPage(pageId) {
         loadCatalogData();
     } else if (pageId === 'admin') {
         checkAdminAccess();
+        loadCaseFormDropdowns();
     }
 }
 
@@ -144,6 +145,20 @@ async function loadActiveCase() {
         if (activeCase) {
             activeCaseName.textContent = activeCase.name;
             activeCaseDescription.textContent = activeCase.description;
+            
+            // Store enabled questions globally for form customization
+            window.activeCaseQuestions = activeCase.enabled_questions || {
+                region: true,
+                variety: true,
+                process: true,
+                taste_note_1: true,
+                taste_note_2: true,
+                favorite_coffee: true,
+                brewing_method: true
+            };
+            
+            // Customize submission form based on enabled questions
+            customizeSubmissionForm();
         } else {
             activeCaseName.textContent = 'No hay caso activo';
             activeCaseDescription.textContent = 'Por favor contacta al administrador.';
@@ -152,6 +167,61 @@ async function loadActiveCase() {
         console.error('Failed to load active case:', error);
         activeCaseName.textContent = 'Error al cargar caso';
         activeCaseDescription.textContent = 'No se pudo obtener la información del caso activo.';
+    }
+}
+
+// Customize submission form based on active case enabled questions
+function customizeSubmissionForm() {
+    const questions = window.activeCaseQuestions;
+    if (!questions) return;
+    
+    // Helper function to show/hide form groups for coffee questions
+    function toggleCoffeeQuestion(questionType, enabled) {
+        for (let i = 1; i <= 4; i++) {
+            const formGroup = document.querySelector(`#coffee${i}_${questionType}`);
+            if (formGroup && formGroup.closest('.form-group')) {
+                formGroup.closest('.form-group').style.display = enabled ? 'block' : 'none';
+                
+                // Make required/optional based on enabled state
+                formGroup.required = enabled;
+            }
+        }
+    }
+    
+    // Show/hide coffee-specific questions
+    toggleCoffeeQuestion('region', questions.region);
+    toggleCoffeeQuestion('variety', questions.variety);
+    toggleCoffeeQuestion('process', questions.process);
+    
+    // Handle taste notes
+    for (let i = 1; i <= 4; i++) {
+        const note1Input = document.getElementById(`coffee${i}_note1`);
+        const note2Input = document.getElementById(`coffee${i}_note2`);
+        
+        if (note1Input && note1Input.closest('.form-group')) {
+            note1Input.closest('.form-group').style.display = questions.taste_note_1 ? 'block' : 'none';
+        }
+        if (note2Input && note2Input.closest('.form-group')) {
+            note2Input.closest('.form-group').style.display = questions.taste_note_2 ? 'block' : 'none';
+        }
+    }
+    
+    // Show/hide bonus questions
+    const favoriteCoffeeGroup = document.getElementById('favorite_coffee');
+    if (favoriteCoffeeGroup && favoriteCoffeeGroup.closest('.form-group')) {
+        favoriteCoffeeGroup.closest('.form-group').style.display = questions.favorite_coffee ? 'block' : 'none';
+    }
+    
+    const brewingMethodGroup = document.getElementById('brewing_method');
+    if (brewingMethodGroup && brewingMethodGroup.closest('.form-group')) {
+        brewingMethodGroup.closest('.form-group').style.display = questions.brewing_method ? 'block' : 'none';
+    }
+    
+    // Hide entire bonus questions section if no bonus questions are enabled
+    const bonusSection = document.querySelector('h3[style*="🔍 Preguntas Bonus"]');
+    if (bonusSection) {
+        const showBonusSection = questions.favorite_coffee || questions.brewing_method;
+        bonusSection.style.display = showBonusSection ? 'block' : 'none';
     }
 }
 
@@ -577,6 +647,258 @@ function showAdminNotification(message, type) {
         setTimeout(() => {
             errorElement.style.display = 'none';
         }, 3000);
+    }
+}
+
+// Case Management Functions
+
+function showCreateCaseForm() {
+    document.getElementById('createCaseForm').style.display = 'block';
+    clearCaseForm();
+}
+
+function cancelCreateCase() {
+    document.getElementById('createCaseForm').style.display = 'none';
+}
+
+function clearCaseForm() {
+    // Clear all form fields
+    document.getElementById('caseName').value = '';
+    document.getElementById('caseDescription').value = '';
+    document.getElementById('caseIsActive').checked = false;
+    
+    // Clear coffee details
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById(`coffee${i}Name`).value = '';
+        document.getElementById(`coffee${i}Region`).value = '';
+        document.getElementById(`coffee${i}Variety`).value = '';
+        document.getElementById(`coffee${i}Process`).value = '';
+    }
+    
+    // Reset question checkboxes to default (all checked)
+    document.getElementById('questionRegion').checked = true;
+    document.getElementById('questionVariety').checked = true;
+    document.getElementById('questionProcess').checked = true;
+    document.getElementById('questionTasteNote1').checked = true;
+    document.getElementById('questionTasteNote2').checked = true;
+    document.getElementById('questionFavoriteCoffee').checked = true;
+    document.getElementById('questionBrewingMethod').checked = true;
+}
+
+async function loadCaseFormDropdowns() {
+    try {
+        const data = await API.get(API_CONFIG.ENDPOINTS.CATALOG);
+        const catalog = data.catalog;
+        
+        // Populate dropdowns for each coffee
+        for (let i = 1; i <= 4; i++) {
+            populateCaseDropdown(`coffee${i}Region`, catalog.region || []);
+            populateCaseDropdown(`coffee${i}Variety`, catalog.variety || []);
+            populateCaseDropdown(`coffee${i}Process`, catalog.process || []);
+        }
+        
+    } catch (error) {
+        console.error('Failed to load catalog data for case form:', error);
+    }
+}
+
+function populateCaseDropdown(selectId, items) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    
+    // Keep the first "Select" option
+    const firstOption = select.firstElementChild;
+    select.innerHTML = '';
+    select.appendChild(firstOption);
+    
+    // Add catalog items
+    items.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.value;
+        option.textContent = item.label;
+        select.appendChild(option);
+    });
+}
+
+async function createCase() {
+    const name = document.getElementById('caseName').value.trim();
+    const description = document.getElementById('caseDescription').value.trim();
+    const isActive = document.getElementById('caseIsActive').checked;
+    
+    if (!name || !description) {
+        showAdminNotification('Nombre y descripción son requeridos', 'error');
+        return;
+    }
+    
+    // Collect coffee data
+    const coffees = [];
+    for (let i = 1; i <= 4; i++) {
+        const coffeeName = document.getElementById(`coffee${i}Name`).value.trim();
+        const region = document.getElementById(`coffee${i}Region`).value;
+        const variety = document.getElementById(`coffee${i}Variety`).value;
+        const process = document.getElementById(`coffee${i}Process`).value;
+        
+        if (!coffeeName || !region || !variety || !process) {
+            showAdminNotification(`Todos los campos del Café #${i} son requeridos`, 'error');
+            return;
+        }
+        
+        coffees.push({
+            id: `coffee_${i}`,
+            name: coffeeName,
+            region: region,
+            variety: variety,
+            process: process
+        });
+    }
+    
+    // Collect enabled questions
+    const enabledQuestions = {
+        region: document.getElementById('questionRegion').checked,
+        variety: document.getElementById('questionVariety').checked,
+        process: document.getElementById('questionProcess').checked,
+        taste_note_1: document.getElementById('questionTasteNote1').checked,
+        taste_note_2: document.getElementById('questionTasteNote2').checked,
+        favorite_coffee: document.getElementById('questionFavoriteCoffee').checked,
+        brewing_method: document.getElementById('questionBrewingMethod').checked
+    };
+
+    const newCase = {
+        name: name,
+        description: description,
+        is_active: isActive,
+        coffees: coffees,
+        enabled_questions: enabledQuestions
+    };
+    
+    try {
+        await API.post(API_CONFIG.ENDPOINTS.ADMIN_CASES, newCase);
+        showAdminNotification('Caso creado exitosamente', 'success');
+        cancelCreateCase();
+        loadAllCases();
+    } catch (error) {
+        console.error('Error creating case:', error);
+        showAdminNotification('Error al crear el caso', 'error');
+    }
+}
+
+async function loadAllCases() {
+    const container = document.getElementById('casesList');
+    
+    // Show loading
+    container.innerHTML = '<p>Cargando casos...</p>';
+    
+    try {
+        const data = await API.get(`${API_CONFIG.ENDPOINTS.ADMIN_CASES}?limit=20`);
+        displayCases(data.cases || []);
+    } catch (error) {
+        console.error('Error loading cases:', error);
+        showAdminNotification('Error al cargar los casos', 'error');
+        container.innerHTML = '<p>Error al cargar los casos</p>';
+    }
+}
+
+function displayCases(cases) {
+    const container = document.getElementById('casesList');
+    
+    if (cases.length === 0) {
+        container.innerHTML = '<p>No hay casos creados</p>';
+        return;
+    }
+    
+    let html = '<div style="display: grid; gap: 1rem;">';
+    
+    cases.forEach(caseItem => {
+        const createdDate = new Date(caseItem.created_at).toLocaleDateString('es-ES');
+        const coffeeCount = caseItem.coffees ? caseItem.coffees.length : 0;
+        
+        html += `
+            <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; position: relative; z-index: 5;">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <strong style="color: #d4af37;">${caseItem.name}</strong>
+                            ${caseItem.is_active ? 
+                                '<span style="background: #2ecc71; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">ACTIVO</span>' : 
+                                '<span style="background: #666; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">INACTIVO</span>'
+                            }
+                        </div>
+                        <p style="margin: 0.5rem 0; opacity: 0.8;">${caseItem.description}</p>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 1rem;">
+                            ${caseItem.coffees ? caseItem.coffees.map(coffee => `
+                                <div style="background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px; font-size: 0.9rem;">
+                                    <strong>${coffee.name}</strong><br>
+                                    <span style="opacity: 0.8;">${coffee.region} • ${coffee.variety} • ${coffee.process}</span>
+                                </div>
+                            `).join('') : '<span style="opacity: 0.6;">Sin información de cafés</span>'}
+                        </div>
+                        ${caseItem.enabled_questions ? `
+                            <div style="margin-top: 1rem;">
+                                <strong style="color: #d4af37; font-size: 0.9rem;">Preguntas Habilitadas:</strong><br>
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem;">
+                                    ${caseItem.enabled_questions.region ? '<span style="background: #2ecc71; color: white; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.8rem;">Región</span>' : ''}
+                                    ${caseItem.enabled_questions.variety ? '<span style="background: #2ecc71; color: white; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.8rem;">Variedad</span>' : ''}
+                                    ${caseItem.enabled_questions.process ? '<span style="background: #2ecc71; color: white; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.8rem;">Proceso</span>' : ''}
+                                    ${caseItem.enabled_questions.taste_note_1 ? '<span style="background: #2ecc71; color: white; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.8rem;">Nota 1</span>' : ''}
+                                    ${caseItem.enabled_questions.taste_note_2 ? '<span style="background: #2ecc71; color: white; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.8rem;">Nota 2</span>' : ''}
+                                    ${caseItem.enabled_questions.favorite_coffee ? '<span style="background: #2ecc71; color: white; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.8rem;">Favorito</span>' : ''}
+                                    ${caseItem.enabled_questions.brewing_method ? '<span style="background: #2ecc71; color: white; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.8rem;">Método</span>' : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+                        <small style="opacity: 0.6;">Creado: ${createdDate} | Cafés: ${coffeeCount}</small>
+                    </div>
+                    <div style="margin-left: 1rem;">
+                        <button onclick="toggleCaseStatus('${caseItem.id}', ${!caseItem.is_active})" class="cta-button" 
+                                style="background: ${caseItem.is_active ? '#e74c3c' : '#2ecc71'}; margin-bottom: 0.5rem; padding: 0.5rem 1rem; position: relative; z-index: 10; pointer-events: auto;">
+                            ${caseItem.is_active ? 'Desactivar' : 'Activar'}
+                        </button><br>
+                        <button onclick="editCase('${caseItem.id}')" class="cta-button" 
+                                style="background: #d4af37; margin-bottom: 0.5rem; padding: 0.5rem 1rem; position: relative; z-index: 10; pointer-events: auto;">
+                            Editar
+                        </button><br>
+                        <button onclick="deleteCase('${caseItem.id}')" class="cta-button" 
+                                style="background: #e74c3c; padding: 0.5rem 1rem; position: relative; z-index: 10; pointer-events: auto;">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+async function toggleCaseStatus(caseId, newStatus) {
+    try {
+        await API.put(`${API_CONFIG.ENDPOINTS.ADMIN_CASES}/${caseId}`, {
+            is_active: newStatus
+        });
+        showAdminNotification(`Caso ${newStatus ? 'activado' : 'desactivado'} exitosamente`, 'success');
+        loadAllCases();
+    } catch (error) {
+        console.error('Error updating case status:', error);
+        showAdminNotification('Error al actualizar el estado del caso', 'error');
+    }
+}
+
+function editCase(caseId) {
+    // For now, just show a simple alert
+    showAdminNotification('Función de edición en desarrollo', 'info');
+}
+
+async function deleteCase(caseId) {
+    if (confirm('¿Estás seguro de que quieres eliminar este caso? Esta acción no se puede deshacer.')) {
+        try {
+            await API.delete(`${API_CONFIG.ENDPOINTS.ADMIN_CASES}/${caseId}`);
+            showAdminNotification('Caso eliminado exitosamente', 'success');
+            loadAllCases();
+        } catch (error) {
+            console.error('Error deleting case:', error);
+            showAdminNotification('Error al eliminar el caso', 'error');
+        }
     }
 }
 

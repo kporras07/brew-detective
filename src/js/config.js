@@ -19,6 +19,7 @@ const API_CONFIG = {
         
         // Admin endpoints
         ADMIN_CATALOG: '/api/v1/admin/catalog',
+        ADMIN_CASES: '/api/v1/admin/cases',
         
         // Auth endpoints
         AUTH_GOOGLE: '/auth/google',
