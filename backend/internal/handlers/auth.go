@@ -83,11 +83,22 @@ func GoogleCallback(c *gin.Context) {
 			return
 		}
 
-		// Update user info from Google
+		// Debug: Log user type before update
+		fmt.Printf("DEBUG: User type before update: '%s'\n", user.Type)
+
+		// Update user info from Google (preserve Type field)
+		userType := user.Type // Preserve the type field
 		user.Email = googleUser.Email
 		user.Name = googleUser.Name
 		user.Picture = googleUser.Picture
 		user.UpdatedAt = time.Now()
+		
+		// Ensure type is preserved (set default if empty)
+		if userType != "" {
+			user.Type = userType
+		} else if user.Type == "" {
+			user.Type = "regular"
+		}
 
 		_, err = userRef.Set(c.Request.Context(), user)
 		if err != nil {
