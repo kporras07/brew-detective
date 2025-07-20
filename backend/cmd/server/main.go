@@ -77,6 +77,7 @@ func main() {
 
 			// Submissions
 			protected.POST("/submissions", handlers.SubmitCase)
+			protected.GET("/submissions", handlers.GetUserSubmissions)
 
 			// Orders
 			protected.POST("/orders", handlers.CreateOrder)

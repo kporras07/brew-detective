@@ -125,6 +125,9 @@ async function updateAuthUI() {
 
         // Update profile page with user data
         await updateProfilePage(user);
+        
+        // Load case history
+        await loadCaseHistory();
     } else {
         console.log('User not authenticated, showing login button'); // Debug
         
@@ -314,6 +317,64 @@ async function handleTokenFromURL() {
         
         // Show the profile page
         showPage('profile');
+    }
+}
+
+// Load case history for user profile
+async function loadCaseHistory() {
+    const container = document.getElementById('caseHistoryContainer');
+    if (!container) return;
+    
+    try {
+        const response = await API.get(`${API_CONFIG.ENDPOINTS.SUBMISSIONS}?limit=10`);
+        const submissions = response.submissions || [];
+        
+        if (submissions.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; opacity: 0.7;">
+                    <p>No has completado ningún caso aún.</p>
+                    <p>¡Empieza tu primera investigación!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        submissions.forEach(submission => {
+            const submittedDate = new Date(submission.submitted_at).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            const accuracy = Math.round(submission.accuracy * 100);
+            
+            html += `
+                <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${submission.case_name}</strong><br>
+                            <span style="opacity: 0.8;">Completado: ${submittedDate}</span><br>
+                            <span style="opacity: 0.6; font-size: 0.9rem;">Precisión: ${accuracy}%</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #d4af37; font-weight: bold;">${submission.score} pts</div>
+                            <div style="color: #2ecc71;">✓ ${submission.status === 'completed' ? 'Resuelto' : 'En progreso'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Failed to load case history:', error);
+        container.innerHTML = `
+            <div style="text-align: center; opacity: 0.7;">
+                <p>Error al cargar el historial de casos.</p>
+            </div>
+        `;
     }
 }
 

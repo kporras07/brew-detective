@@ -116,6 +116,10 @@ function loadProfile() {
         .then(userData => {
             Auth.setUser(userData);
             updateProfilePage(userData);
+            // Load case history
+            if (typeof loadCaseHistory === 'function') {
+                loadCaseHistory();
+            }
         })
         .catch(error => {
             console.error('Failed to load profile:', error);

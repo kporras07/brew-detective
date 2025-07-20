@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"brew-detective-backend/internal/database"
@@ -135,7 +136,7 @@ func updateUserStats(userID string, score int, accuracy float64) {
 		// User doesn't exist - submissions should only work for existing users
 		return
 	}
-	
+
 	if !doc.Exists() {
 		// User doesn't exist - submissions should only work for existing users
 		return
@@ -280,4 +281,95 @@ func getActiveCase() (*models.CoffeeCase, error) {
 	}
 
 	return &coffeeCase, nil
+}
+
+// GetUserSubmissions returns submissions for a specific user
+func GetUserSubmissions(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User authentication required"})
+		return
+	}
+
+	// Get query parameters for pagination
+	limitStr := c.Query("limit")
+	offsetStr := c.Query("offset")
+
+	limit := 10 // Default limit
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 50 {
+			limit = l
+		}
+	}
+
+	offset := 0
+	if offsetStr != "" {
+		if o, err := strconv.Atoi(offsetStr); err == nil && o >= 0 {
+			offset = o
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Query submissions for this user, ordered by most recent first
+	query := database.FirestoreClient.Collection(database.SubmissionsCollection).
+		Where("user_id", "==", userID.(string)).
+		OrderBy("submitted_at", firestore.Desc).
+		Limit(limit).
+		Offset(offset)
+
+	iter := query.Documents(ctx)
+
+	var submissions []map[string]interface{}
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch submissions", "details": err.Error()})
+			return
+		}
+
+		var submission models.Submission
+		if err := doc.DataTo(&submission); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse submission"})
+			return
+		}
+
+		// Get case information for this submission
+		caseRef := database.FirestoreClient.Collection(database.CasesCollection).Doc(submission.CaseID)
+		caseDoc, err := caseRef.Get(ctx)
+		var caseName string
+		if err == nil && caseDoc.Exists() {
+			var coffeeCase models.CoffeeCase
+			if err := caseDoc.DataTo(&coffeeCase); err == nil {
+				caseName = coffeeCase.Name
+			}
+		}
+		if caseName == "" {
+			caseName = "Caso Desconocido"
+		}
+
+		// Create response object with submission and case info
+		submissionResponse := map[string]interface{}{
+			"id":           submission.ID,
+			"case_id":      submission.CaseID,
+			"case_name":    caseName,
+			"score":        submission.Score,
+			"accuracy":     submission.Accuracy,
+			"submitted_at": submission.SubmittedAt,
+			"status":       "completed",
+		}
+
+		submissions = append(submissions, submissionResponse)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"submissions": submissions,
+		"limit":       limit,
+		"offset":      offset,
+		"count":       len(submissions),
+	})
 }
