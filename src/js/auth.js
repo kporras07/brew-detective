@@ -185,6 +185,9 @@ async function updateProfilePage(user) {
 
     // Update statistics with real data from API
     await updateUserStats(user);
+    
+    // Load case history
+    await loadCaseHistory();
 }
 
 // Update user statistics
@@ -210,9 +213,9 @@ async function updateUserStats(user) {
         const userRank = leaderboard.findIndex(entry => entry.user_id === user.id) + 1;
         
         const stats = {
-            points: user.score || 0,
+            points: user.points || 0,
             rank: userRank > 0 ? userRank : '---',
-            casesSolved: user.cases_solved || 0,
+            casesSolved: user.cases_count || 0,
             accuracy: Math.round((user.accuracy || 0) * 100)
         };
 
@@ -221,6 +224,9 @@ async function updateUserStats(user) {
         if (rankDisplay) rankDisplay.textContent = stats.rank !== '---' ? `# ${stats.rank}` : 'Sin ranking';
         if (casesDisplay) casesDisplay.textContent = stats.casesSolved;
         if (accuracyDisplay) accuracyDisplay.textContent = `${stats.accuracy}%`;
+        
+        // Update badges if they exist
+        updateUserBadges(user);
     } catch (error) {
         console.error('Failed to load user stats:', error);
         // Show error state instead of fake data
@@ -228,6 +234,20 @@ async function updateUserStats(user) {
         if (rankDisplay) rankDisplay.textContent = 'Error';
         if (casesDisplay) casesDisplay.textContent = 'Error';
         if (accuracyDisplay) accuracyDisplay.textContent = 'Error';
+    }
+}
+
+// Update user badges display
+function updateUserBadges(user) {
+    const badgeContainer = document.getElementById('userBadgesContainer');
+    if (!badgeContainer) return;
+    
+    if (user.badges && user.badges.length > 0) {
+        badgeContainer.innerHTML = user.badges.map(badge => 
+            `<span class="badge">${badge}</span>`
+        ).join('');
+    } else {
+        badgeContainer.innerHTML = '<span class="badge">🔍 Detective Novato</span>';
     }
 }
 
