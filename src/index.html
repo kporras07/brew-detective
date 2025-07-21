@@ -139,17 +139,46 @@
                     <p style="text-align: center; margin-bottom: 2rem; opacity: 0.9;">
                         Incluye 4 cafés costarricenses misteriosos de 80g cada uno + guía de cata + acceso al juego online
                     </p>
-                    <div style="text-align: center;">
-                        <a href="https://wa.me/50612345678?text=Hola!%20Quiero%20ordenar%20una%20caja%20Brew%20Detective%20por%20₡18,000" 
-                           class="cta-button" 
-                           target="_blank" 
-                           rel="noopener noreferrer">
+                    
+                    <!-- Authenticated User Content -->
+                    <div id="orderAuthenticatedContent" style="display: none; text-align: center;">
+                        <button onclick="openWhatsAppOrder()" class="cta-button">
                             📱 Ordenar por WhatsApp
-                        </a>
+                        </button>
+                        <p style="margin-top: 1rem; opacity: 0.7; font-size: 0.9rem;">
+                            Te contactaremos para coordinar la entrega y el pago
+                        </p>
                     </div>
-                    <p style="text-align: center; margin-top: 1rem; opacity: 0.7; font-size: 0.9rem;">
-                        Te contactaremos para coordinar la entrega y el pago
-                    </p>
+                    
+                    <!-- Unauthenticated User Content -->
+                    <div id="orderUnauthenticatedContent" style="display: block; text-align: center;">
+                        <div style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1)); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 12px; padding: 2rem; margin: 2rem 0;">
+                            <h4 style="color: #d4af37; margin-bottom: 1rem;">🔐 Inicia Sesión para Ordenar</h4>
+                            <p style="color: rgba(244, 241, 232, 0.9); margin-bottom: 1.5rem;">
+                                Para poder ordenar tu caja detective, necesitas tener una cuenta. Esto nos permite:
+                            </p>
+                            <div style="text-align: left; margin: 1.5rem 0;">
+                                <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
+                                    ✓ Gestionar tus pedidos y entregas
+                                </div>
+                                <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
+                                    ✓ Guardar tu progreso como detective
+                                </div>
+                                <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
+                                    ✓ Acceder a tu historial de casos
+                                </div>
+                                <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
+                                    ✓ Participar en el ranking de detectives
+                                </div>
+                            </div>
+                            <button onclick="Auth.login()" class="cta-button">
+                                🚀 Iniciar Sesión con Google
+                            </button>
+                            <p style="margin-top: 1rem; opacity: 0.7; font-size: 0.9rem;">
+                                Es rápido, seguro y gratuito
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

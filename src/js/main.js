@@ -84,6 +84,8 @@ function showPage(pageId) {
         checkAdminAccess();
         loadCaseFormDropdowns();
         loadOrderFormDropdowns();
+    } else if (pageId === 'order') {
+        updateOrderPageAuth();
     }
 }
 
@@ -97,6 +99,56 @@ function checkAuthForSubmit() {
         return;
     }
 }
+
+// Update order page based on authentication status
+function updateOrderPageAuth() {
+    const authenticatedContent = document.getElementById('orderAuthenticatedContent');
+    const unauthenticatedContent = document.getElementById('orderUnauthenticatedContent');
+    
+    if (Auth.isAuthenticated()) {
+        // User is logged in - show WhatsApp button
+        authenticatedContent.style.display = 'block';
+        unauthenticatedContent.style.display = 'none';
+    } else {
+        // User is not logged in - show login prompt
+        authenticatedContent.style.display = 'none';
+        unauthenticatedContent.style.display = 'block';
+    }
+}
+
+// Open WhatsApp order with user email included
+function openWhatsAppOrder() {
+    const user = Auth.getUser();
+    
+    if (!user) {
+        showNotification('Error: No se pudo obtener la información del usuario', 'error');
+        return;
+    }
+    
+    const userName = user.name || 'Usuario';
+    const userEmail = user.email || '';
+    
+    // Create the WhatsApp message with user information
+    const message = `Hola! Quiero ordenar una caja Brew Detective por ₡18,000
+
+Nombre: ${userName}
+Email: ${userEmail}
+
+Por favor coordinen conmigo la entrega y el pago. ¡Gracias!`;
+    
+    // Encode the message for URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // WhatsApp phone number
+    const phoneNumber = '50685489236';
+    
+    // Create the WhatsApp URL
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    
+    // Open WhatsApp in a new window/tab
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+}
+
 
 // Load profile data
 function loadProfile() {

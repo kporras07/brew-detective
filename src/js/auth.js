@@ -128,6 +128,9 @@ async function updateAuthUI() {
         
         // Load case history
         await loadCaseHistory();
+        
+        // Update order page authentication status
+        updateOrderPageAuth();
     } else {
         console.log('User not authenticated, showing login button'); // Debug
         
@@ -160,6 +163,9 @@ async function updateAuthUI() {
         if (adminMenuItem) {
             adminMenuItem.style.display = 'none';
         }
+        
+        // Update order page authentication status
+        updateOrderPageAuth();
     }
 }
 
