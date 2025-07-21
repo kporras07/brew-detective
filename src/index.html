@@ -10,12 +10,12 @@
     <!-- Header -->
     <header>
         <nav class="container">
-            <div class="logo">🔍 Brew Detective</div>
+            <a href="/" class="logo">🔍 Brew Detective</a>
             <ul class="nav-links">
-                <li><a href="#" onclick="showPage('home')">Inicio</a></li>
-                <li><a href="#" onclick="showPage('order')">Ordenar Caja</a></li>
-                <li id="submitMenuItem" style="display: none;"><a href="#" onclick="showPage('submit')">Enviar Respuestas</a></li>
-                <li><a href="#" onclick="showPage('leaderboard')">Ranking</a></li>
+                <li><a href="/home">Inicio</a></li>
+                <li><a href="/order">Ordenar Caja</a></li>
+                <li id="submitMenuItem" style="display: none;"><a href="/submit">Enviar Respuestas</a></li>
+                <li><a href="/leaderboard">Ranking</a></li>
                 <li class="auth-nav" id="authNav">
                     <a href="#" onclick="Auth.login()" id="loginBtn">Iniciar Sesión</a>
                     <div class="user-dropdown" id="userDropdown" style="display: none;">
@@ -25,8 +25,8 @@
                             <span class="dropdown-arrow">▼</span>
                         </a>
                         <div class="user-menu" id="userMenu">
-                            <a href="#" onclick="showPage('profile'); closeUserMenu()">Mi Perfil</a>
-                            <a href="#" onclick="showPage('admin'); closeUserMenu()" id="adminMenuItem" style="display: none;">Administración</a>
+                            <a href="/profile" onclick="closeUserMenu()">Mi Perfil</a>
+                            <a href="/admin" onclick="closeUserMenu()" id="adminMenuItem" style="display: none;">Administración</a>
                             <a href="#" onclick="Auth.logout()">Cerrar Sesión</a>
                         </div>
                     </div>
@@ -41,14 +41,14 @@
         <div class="mobile-nav" id="mobileNav">
             <button class="mobile-close" onclick="closeMobileMenu()">&times;</button>
             <ul>
-                <li><a href="#" onclick="showPage('home'); closeMobileMenu()">Inicio</a></li>
-                <li><a href="#" onclick="showPage('order'); closeMobileMenu()">Ordenar Caja</a></li>
-                <li id="submitMenuItemMobile" style="display: none;"><a href="#" onclick="showPage('submit'); closeMobileMenu()">Enviar Respuestas</a></li>
-                <li><a href="#" onclick="showPage('leaderboard'); closeMobileMenu()">Ranking</a></li>
+                <li><a href="/home" onclick="closeMobileMenu()">Inicio</a></li>
+                <li><a href="/order" onclick="closeMobileMenu()">Ordenar Caja</a></li>
+                <li id="submitMenuItemMobile" style="display: none;"><a href="/submit" onclick="closeMobileMenu()">Enviar Respuestas</a></li>
+                <li><a href="/leaderboard" onclick="closeMobileMenu()">Ranking</a></li>
                 <li class="auth-nav-mobile" id="authNavMobile">
                     <a href="#" onclick="Auth.login(); closeMobileMenu()" id="loginBtnMobile">Iniciar Sesión</a>
                     <div class="user-dropdown-mobile" id="userDropdownMobile" style="display: none;">
-                        <a href="#" onclick="showPage('profile'); closeMobileMenu()" id="profileBtnMobile">Mi Perfil</a>
+                        <a href="/profile" onclick="closeMobileMenu()" id="profileBtnMobile">Mi Perfil</a>
                         <a href="#" onclick="Auth.logout(); closeMobileMenu()" id="logoutBtnMobile">Cerrar Sesión</a>
                     </div>
                 </li>
@@ -63,7 +63,7 @@
                 <div class="hero-content fade-in">
                     <h1>Brew Detective</h1>
                     <p>Conviértete en un detective del café. Resuelve misterios, descifra sabores y compite por el primer lugar en el ranking de catadores más expertos.</p>
-                    <a href="#" class="cta-button" onclick="showPage('order')">Iniciar Investigación</a>
+                    <a href="/order" class="cta-button">Iniciar Investigación</a>
                 </div>
             </div>
             <div class="scroll-indicator">
@@ -1067,15 +1067,15 @@
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 1rem; max-width: 300px; margin: 0 auto;">
-                        <button onclick="showPage('leaderboard')" class="cta-button">
+                        <a href="/leaderboard" class="cta-button">
                             🏆 Ver Ranking
-                        </button>
-                        <button onclick="showPage('profile')" class="cta-button">
+                        </a>
+                        <a href="/profile" class="cta-button">
                             👤 Mi Perfil
-                        </button>
-                        <button onclick="showPage('order')" class="cta-button">
+                        </a>
+                        <a href="/order" class="cta-button">
                             ☕ Ordenar Más Café
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

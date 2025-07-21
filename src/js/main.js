@@ -1,3 +1,95 @@
+// Router for handling navigation and URLs
+const Router = {
+    routes: {
+        '/': 'home',
+        '/home': 'home',
+        '/order': 'order',
+        '/submit': 'submit',
+        '/leaderboard': 'leaderboard',
+        '/ranking': 'leaderboard', // Alias for leaderboard
+        '/profile': 'profile',
+        '/admin': 'admin'
+    },
+    
+    init() {
+        // Handle initial page load
+        this.handleRoute();
+        
+        // Handle browser back/forward navigation
+        window.addEventListener('popstate', () => {
+            this.handleRoute();
+        });
+    },
+    
+    navigateTo(path) {
+        // Update browser URL without page reload
+        history.pushState(null, null, path);
+        this.handleRoute();
+    },
+    
+    handleRoute() {
+        let path = window.location.pathname;
+        
+        // Handle root path
+        if (path === '/' || path === '') {
+            path = '/home';
+        }
+        
+        const pageId = this.routes[path] || 'home';
+        
+        // Show the page without updating URL (since it's already updated)
+        this.showPageInternal(pageId);
+    },
+    
+    showPageInternal(pageId) {
+        // Hide all pages
+        const pages = document.querySelectorAll('.page');
+        pages.forEach(page => page.classList.remove('active'));
+        
+        // Show selected page
+        const targetPage = document.getElementById(pageId);
+        if (targetPage) {
+            targetPage.classList.add('active');
+        } else {
+            // Fallback to home if page doesn't exist
+            document.getElementById('home').classList.add('active');
+        }
+        
+        // Load data for specific pages
+        if (pageId === 'leaderboard') {
+            loadLeaderboard();
+        } else if (pageId === 'profile') {
+            loadProfile();
+        } else if (pageId === 'submit') {
+            checkAuthForSubmit();
+            loadActiveCase();
+            loadCatalogData();
+        } else if (pageId === 'admin') {
+            checkAdminAccess();
+            loadCaseFormDropdowns();
+            loadOrderFormDropdowns();
+        } else if (pageId === 'order') {
+            updateOrderPageAuth();
+        }
+        
+        // Update page title
+        this.updatePageTitle(pageId);
+    },
+    
+    updatePageTitle(pageId) {
+        const titles = {
+            'home': 'Brew Detective - Misterio Cafetalero de Costa Rica',
+            'order': 'Ordenar Caja - Brew Detective',
+            'submit': 'Enviar Respuestas - Brew Detective', 
+            'leaderboard': 'Ranking de Detectives - Brew Detective',
+            'profile': 'Mi Perfil - Brew Detective',
+            'admin': 'Administración - Brew Detective'
+        };
+        
+        document.title = titles[pageId] || titles['home'];
+    }
+};
+
 // User dropdown functionality
 function toggleUserMenu() {
     const userMenu = document.getElementById('userMenu');
@@ -64,29 +156,27 @@ document.addEventListener('click', function(event) {
 
 // Navigation functionality
 function showPage(pageId) {
-    // Hide all pages
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(page => page.classList.remove('active'));
+    // Find the path for this page
+    const path = Object.keys(Router.routes).find(key => Router.routes[key] === pageId) || `/${pageId}`;
     
-    // Show selected page
-    document.getElementById(pageId).classList.add('active');
-    
-    // Load data for specific pages
-    if (pageId === 'leaderboard') {
-        loadLeaderboard();
-    } else if (pageId === 'profile') {
-        loadProfile();
-    } else if (pageId === 'submit') {
-        checkAuthForSubmit();
-        loadActiveCase();
-        loadCatalogData();
-    } else if (pageId === 'admin') {
-        checkAdminAccess();
-        loadCaseFormDropdowns();
-        loadOrderFormDropdowns();
-    } else if (pageId === 'order') {
-        updateOrderPageAuth();
-    }
+    // Use router to navigate
+    Router.navigateTo(path);
+}
+
+// Setup navigation links to work with router
+function setupNavigationLinks() {
+    // Handle all navigation links
+    document.addEventListener('click', function(event) {
+        const link = event.target.closest('a[href^="/"]');
+        if (link) {
+            // Prevent default page reload
+            event.preventDefault();
+            
+            // Get the href and navigate using router
+            const href = link.getAttribute('href');
+            Router.navigateTo(href);
+        }
+    });
 }
 
 // Check authentication for submit page
@@ -1691,6 +1781,12 @@ function copyOrderId(orderId) {
 
 // Add some interactive animations
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize router
+    Router.init();
+    
+    // Handle navigation link clicks
+    setupNavigationLinks();
+    
     // Load catalog data on page load
     loadCatalogData();
     
