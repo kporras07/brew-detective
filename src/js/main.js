@@ -858,13 +858,8 @@ async function createCase() {
         const process = document.getElementById(`coffee${i}Process`).value;
         const notes = document.getElementById(`coffee${i}Notes`).value.trim();
         
-        if (!coffeeName || !region || !variety || !process) {
+        if (!coffeeName || !region || !variety || !process || !notes) {
             showAdminNotification(`Todos los campos del Café #${i} son requeridos`, 'error');
-            return;
-        }
-        
-        if (!notes) {
-            showAdminNotification(`Las notas de cata del Café #${i} son requeridas`, 'error');
             return;
         }
         
@@ -1311,13 +1306,8 @@ async function updateCase() {
         const process = document.getElementById(`editCoffee${i}Process`).value;
         const notes = document.getElementById(`editCoffee${i}Notes`).value.trim();
         
-        if (!coffeeName || !region || !variety || !process) {
+        if (!coffeeName || !region || !variety || !process || !notes) {
             showAdminNotification(`Todos los campos del Café #${i} son requeridos`, 'error');
-            return;
-        }
-        
-        if (!notes) {
-            showAdminNotification(`Las notas de cata del Café #${i} son requeridas`, 'error');
             return;
         }
         
