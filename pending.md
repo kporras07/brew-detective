@@ -1,4 +1,4 @@
 # Pending
 
-- What about ranking?
 - What about badges?
+- Refactor all inline style to sass.

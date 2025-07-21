@@ -467,25 +467,39 @@ function populateThankYouPage(submissionResponse) {
     }
 }
 
-// Load leaderboard from API
+// Load both leaderboards from API
 async function loadLeaderboard() {
-    const leaderboardContainer = document.querySelector('.leaderboard');
-    if (!leaderboardContainer) return;
+    await Promise.all([
+        loadCurrentCaseLeaderboard(),
+        loadGlobalLeaderboard()
+    ]);
+}
+
+// Load current case leaderboard
+async function loadCurrentCaseLeaderboard() {
+    const container = document.getElementById('currentCaseLeaderboard');
+    const infoContainer = document.getElementById('currentCaseInfo');
+    if (!container) return;
     
     // Show loading spinner
-    leaderboardContainer.innerHTML = `
+    container.innerHTML = `
         <div class="loading-spinner">
             <div class="spinner"></div>
-            <p>Cargando ranking de detectives...</p>
+            <p>Cargando ranking del caso actual...</p>
         </div>
     `;
     
     try {
-        const response = await API.get(API_CONFIG.ENDPOINTS.LEADERBOARD);
+        const response = await API.get(API_CONFIG.ENDPOINTS.LEADERBOARD_CURRENT);
         const leaderboard = response.leaderboard || [];
         
+        // Update case info
+        if (infoContainer && response.case_name) {
+            infoContainer.innerHTML = `<p><strong>${response.case_name}</strong> - ${leaderboard.length} detectives participando</p>`;
+        }
+        
         // Clear loading spinner
-        leaderboardContainer.innerHTML = '';
+        container.innerHTML = '';
         
         // Add entries
         leaderboard.forEach((entry, index) => {
@@ -503,20 +517,79 @@ async function loadLeaderboard() {
                         '<span class="badge">Detective Novato</span>'
                     }
                 </div>
-                <div class="score">${entry.points || 0} pts</div>
+                <div class="score">${entry.points || 0} pts (${Math.round(entry.accuracy * 100)}%)</div>
             `;
             
-            leaderboardContainer.appendChild(entryElement);
+            container.appendChild(entryElement);
         });
         
         // Show empty state if no data
         if (leaderboard.length === 0) {
-            leaderboardContainer.innerHTML = '<p style="text-align: center; padding: 2rem;">No hay detectives en el ranking aún. ¡Sé el primero!</p>';
+            container.innerHTML = '<p style="text-align: center; padding: 2rem;">No hay detectives en este caso aún. ¡Sé el primero en resolverlo!</p>';
+            if (infoContainer) {
+                infoContainer.innerHTML = '<p>No hay participantes en el caso actual</p>';
+            }
         }
         
     } catch (error) {
-        console.error('Failed to load leaderboard:', error);
-        leaderboardContainer.innerHTML = '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Error al cargar el ranking. Por favor intenta nuevamente más tarde.</p>';
+        console.error('Failed to load current case leaderboard:', error);
+        container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Error al cargar el ranking del caso actual.</p>';
+        if (infoContainer) {
+            infoContainer.innerHTML = '<p style="color: #e74c3c;">Error al cargar información del caso</p>';
+        }
+    }
+}
+
+// Load global/historical leaderboard
+async function loadGlobalLeaderboard() {
+    const container = document.getElementById('globalLeaderboard');
+    if (!container) return;
+    
+    // Show loading spinner
+    container.innerHTML = `
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Cargando ranking global...</p>
+        </div>
+    `;
+    
+    try {
+        const response = await API.get(API_CONFIG.ENDPOINTS.LEADERBOARD);
+        const leaderboard = response.leaderboard || [];
+        
+        // Clear loading spinner
+        container.innerHTML = '';
+        
+        // Add entries
+        leaderboard.forEach((entry, index) => {
+            const rank = index + 1;
+            const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+            
+            const entryElement = document.createElement('div');
+            entryElement.className = 'leaderboard-entry';
+            entryElement.innerHTML = `
+                <div class="rank">${medal} ${rank}</div>
+                <div class="detective-name">
+                    ${entry.detective_name || 'Detective Anónimo'}
+                    ${entry.badges && entry.badges.length > 0 ? 
+                        entry.badges.map(badge => `<span class="badge">${badge}</span>`).join('') : 
+                        '<span class="badge">Detective Novato</span>'
+                    }
+                </div>
+                <div class="score">${entry.points || 0} pts (${entry.cases_count || 0} casos)</div>
+            `;
+            
+            container.appendChild(entryElement);
+        });
+        
+        // Show empty state if no data
+        if (leaderboard.length === 0) {
+            container.innerHTML = '<p style="text-align: center; padding: 2rem;">No hay detectives en el ranking global aún. ¡Sé el primero!</p>';
+        }
+        
+    } catch (error) {
+        console.error('Failed to load global leaderboard:', error);
+        container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Error al cargar el ranking global.</p>';
     }
 }
 

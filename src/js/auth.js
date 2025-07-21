@@ -192,48 +192,82 @@ async function updateProfilePage(user) {
 
 // Update user statistics
 async function updateUserStats(user) {
-    // Show loading state for stats
+    // Get all stat display elements
     const pointsDisplay = document.querySelector('[data-stat="points"]');
-    const rankDisplay = document.querySelector('[data-stat="rank"]');
+    const globalRankDisplay = document.querySelector('[data-stat="global-rank"]');
     const casesDisplay = document.querySelector('[data-stat="cases"]');
     const accuracyDisplay = document.querySelector('[data-stat="accuracy"]');
+    const currentRankDisplay = document.querySelector('[data-stat="current-rank"]');
+    const currentScoreDisplay = document.querySelector('[data-stat="current-score"]');
+    const currentAccuracyDisplay = document.querySelector('[data-stat="current-accuracy"]');
 
-    // Set loading state
+    // Set loading state for global stats
     if (pointsDisplay) pointsDisplay.textContent = '...';
-    if (rankDisplay) rankDisplay.textContent = '...';
+    if (globalRankDisplay) globalRankDisplay.textContent = '...';
     if (casesDisplay) casesDisplay.textContent = '...';
     if (accuracyDisplay) accuracyDisplay.textContent = '...';
     
+    // Set loading state for current case stats
+    if (currentRankDisplay) currentRankDisplay.textContent = '...';
+    if (currentScoreDisplay) currentScoreDisplay.textContent = '...';
+    if (currentAccuracyDisplay) currentAccuracyDisplay.textContent = '...';
+    
     try {
-        // Fetch real user rank from API
-        const leaderboardResponse = await API.get(API_CONFIG.ENDPOINTS.LEADERBOARD);
-        const leaderboard = leaderboardResponse.leaderboard || [];
+        // Fetch both leaderboards in parallel
+        const [globalResponse, currentResponse] = await Promise.all([
+            API.get(API_CONFIG.ENDPOINTS.LEADERBOARD),
+            API.get(API_CONFIG.ENDPOINTS.LEADERBOARD_CURRENT).catch(() => ({ leaderboard: [] })) // Don't fail if no current case
+        ]);
         
-        // Find user's actual rank in leaderboard
-        const userRank = leaderboard.findIndex(entry => entry.user_id === user.id) + 1;
+        // Global leaderboard stats
+        const globalLeaderboard = globalResponse.leaderboard || [];
+        const globalRank = globalLeaderboard.findIndex(entry => entry.user_id === user.id) + 1;
         
-        const stats = {
+        const globalStats = {
             points: user.points || 0,
-            rank: userRank > 0 ? userRank : '---',
+            rank: globalRank > 0 ? globalRank : '---',
             casesSolved: user.cases_count || 0,
             accuracy: Math.round((user.accuracy || 0) * 100)
         };
 
-        // Update UI elements with actual data
-        if (pointsDisplay) pointsDisplay.textContent = stats.points.toLocaleString();
-        if (rankDisplay) rankDisplay.textContent = stats.rank !== '---' ? `# ${stats.rank}` : 'Sin ranking';
-        if (casesDisplay) casesDisplay.textContent = stats.casesSolved;
-        if (accuracyDisplay) accuracyDisplay.textContent = `${stats.accuracy}%`;
+        // Update global stats UI
+        if (pointsDisplay) pointsDisplay.textContent = globalStats.points.toLocaleString();
+        if (globalRankDisplay) globalRankDisplay.textContent = globalStats.rank !== '---' ? `# ${globalStats.rank}` : 'Sin ranking';
+        if (casesDisplay) casesDisplay.textContent = globalStats.casesSolved;
+        if (accuracyDisplay) accuracyDisplay.textContent = `${globalStats.accuracy}%`;
+        
+        // Current case leaderboard stats
+        const currentLeaderboard = currentResponse.leaderboard || [];
+        const currentCaseEntry = currentLeaderboard.find(entry => entry.user_id === user.id);
+        
+        if (currentCaseEntry) {
+            const currentRank = currentLeaderboard.findIndex(entry => entry.user_id === user.id) + 1;
+            if (currentRankDisplay) currentRankDisplay.textContent = `# ${currentRank}`;
+            if (currentScoreDisplay) currentScoreDisplay.textContent = `${currentCaseEntry.points} pts`;
+            if (currentAccuracyDisplay) currentAccuracyDisplay.textContent = `${Math.round(currentCaseEntry.accuracy * 100)}%`;
+        } else {
+            // User hasn't participated in current case
+            if (currentRankDisplay) currentRankDisplay.textContent = 'No participando';
+            if (currentScoreDisplay) currentScoreDisplay.textContent = '--';
+            if (currentAccuracyDisplay) currentAccuracyDisplay.textContent = '--%';
+        }
         
         // Update badges if they exist
         updateUserBadges(user);
+        
     } catch (error) {
         console.error('Failed to load user stats:', error);
-        // Show error state instead of fake data
+        
+        // Show error state for global stats
         if (pointsDisplay) pointsDisplay.textContent = 'Error';
-        if (rankDisplay) rankDisplay.textContent = 'Error';
+        if (globalRankDisplay) globalRankDisplay.textContent = 'Error';
         if (casesDisplay) casesDisplay.textContent = 'Error';
         if (accuracyDisplay) accuracyDisplay.textContent = 'Error';
+        
+        // Show error state for current case stats
+        if (currentRankDisplay) currentRankDisplay.textContent = 'Error';
+        if (currentScoreDisplay) currentScoreDisplay.textContent = 'Error';
+        if (currentAccuracyDisplay) currentAccuracyDisplay.textContent = 'Error';
     }
 }
 

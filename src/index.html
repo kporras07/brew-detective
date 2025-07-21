@@ -384,12 +384,30 @@
         <section class="section">
             <div class="container">
                 <h2 class="section-title">Ranking de Detectives</h2>
-                <div class="leaderboard">
-                    <!-- Leaderboard entries will be loaded dynamically from API -->
+                
+                <!-- Current Case Leaderboard -->
+                <div class="card" style="margin-bottom: 2rem;">
+                    <h3 style="color: #d4af37; margin-bottom: 1rem;">🏆 Caso Actual</h3>
+                    <div id="currentCaseInfo" style="margin-bottom: 1rem; opacity: 0.8;">
+                        <p>Cargando información del caso...</p>
+                    </div>
+                    <div id="currentCaseLeaderboard" class="leaderboard">
+                        <!-- Current case leaderboard entries will be loaded dynamically -->
+                    </div>
                 </div>
+                
+                <!-- Global/Historical Leaderboard -->
+                <div class="card">
+                    <h3 style="color: #d4af37; margin-bottom: 1rem;">🌟 Ranking Global</h3>
+                    <p style="margin-bottom: 1rem; opacity: 0.8;">Puntuación acumulada de todos los casos resueltos</p>
+                    <div id="globalLeaderboard" class="leaderboard">
+                        <!-- Global leaderboard entries will be loaded dynamically -->
+                    </div>
+                </div>
+                
                 <div style="text-align: center; margin-top: 2rem;">
-                    <p style="color: #d4af37; font-size: 1.1rem;">🏆 Próxima actualización: en 2 días</p>
-                    <p style="margin-top: 1rem; opacity: 0.8;">El ranking se actualiza cada domingo con los nuevos casos resueltos</p>
+                    <p style="color: #d4af37; font-size: 1.1rem;">🏆 Rankings actualizados en tiempo real</p>
+                    <p style="margin-top: 1rem; opacity: 0.8;">¡Completa más casos para subir en el ranking!</p>
                 </div>
             </div>
         </section>
@@ -403,7 +421,7 @@
                 <div class="cards-grid">
                     <div class="card">
                         <h3>👤 Información Personal</h3>
-                        <div class="form-container" style="background: transparent; border: none; padding: 0;">
+                        <div class="form-container" style="background: transparent; border: none; margin: 0; backdrop-filter: none;">
                             <div class="form-group">
                                 <label for="profileName">Nombre del Detective:</label>
                                 <input type="text" id="profileName" placeholder="Ingresa tu nombre">
@@ -418,22 +436,46 @@
                     
                     <div class="card">
                         <h3>📊 Mis Estadísticas</h3>
-                        <div style="text-align: center;">
-                            <div style="margin: 1rem 0;">
-                                <div style="font-size: 2rem; color: #d4af37; font-weight: bold;" data-stat="points">0</div>
-                                <div>Puntos Totales</div>
+                        
+                        <!-- Global Stats -->
+                        <div style="margin-bottom: 2rem;">
+                            <h4 style="color: #d4af37; margin-bottom: 1rem;">🌟 Estadísticas Globales</h4>
+                            <div style="text-align: center;">
+                                <div style="margin: 1rem 0;">
+                                    <div style="font-size: 2rem; color: #d4af37; font-weight: bold;" data-stat="points">0</div>
+                                    <div>Puntos Totales</div>
+                                </div>
+                                <div style="margin: 1rem 0;">
+                                    <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="global-rank"># --</div>
+                                    <div>Ranking Global</div>
+                                </div>
+                                <div style="margin: 1rem 0;">
+                                    <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="cases">0</div>
+                                    <div>Casos Completados</div>
+                                </div>
+                                <div style="margin: 1rem 0;">
+                                    <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="accuracy">0%</div>
+                                    <div>Precisión Promedio</div>
+                                </div>
                             </div>
-                            <div style="margin: 1rem 0;">
-                                <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="rank"># --</div>
-                                <div>Posición en el Ranking</div>
-                            </div>
-                            <div style="margin: 1rem 0;">
-                                <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="cases">0</div>
-                                <div>Casos Resueltos</div>
-                            </div>
-                            <div style="margin: 1rem 0;">
-                                <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="accuracy">0%</div>
-                                <div>Precisión</div>
+                        </div>
+                        
+                        <!-- Current Case Stats -->
+                        <div>
+                            <h4 style="color: #d4af37; margin-bottom: 1rem;">🏆 Caso Actual</h4>
+                            <div style="text-align: center;">
+                                <div style="margin: 1rem 0;">
+                                    <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="current-rank"># --</div>
+                                    <div>Posición en Caso Actual</div>
+                                </div>
+                                <div style="margin: 1rem 0;">
+                                    <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="current-score">--</div>
+                                    <div>Mejor Puntuación</div>
+                                </div>
+                                <div style="margin: 1rem 0;">
+                                    <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="current-accuracy">--%</div>
+                                    <div>Precisión en Caso Actual</div>
+                                </div>
                             </div>
                         </div>
                     </div>

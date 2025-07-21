@@ -12,6 +12,7 @@ const API_CONFIG = {
         ACTIVE_CASE: '/api/v1/cases/active',
         SUBMISSIONS: '/api/v1/submissions',
         LEADERBOARD: '/api/v1/leaderboard',
+        LEADERBOARD_CURRENT: '/api/v1/leaderboard/current',
         USERS: '/api/v1/users',
         ORDERS: '/api/v1/orders',
         PROFILE: '/api/v1/profile',

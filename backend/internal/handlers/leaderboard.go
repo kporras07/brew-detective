@@ -17,7 +17,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// GetLeaderboard returns the top users ranked by points
+// GetLeaderboard returns the global/historical leaderboard ranked by total points across all cases
 func GetLeaderboard(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -50,13 +50,13 @@ func GetLeaderboard(c *gin.Context) {
 		}
 
 		// Only include users who have attempted at least one case
-		if user.CasesAttempted > 0 || user.CasesSolved > 0 || user.Score > 0 {
+		if user.CasesAttempted > 0 || user.CasesSolved > 0 || user.Points > 0 {
 			entry := models.LeaderboardEntryWithUser{
 				UserID:        user.ID,
-				DetectiveName: user.Name, // Get name from User model
-				Points:        user.Score, // Use Score instead of Points
+				DetectiveName: user.Name,
+				Points:        user.Points, // Use Points field for total accumulated points
 				Accuracy:      user.Accuracy,
-				CasesCount:    user.CasesAttempted, // Use CasesAttempted
+				CasesCount:    user.CasesCount, // Use CasesCount for total cases solved
 				Badges:        user.Badges,
 			}
 			entries = append(entries, entry)
@@ -277,5 +277,136 @@ func GetAllUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"users": users,
 		"count": len(users),
+	})
+}
+
+// getCurrentActiveCase gets the current active case (helper function)
+func getCurrentActiveCase() (*models.CoffeeCase, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	iter := database.FirestoreClient.Collection(database.CasesCollection).
+		Where("is_active", "==", true).
+		Limit(1).
+		Documents(ctx)
+
+	doc, err := iter.Next()
+	if err == iterator.Done {
+		return nil, err
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var coffeeCase models.CoffeeCase
+	if err := doc.DataTo(&coffeeCase); err != nil {
+		return nil, err
+	}
+
+	return &coffeeCase, nil
+}
+
+// GetCurrentCaseLeaderboard returns the leaderboard for the current active case only
+func GetCurrentCaseLeaderboard(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Get the current active case
+	activeCase, err := getCurrentActiveCase()
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No active case found"})
+		return
+	}
+
+	// Get submissions for the current active case only
+	iter := database.FirestoreClient.Collection(database.SubmissionsCollection).
+		Where("case_id", "==", activeCase.ID).
+		Documents(ctx)
+
+	// Map to store user scores for current case
+	userScores := make(map[string]models.LeaderboardEntryWithUser)
+	
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Failed to fetch submissions", 
+				"details": err.Error(),
+			})
+			return
+		}
+
+		var submission models.Submission
+		if err := doc.DataTo(&submission); err != nil {
+			continue // Skip invalid submissions
+		}
+
+		// Get or initialize user entry
+		entry, exists := userScores[submission.UserID]
+		if !exists {
+			// Get user details
+			userRef := database.FirestoreClient.Collection(database.UsersCollection).Doc(submission.UserID)
+			userDoc, err := userRef.Get(ctx)
+			if err != nil {
+				continue // Skip if user not found
+			}
+			
+			var user models.User
+			if err := userDoc.DataTo(&user); err != nil {
+				continue
+			}
+
+			entry = models.LeaderboardEntryWithUser{
+				UserID:        submission.UserID,
+				DetectiveName: user.Name,
+				Points:        0,
+				Accuracy:      0,
+				CasesCount:    0,
+				Badges:        user.Badges,
+			}
+		}
+
+		// Update with best score for this case (keep highest score)
+		if submission.Score > entry.Points {
+			entry.Points = submission.Score
+			entry.Accuracy = submission.Accuracy
+		}
+		entry.CasesCount = 1 // For current case, this is always 1
+		
+		userScores[submission.UserID] = entry
+	}
+
+	// Convert map to slice
+	var entries []models.LeaderboardEntryWithUser
+	for _, entry := range userScores {
+		entries = append(entries, entry)
+	}
+
+	// Sort by points (descending), then by accuracy for ties
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].Points == entries[j].Points {
+			return entries[i].Accuracy > entries[j].Accuracy
+		}
+		return entries[i].Points > entries[j].Points
+	})
+
+	// Assign ranks
+	for i := range entries {
+		entries[i].Rank = i + 1
+	}
+
+	// Limit to top 50
+	if len(entries) > 50 {
+		entries = entries[:50]
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"leaderboard": entries,
+		"total_users": len(entries),
+		"case_id": activeCase.ID,
+		"case_name": activeCase.Name,
 	})
 }
