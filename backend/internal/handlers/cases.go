@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"brew-detective-backend/internal/database"
@@ -37,6 +38,13 @@ func CreateCase(c *gin.Context) {
 	newCase.CreatedAt = time.Now()
 	newCase.UpdatedAt = time.Now()
 
+	// Generate UUIDs for each coffee if they don't have proper ones
+	for i := range newCase.Coffees {
+		if newCase.Coffees[i].ID == "" || strings.HasPrefix(newCase.Coffees[i].ID, "coffee_") {
+			newCase.Coffees[i].ID = uuid.New().String()
+		}
+	}
+
 	// Default to inactive when created
 	if !newCase.IsActive {
 		newCase.IsActive = false
@@ -67,6 +75,23 @@ func UpdateCase(c *gin.Context) {
 	if err := c.ShouldBindJSON(&updates); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid update data"})
 		return
+	}
+
+	// Handle coffee UUIDs if coffees are being updated
+	if coffeesData, exists := updates["coffees"]; exists {
+		if coffeesSlice, ok := coffeesData.([]interface{}); ok {
+			for i, coffeeData := range coffeesSlice {
+				if coffeeMap, ok := coffeeData.(map[string]interface{}); ok {
+					if id, hasID := coffeeMap["id"]; hasID {
+						if idStr, ok := id.(string); ok && (idStr == "" || strings.HasPrefix(idStr, "coffee_")) {
+							coffeeMap["id"] = uuid.New().String()
+							coffeesSlice[i] = coffeeMap
+						}
+					}
+				}
+			}
+			updates["coffees"] = coffeesSlice
+		}
 	}
 
 	// Add updated timestamp

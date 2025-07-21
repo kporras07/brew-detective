@@ -147,7 +147,8 @@ async function loadActiveCase() {
             activeCaseName.textContent = activeCase.name;
             activeCaseDescription.textContent = activeCase.description;
             
-            // Store enabled questions globally for form customization
+            // Store entire active case globally for form customization
+            window.activeCase = activeCase;
             window.activeCaseQuestions = activeCase.enabled_questions || {
                 region: true,
                 variety: true,
@@ -157,6 +158,9 @@ async function loadActiveCase() {
                 favorite_coffee: true,
                 brewing_method: true
             };
+            
+            console.log('Active case loaded:', activeCase);
+            console.log('Coffee IDs:', activeCase.coffees?.map(c => ({ id: c.id, name: c.name })));
             
             // Customize submission form based on enabled questions
             customizeSubmissionForm();
@@ -318,12 +322,20 @@ document.getElementById('submitForm').addEventListener('submit', async function(
     document.getElementById('submitSuccess').style.display = 'none';
     document.getElementById('submitError').style.display = 'none';
     
-    // Collect form data
+    // Get coffee IDs from active case
+    const activeCase = window.activeCase;
+    if (!activeCase || !activeCase.coffees || activeCase.coffees.length < 4) {
+        document.getElementById('submitError').style.display = 'block';
+        document.getElementById('submitError').innerHTML = 'Error: No se pudo obtener la información del caso activo. Por favor recarga la página.';
+        return;
+    }
+    
+    // Collect form data with actual coffee UUIDs
     const submission = {
         order_id: document.getElementById('orderId').value.toUpperCase(),
         coffee_answers: [
             {
-                coffee_id: '1',
+                coffee_id: activeCase.coffees[0].id,
                 region: document.getElementById('coffee1_region').value,
                 variety: document.getElementById('coffee1_variety').value,
                 process: document.getElementById('coffee1_process').value,
@@ -331,7 +343,7 @@ document.getElementById('submitForm').addEventListener('submit', async function(
                 taste_note_2: document.getElementById('coffee1_note2').value
             },
             {
-                coffee_id: '2',
+                coffee_id: activeCase.coffees[1].id,
                 region: document.getElementById('coffee2_region').value,
                 variety: document.getElementById('coffee2_variety').value,
                 process: document.getElementById('coffee2_process').value,
@@ -339,7 +351,7 @@ document.getElementById('submitForm').addEventListener('submit', async function(
                 taste_note_2: document.getElementById('coffee2_note2').value
             },
             {
-                coffee_id: '3',
+                coffee_id: activeCase.coffees[2].id,
                 region: document.getElementById('coffee3_region').value,
                 variety: document.getElementById('coffee3_variety').value,
                 process: document.getElementById('coffee3_process').value,
@@ -347,7 +359,7 @@ document.getElementById('submitForm').addEventListener('submit', async function(
                 taste_note_2: document.getElementById('coffee3_note2').value
             },
             {
-                coffee_id: '4',
+                coffee_id: activeCase.coffees[3].id,
                 region: document.getElementById('coffee4_region').value,
                 variety: document.getElementById('coffee4_variety').value,
                 process: document.getElementById('coffee4_process').value,
@@ -358,6 +370,8 @@ document.getElementById('submitForm').addEventListener('submit', async function(
         favorite_coffee: document.getElementById('favorite_coffee').value,
         brewing_method: document.getElementById('brewing_method').value
     };
+    
+    console.log('Submission with coffee IDs:', submission.coffee_answers.map(ca => ({ coffee_id: ca.coffee_id })));
     
     try {
         const response = await API.post(API_CONFIG.ENDPOINTS.SUBMISSIONS, submission);
@@ -1005,17 +1019,29 @@ async function editCase(caseId) {
         // Hide other forms
         document.getElementById('createCaseForm').style.display = 'none';
         
-        // Show edit form
+        // Show edit form first
         document.getElementById('editCaseForm').style.display = 'block';
         
-        // Populate form with existing data
-        populateEditForm(caseData);
-        
-        // Load dropdowns for edit form first
-        await loadEditFormDropdowns();
-        
-        // Set dropdown values after dropdowns are populated
-        setEditFormDropdownValues(caseData);
+        // Wait a moment for the form to be rendered
+        setTimeout(async () => {
+            try {
+                // Populate form with existing data
+                populateEditForm(caseData);
+                
+                // Load dropdowns for edit form first
+                await loadEditFormDropdowns();
+                
+                // Add a small delay to ensure dropdowns are fully rendered
+                setTimeout(() => {
+                    // Set dropdown values after dropdowns are populated
+                    setEditFormDropdownValues(caseData);
+                }, 200);
+                
+            } catch (error) {
+                console.error('Error populating edit form:', error);
+                showAdminNotification('Error al poblar el formulario de edición', 'error');
+            }
+        }, 50);
         
     } catch (error) {
         console.error('Error loading case for edit:', error);
@@ -1024,22 +1050,77 @@ async function editCase(caseId) {
 }
 
 function populateEditForm(caseData) {
-    // Basic case info
-    document.getElementById('editCaseId').value = caseData.id;
-    document.getElementById('editCaseName').value = caseData.name || '';
-    document.getElementById('editCaseDescription').value = caseData.description || '';
-    document.getElementById('editCaseIsActive').checked = caseData.is_active || false;
+    try {
+        console.log('Populating edit form with case data:', caseData);
+        
+        // Check if edit form is visible
+        const editForm = document.getElementById('editCaseForm');
+        if (!editForm || editForm.style.display === 'none') {
+            console.error('Edit form is not visible or does not exist');
+            return;
+        }
+        
+        // Basic case info
+        const editCaseId = document.getElementById('editCaseId');
+        const editCaseName = document.getElementById('editCaseName');
+        const editCaseDescription = document.getElementById('editCaseDescription');
+        const editCaseIsActive = document.getElementById('editCaseIsActive');
+    
+    if (editCaseId) {
+        editCaseId.value = caseData.id;
+    } else {
+        console.error('editCaseId element not found');
+    }
+    
+    if (editCaseName) {
+        editCaseName.value = caseData.name || '';
+    } else {
+        console.error('editCaseName element not found');
+    }
+    
+    if (editCaseDescription) {
+        editCaseDescription.value = caseData.description || '';
+    } else {
+        console.error('editCaseDescription element not found');
+    }
+    
+    if (editCaseIsActive) {
+        editCaseIsActive.checked = caseData.is_active || false;
+    } else {
+        console.error('editCaseIsActive element not found');
+    }
     
     // Coffee details (names and notes, dropdowns will be set after loading)
     for (let i = 1; i <= 4; i++) {
         const coffee = caseData.coffees && caseData.coffees[i-1];
+        const nameElement = document.getElementById(`editCoffee${i}Name`);
+        const notesElement = document.getElementById(`editCoffee${i}Notes`);
+        
+        console.log(`Coffee ${i} elements found:`, {
+            name: !!nameElement,
+            notes: !!notesElement
+        });
+        
         if (coffee) {
-            document.getElementById(`editCoffee${i}Name`).value = coffee.name || '';
-            document.getElementById(`editCoffee${i}Notes`).value = coffee.tasting_notes || '';
+            if (nameElement) {
+                nameElement.value = coffee.name || '';
+            } else {
+                console.error(`editCoffee${i}Name element not found`);
+            }
+            
+            if (notesElement) {
+                notesElement.value = coffee.tasting_notes || '';
+            } else {
+                console.error(`editCoffee${i}Notes element not found`);
+            }
         } else {
             // Clear fields if no coffee data
-            document.getElementById(`editCoffee${i}Name`).value = '';
-            document.getElementById(`editCoffee${i}Notes`).value = '';
+            if (nameElement) {
+                nameElement.value = '';
+            }
+            if (notesElement) {
+                notesElement.value = '';
+            }
         }
     }
     
@@ -1054,42 +1135,140 @@ function populateEditForm(caseData) {
         brewing_method: true
     };
     
-    document.getElementById('editQuestionRegion').checked = questions.region;
-    document.getElementById('editQuestionVariety').checked = questions.variety;
-    document.getElementById('editQuestionProcess').checked = questions.process;
-    document.getElementById('editQuestionTasteNote1').checked = questions.taste_note_1;
-    document.getElementById('editQuestionTasteNote2').checked = questions.taste_note_2;
-    document.getElementById('editQuestionFavoriteCoffee').checked = questions.favorite_coffee;
-    document.getElementById('editQuestionBrewingMethod').checked = questions.brewing_method;
+    const questionElements = [
+        { id: 'editQuestionRegion', value: questions.region },
+        { id: 'editQuestionVariety', value: questions.variety },
+        { id: 'editQuestionProcess', value: questions.process },
+        { id: 'editQuestionTasteNote1', value: questions.taste_note_1 },
+        { id: 'editQuestionTasteNote2', value: questions.taste_note_2 },
+        { id: 'editQuestionFavoriteCoffee', value: questions.favorite_coffee },
+        { id: 'editQuestionBrewingMethod', value: questions.brewing_method }
+    ];
+    
+    questionElements.forEach(({ id, value }) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.checked = value;
+        } else {
+            console.error(`${id} element not found`);
+        }
+    });
+        
+    } catch (error) {
+        console.error('Error in populateEditForm:', error);
+        throw error; // Re-throw to be caught by the calling function
+    }
 }
 
 function setEditFormDropdownValues(caseData) {
-    // Set coffee dropdown values after dropdowns are populated
-    for (let i = 1; i <= 4; i++) {
+    try {
+        console.log('Setting edit form dropdown values for case:', caseData);
+        
+        // Set coffee dropdown values after dropdowns are populated
+        for (let i = 1; i <= 4; i++) {
         const coffee = caseData.coffees && caseData.coffees[i-1];
         if (coffee) {
+            console.log(`Coffee ${i} data:`, coffee);
+            
             const regionSelect = document.getElementById(`editCoffee${i}Region`);
             const varietySelect = document.getElementById(`editCoffee${i}Variety`);
             const processSelect = document.getElementById(`editCoffee${i}Process`);
             
-            if (regionSelect) regionSelect.value = coffee.region || '';
-            if (varietySelect) varietySelect.value = coffee.variety || '';
-            if (processSelect) processSelect.value = coffee.process || '';
+            console.log(`Coffee ${i} - Region: '${coffee.region}', Variety: '${coffee.variety}', Process: '${coffee.process}'`);
+            
+            if (regionSelect) {
+                console.log(`Region dropdown options:`, Array.from(regionSelect.options).map(o => ({value: o.value, text: o.textContent})));
+                
+                // Try to set by value first
+                regionSelect.value = coffee.region || '';
+                
+                // If value didn't match, try to find by label/text
+                if (regionSelect.value === '' && coffee.region) {
+                    const matchingOption = Array.from(regionSelect.options).find(option => 
+                        option.textContent.toLowerCase() === coffee.region.toLowerCase()
+                    );
+                    if (matchingOption) {
+                        regionSelect.value = matchingOption.value;
+                        console.log(`Found region by label match: '${coffee.region}' -> '${matchingOption.value}'`);
+                    }
+                }
+                
+                console.log(`Set region to: '${regionSelect.value}', coffee.region was: '${coffee.region}'`);
+            }
+            if (varietySelect) {
+                console.log(`Variety dropdown options:`, Array.from(varietySelect.options).map(o => ({value: o.value, text: o.textContent})));
+                
+                // Try to set by value first
+                varietySelect.value = coffee.variety || '';
+                
+                // If value didn't match, try to find by label/text
+                if (varietySelect.value === '' && coffee.variety) {
+                    const matchingOption = Array.from(varietySelect.options).find(option => 
+                        option.textContent.toLowerCase() === coffee.variety.toLowerCase()
+                    );
+                    if (matchingOption) {
+                        varietySelect.value = matchingOption.value;
+                        console.log(`Found variety by label match: '${coffee.variety}' -> '${matchingOption.value}'`);
+                    }
+                }
+                
+                console.log(`Set variety to: '${varietySelect.value}', coffee.variety was: '${coffee.variety}'`);
+            }
+            if (processSelect) {
+                console.log(`Process dropdown options:`, Array.from(processSelect.options).map(o => ({value: o.value, text: o.textContent})));
+                
+                // Try to set by value first
+                processSelect.value = coffee.process || '';
+                
+                // If value didn't match, try to find by label/text
+                if (processSelect.value === '' && coffee.process) {
+                    const matchingOption = Array.from(processSelect.options).find(option => 
+                        option.textContent.toLowerCase() === coffee.process.toLowerCase()
+                    );
+                    if (matchingOption) {
+                        processSelect.value = matchingOption.value;
+                        console.log(`Found process by label match: '${coffee.process}' -> '${matchingOption.value}'`);
+                    }
+                }
+                
+                console.log(`Set process to: '${processSelect.value}', coffee.process was: '${coffee.process}'`);
+            }
         }
+    }
+    
+    } catch (error) {
+        console.error('Error in setEditFormDropdownValues:', error);
+        throw error; // Re-throw to be caught by the calling function
     }
 }
 
 async function loadEditFormDropdowns() {
     try {
+        console.log('Loading edit form dropdowns...');
         const data = await API.get(API_CONFIG.ENDPOINTS.CATALOG);
         const catalog = data.catalog;
+        console.log('Edit form catalog data:', catalog);
         
         // Populate dropdowns for each coffee in edit form
         for (let i = 1; i <= 4; i++) {
+            console.log(`Populating edit form dropdowns for coffee ${i}`);
             populateCaseDropdown(`editCoffee${i}Region`, catalog.region || []);
             populateCaseDropdown(`editCoffee${i}Variety`, catalog.variety || []);
             populateCaseDropdown(`editCoffee${i}Process`, catalog.process || []);
+            
+            // Verify dropdowns were populated
+            const regionSelect = document.getElementById(`editCoffee${i}Region`);
+            const varietySelect = document.getElementById(`editCoffee${i}Variety`);
+            const processSelect = document.getElementById(`editCoffee${i}Process`);
+            
+            console.log(`Coffee ${i} dropdowns populated:`, {
+                region: regionSelect ? regionSelect.options.length : 'not found',
+                variety: varietySelect ? varietySelect.options.length : 'not found', 
+                process: processSelect ? processSelect.options.length : 'not found'
+            });
         }
+        
+        console.log('Edit form dropdowns loading complete');
         
     } catch (error) {
         console.error('Failed to load catalog data for edit form:', error);
@@ -1106,6 +1285,18 @@ async function updateCase() {
     const description = document.getElementById('editCaseDescription').value.trim();
     const isActive = document.getElementById('editCaseIsActive').checked;
     
+    // Get the original case data to preserve coffee IDs
+    let originalCoffeeIds = [];
+    try {
+        const response = await API.get(`${API_CONFIG.ENDPOINTS.ADMIN_CASES}/${caseId}`);
+        const originalCase = response.case;
+        originalCoffeeIds = originalCase.coffees ? originalCase.coffees.map(c => c.id) : [];
+        console.log('Original coffee IDs:', originalCoffeeIds);
+    } catch (error) {
+        console.error('Error getting original case data:', error);
+        // If we can't get original IDs, we'll use generated ones as fallback
+    }
+    
     if (!name || !description) {
         showAdminNotification('Nombre y descripción son requeridos', 'error');
         return;
@@ -1118,18 +1309,25 @@ async function updateCase() {
         const region = document.getElementById(`editCoffee${i}Region`).value;
         const variety = document.getElementById(`editCoffee${i}Variety`).value;
         const process = document.getElementById(`editCoffee${i}Process`).value;
+        const notes = document.getElementById(`editCoffee${i}Notes`).value.trim();
         
         if (!coffeeName || !region || !variety || !process) {
             showAdminNotification(`Todos los campos del Café #${i} son requeridos`, 'error');
             return;
         }
         
+        if (!notes) {
+            showAdminNotification(`Las notas de cata del Café #${i} son requeridas`, 'error');
+            return;
+        }
+        
         coffees.push({
-            id: `coffee_${i}`,
+            id: originalCoffeeIds[i-1] || `coffee_${i}`, // Use original ID if available, fallback to generated
             name: coffeeName,
             region: region,
             variety: variety,
-            process: process
+            process: process,
+            tasting_notes: notes
         });
     }
     
