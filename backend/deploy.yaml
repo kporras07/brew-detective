@@ -14,11 +14,12 @@ spec:
         run.googleapis.com/cpu: "1000m"
         run.googleapis.com/startup-cpu-boost: "true"
         run.googleapis.com/timeout: "300s"
+        run.googleapis.com/build-timestamp: "REPLACE_WITH_TIMESTAMP"
     spec:
       serviceAccountName: brew-detective@brew-detective.iam.gserviceaccount.com
       containerConcurrency: 100
       containers:
-      - image: us-central1-docker.pkg.dev/brew-detective/brew-detective-repo/brew-detective-backend
+      - image: FULL_IMAGE_NAME
         ports:
         - name: http1
           containerPort: 8080
