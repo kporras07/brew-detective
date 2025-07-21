@@ -947,6 +947,64 @@
         </section>
     </div>
 
+    <!-- Thank You Page -->
+    <div id="thankyou" class="page">
+        <section class="section">
+            <div class="container">
+                <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+                    <div style="margin-bottom: 2rem;">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+                        <h2 style="color: #d4af37; margin-bottom: 1rem;">¡Respuestas Enviadas Exitosamente!</h2>
+                        <p style="color: rgba(244, 241, 232, 0.9); font-size: 1.1rem; margin-bottom: 2rem;">
+                            Gracias por participar en este caso detective. Tu análisis ha sido registrado.
+                        </p>
+                    </div>
+
+                    <div id="scoreDisplay" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1)); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 12px; padding: 1.5rem; margin: 2rem 0;">
+                        <h3 style="color: #d4af37; margin-bottom: 1rem;">Tu Puntuación</h3>
+                        <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <div style="font-size: 2.5rem; font-weight: bold; color: #d4af37;" id="finalScore">--</div>
+                                <div style="color: rgba(244, 241, 232, 0.8); font-size: 0.9rem;">Puntos Totales</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 2.5rem; font-weight: bold; color: #d4af37;" id="finalAccuracy">--%</div>
+                                <div style="color: rgba(244, 241, 232, 0.8); font-size: 0.9rem;">Precisión</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin: 2rem 0;">
+                        <h4 style="color: #d4af37; margin-bottom: 1rem;">🚀 ¿Qué sigue?</h4>
+                        <div style="text-align: left; margin-bottom: 2rem;">
+                            <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
+                                ✓ Ve tu posición en el ranking de detectives
+                            </div>
+                            <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
+                                ✓ Actualiza tu perfil con tu experiencia
+                            </div>
+                            <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
+                                ✓ Pide tu próxima caja de café misterioso
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 1rem; max-width: 300px; margin: 0 auto;">
+                        <button onclick="showPage('leaderboard')" class="cta-button">
+                            🏆 Ver Ranking
+                        </button>
+                        <button onclick="showPage('profile')" class="cta-button" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.2)); border: 2px solid rgba(212, 175, 55, 0.5);">
+                            👤 Mi Perfil
+                        </button>
+                        <button onclick="showPage('order')" class="cta-button" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.2)); border: 2px solid rgba(212, 175, 55, 0.5);">
+                            ☕ Ordenar Más Café
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
     <!-- Footer -->
     <footer>
         <div class="container">

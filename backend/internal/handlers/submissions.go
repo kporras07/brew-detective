@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"brew-detective-backend/internal/database"
@@ -122,22 +123,60 @@ func calculateScore(submission *models.Submission) (int, float64) {
 	basePoints := 100
 
 	for _, answer := range submission.CoffeeAnswers {
-		// Simulate scoring based on enabled questions only
-		// In reality, you'd compare with correct answers from the case
+		// Find the correct coffee data for this answer
+		var correctCoffee *models.CoffeeItem
+		for _, coffee := range activeCase.Coffees {
+			if coffee.ID == answer.CoffeeID {
+				correctCoffee = &coffee
+				break
+			}
+		}
+		
+		if correctCoffee == nil {
+			continue // Skip if coffee not found
+		}
+		
+		// Compare user answers against correct coffee data
 		if activeCase.EnabledQuestions.Region && answer.Region != "" {
-			correctAnswers++
+			if strings.EqualFold(strings.TrimSpace(answer.Region), strings.TrimSpace(correctCoffee.Region)) {
+				correctAnswers++
+			}
 		}
 		if activeCase.EnabledQuestions.Variety && answer.Variety != "" {
-			correctAnswers++
+			if strings.EqualFold(strings.TrimSpace(answer.Variety), strings.TrimSpace(correctCoffee.Variety)) {
+				correctAnswers++
+			}
 		}
 		if activeCase.EnabledQuestions.Process && answer.Process != "" {
-			correctAnswers++
+			if strings.EqualFold(strings.TrimSpace(answer.Process), strings.TrimSpace(correctCoffee.Process)) {
+				correctAnswers++
+			}
 		}
+		
+		// Handle comma-separated tasting notes (avoid double points for same note)
+		var awardedTastingNotes []string
+		
 		if activeCase.EnabledQuestions.TasteNote1 && answer.TasteNote1 != "" {
-			correctAnswers++
+			if matchedNote := getMatchedTastingNote(answer.TasteNote1, correctCoffee.TastingNotes); matchedNote != "" {
+				awardedTastingNotes = append(awardedTastingNotes, matchedNote)
+				correctAnswers++
+			}
 		}
+		
 		if activeCase.EnabledQuestions.TasteNote2 && answer.TasteNote2 != "" {
-			correctAnswers++
+			if matchedNote := getMatchedTastingNote(answer.TasteNote2, correctCoffee.TastingNotes); matchedNote != "" {
+				// Check if we already awarded points for this exact note
+				alreadyAwarded := false
+				for _, awarded := range awardedTastingNotes {
+					if strings.EqualFold(awarded, matchedNote) {
+						alreadyAwarded = true
+						break
+					}
+				}
+				if !alreadyAwarded {
+					correctAnswers++
+				}
+			}
 		}
 	}
 
@@ -437,4 +476,40 @@ func GetUserSubmissions(c *gin.Context) {
 		"offset":      offset,
 		"count":       len(submissions),
 	})
+}
+
+// getMatchedTastingNote returns the matched note from correct notes, or empty string if no match
+func getMatchedTastingNote(userNote, correctNotes string) string {
+	if userNote == "" || correctNotes == "" {
+		return ""
+	}
+	
+	// Clean and normalize user input
+	userNote = strings.TrimSpace(strings.ToLower(userNote))
+	
+	// Split correct notes by comma and check each one
+	correctNotesSlice := strings.Split(correctNotes, ",")
+	for _, note := range correctNotesSlice {
+		note = strings.TrimSpace(strings.ToLower(note))
+		if note == "" {
+			continue
+		}
+		
+		// Check for exact match
+		if userNote == note {
+			return note
+		}
+		
+		// Check for partial match (user note contains correct note or vice versa)
+		if strings.Contains(userNote, note) || strings.Contains(note, userNote) {
+			return note
+		}
+	}
+	
+	return ""
+}
+
+// matchesTastingNotes checks if a user's tasting note matches any of the comma-separated correct notes (legacy function)
+func matchesTastingNotes(userNote, correctNotes string) bool {
+	return getMatchedTastingNote(userNote, correctNotes) != ""
 }

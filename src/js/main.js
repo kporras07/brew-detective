@@ -362,21 +362,21 @@ document.getElementById('submitForm').addEventListener('submit', async function(
     try {
         const response = await API.post(API_CONFIG.ENDPOINTS.SUBMISSIONS, submission);
         
-        // Show success message
+        // Store score data for thank you page
+        if (response.score !== undefined && response.accuracy !== undefined) {
+            sessionStorage.setItem('lastSubmissionScore', response.score);
+            sessionStorage.setItem('lastSubmissionAccuracy', response.accuracy);
+        }
+        
+        // Show success message briefly
         document.getElementById('submitSuccess').style.display = 'block';
         document.getElementById('submitForm').reset();
         
-        // Show score if available
-        if (response.score) {
-            document.getElementById('submitSuccess').innerHTML = 
-                `¡Caso resuelto exitosamente! Puntuación: ${response.score} (${Math.round(response.accuracy * 100)}% precisión)`;
-        }
-        
-        // Redirect to leaderboard after delay
+        // Redirect to thank you page immediately
         setTimeout(() => {
-            showPage('leaderboard');
-            loadLeaderboard(); // Refresh leaderboard
-        }, 2000);
+            showPage('thankyou');
+            populateThankYouPage(response);
+        }, 1000);
         
     } catch (error) {
         console.error('Submission failed:', error);
@@ -385,6 +385,21 @@ document.getElementById('submitForm').addEventListener('submit', async function(
             'Error al enviar respuestas. Por favor verifica tu conexión e intenta nuevamente.';
     }
 });
+
+// Populate thank you page with score data
+function populateThankYouPage(submissionResponse) {
+    const finalScoreElement = document.getElementById('finalScore');
+    const finalAccuracyElement = document.getElementById('finalAccuracy');
+    
+    if (finalScoreElement && finalAccuracyElement) {
+        // Use response data if available, otherwise try sessionStorage
+        const score = submissionResponse?.score ?? sessionStorage.getItem('lastSubmissionScore') ?? '--';
+        const accuracy = submissionResponse?.accuracy ?? sessionStorage.getItem('lastSubmissionAccuracy') ?? 0;
+        
+        finalScoreElement.textContent = score;
+        finalAccuracyElement.textContent = accuracy !== '--' ? `${Math.round(accuracy * 100)}%` : '--%';
+    }
+}
 
 // Load leaderboard from API
 async function loadLeaderboard() {
