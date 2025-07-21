@@ -193,7 +193,6 @@ func UpdateUserProfile(c *gin.Context) {
 	var updates struct {
 		Name  string `json:"name"`
 		Email string `json:"email"`
-		Level string `json:"level"`
 	}
 	
 	if err := c.ShouldBindJSON(&updates); err != nil {
@@ -225,9 +224,6 @@ func UpdateUserProfile(c *gin.Context) {
 	}
 	if updates.Email != "" {
 		user.Email = updates.Email
-	}
-	if updates.Level != "" {
-		user.Level = updates.Level
 	}
 	user.UpdatedAt = time.Now()
 

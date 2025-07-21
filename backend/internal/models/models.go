@@ -11,7 +11,6 @@ type User struct {
 	Email          string    `firestore:"email" json:"email"`
 	Picture        string    `firestore:"picture" json:"picture"`
 	Type           string    `firestore:"type" json:"type"`     // regular, admin
-	Level          string    `firestore:"level" json:"level"`   // beginner, intermediate, expert
 	Score          int       `firestore:"score" json:"score"`
 	Points         int       `firestore:"points" json:"points"`
 	CasesAttempted int       `firestore:"cases_attempted" json:"cases_attempted"`

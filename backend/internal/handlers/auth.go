@@ -65,7 +65,6 @@ func GoogleCallback(c *gin.Context) {
 			CreatedAt:      time.Now(),
 			UpdatedAt:      time.Now(),
 			Score:          0,
-			Level:          "Rookie Detective",
 			Badges:         []string{},
 			CasesAttempted: 0,
 			CasesSolved:    0,
@@ -86,10 +85,16 @@ func GoogleCallback(c *gin.Context) {
 		// Debug: Log user type before update
 		fmt.Printf("DEBUG: User type before update: '%s'\n", user.Type)
 
-		// Update user info from Google (preserve Type field)
+		// Update user info from Google (preserve Type and Name fields)
 		userType := user.Type // Preserve the type field
+		userName := user.Name // Preserve custom name if set
 		user.Email = googleUser.Email
-		user.Name = googleUser.Name
+		// Only update name from Google if user hasn't set a custom name
+		if userName == "" || userName == googleUser.Name {
+			user.Name = googleUser.Name
+		} else {
+			user.Name = userName // Keep custom name
+		}
 		user.Picture = googleUser.Picture
 		user.UpdatedAt = time.Now()
 		

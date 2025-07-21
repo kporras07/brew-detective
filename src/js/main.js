@@ -524,7 +524,6 @@ async function loadLeaderboard() {
 async function saveProfile() {
     const name = document.getElementById('profileName').value;
     const email = document.getElementById('profileEmail').value;
-    const level = document.getElementById('profileLevel').value;
     
     if (!name) {
         alert('Por favor completa el nombre.');
@@ -545,15 +544,14 @@ async function saveProfile() {
     
     try {
         const profileData = {
-            name: name,
-            level: level
+            name: name
         };
         
         await API.put(`${API_CONFIG.ENDPOINTS.USERS}/${user.id}`, profileData);
         alert('¡Perfil actualizado exitosamente, Detective ' + name + '!');
         
         // Update local user data
-        const updatedUser = { ...user, name: name, level: level };
+        const updatedUser = { ...user, name: name };
         Auth.setUser(updatedUser);
         
         // Update UI
