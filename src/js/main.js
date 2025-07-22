@@ -8,7 +8,8 @@ const Router = {
         '/leaderboard': 'leaderboard',
         '/ranking': 'leaderboard', // Alias for leaderboard
         '/profile': 'profile',
-        '/admin': 'admin'
+        '/admin': 'admin',
+        '/thankyou': 'thankyou'
     },
     
     init() {
