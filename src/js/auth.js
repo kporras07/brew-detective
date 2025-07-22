@@ -77,7 +77,7 @@ async function updateAuthUI() {
             loginBtn.style.display = 'none';
         }
         if (userDropdown) {
-            userDropdown.style.display = 'block';
+            userDropdown.classList.remove('hidden');
             console.log('User dropdown shown'); // Debug
         }
         if (userName) {
@@ -98,7 +98,7 @@ async function updateAuthUI() {
             loginBtnMobile.style.display = 'none';
         }
         if (userDropdownMobile) {
-            userDropdownMobile.style.display = 'block';
+            userDropdownMobile.classList.remove('hidden');
         }
 
         // Show submit menu items for authenticated users
@@ -139,7 +139,7 @@ async function updateAuthUI() {
             loginBtn.style.display = 'inline';
         }
         if (userDropdown) {
-            userDropdown.style.display = 'none';
+            userDropdown.classList.add('hidden');
         }
 
         // Mobile: Show login button, hide user dropdown
@@ -147,7 +147,7 @@ async function updateAuthUI() {
             loginBtnMobile.style.display = 'inline';
         }
         if (userDropdownMobile) {
-            userDropdownMobile.style.display = 'none';
+            userDropdownMobile.classList.add('hidden');
         }
 
         // Hide submit menu items for unauthenticated users

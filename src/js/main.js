@@ -815,13 +815,13 @@ function loadCatalogItems() {
     
     if (!category) {
         document.getElementById('catalogItemsList').innerHTML = '';
-        document.getElementById('addItemBtn').style.display = 'none';
-        document.getElementById('refreshBtn').style.display = 'none';
+        document.getElementById('addItemBtn').classList.add('hidden');
+        document.getElementById('refreshBtn').classList.add('hidden');
         return;
     }
     
-    document.getElementById('addItemBtn').style.display = 'inline-block';
-    document.getElementById('refreshBtn').style.display = 'inline-block';
+    document.getElementById('addItemBtn').classList.remove('hidden');
+    document.getElementById('refreshBtn').classList.remove('hidden');
     
     // Show loading
     document.getElementById('catalogItemsList').innerHTML = '<p>Cargando items...</p>';
@@ -872,7 +872,7 @@ function displayCatalogItems(items) {
 }
 
 function showAddItemForm() {
-    document.getElementById('addItemForm').style.display = 'block';
+    document.getElementById('addItemForm').classList.add('admin-section__form--visible');
     document.getElementById('newItemValue').value = '';
     document.getElementById('newItemLabel').value = '';
     document.getElementById('newItemOrder').value = '0';
@@ -880,7 +880,7 @@ function showAddItemForm() {
 }
 
 function cancelAddItem() {
-    document.getElementById('addItemForm').style.display = 'none';
+    document.getElementById('addItemForm').classList.remove('admin-section__form--visible');
 }
 
 function createCatalogItem() {
@@ -974,12 +974,12 @@ function showAdminNotification(message, type) {
 // Case Management Functions
 
 function showCreateCaseForm() {
-    document.getElementById('createCaseForm').style.display = 'block';
+    document.getElementById('createCaseForm').classList.add('admin-section__form--visible');
     clearCaseForm();
 }
 
 function cancelCreateCase() {
-    document.getElementById('createCaseForm').style.display = 'none';
+    document.getElementById('createCaseForm').classList.remove('admin-section__form--visible');
 }
 
 function clearCaseForm() {
@@ -1225,10 +1225,10 @@ async function editCase(caseId) {
         const caseData = response.case;
         
         // Hide other forms
-        document.getElementById('createCaseForm').style.display = 'none';
+        document.getElementById('createCaseForm').classList.remove('admin-section__form--visible');
         
         // Show edit form first
-        document.getElementById('editCaseForm').style.display = 'block';
+        document.getElementById('editCaseForm').classList.add('admin-section__form--visible');
         
         // Wait a moment for the form to be rendered
         setTimeout(async () => {
@@ -1484,7 +1484,7 @@ async function loadEditFormDropdowns() {
 }
 
 function cancelEditCase() {
-    document.getElementById('editCaseForm').style.display = 'none';
+    document.getElementById('editCaseForm').classList.remove('admin-section__form--visible');
 }
 
 async function updateCase() {
@@ -1580,12 +1580,12 @@ async function deleteCase(caseId) {
 // Order Management Functions
 
 function showCreateOrderForm() {
-    document.getElementById('createOrderForm').style.display = 'block';
+    document.getElementById('createOrderForm').classList.add('admin-section__form--visible');
     clearOrderForm();
 }
 
 function cancelCreateOrder() {
-    document.getElementById('createOrderForm').style.display = 'none';
+    document.getElementById('createOrderForm').classList.remove('admin-section__form--visible');
 }
 
 function clearOrderForm() {

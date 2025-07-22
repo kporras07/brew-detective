@@ -14,19 +14,19 @@
             <ul class="nav-links">
                 <li><a href="/home">Inicio</a></li>
                 <li><a href="/order">Ordenar Caja</a></li>
-                <li id="submitMenuItem" style="display: none;"><a href="/submit">Enviar Respuestas</a></li>
+                <li id="submitMenuItem" class="nav-hidden"><a href="/submit">Enviar Respuestas</a></li>
                 <li><a href="/leaderboard">Ranking</a></li>
                 <li class="auth-nav" id="authNav">
                     <a href="#" onclick="Auth.login()" id="loginBtn">Iniciar Sesión</a>
-                    <div class="user-dropdown" id="userDropdown" style="display: none;">
+                    <div class="user-dropdown hidden" id="userDropdown">
                         <a href="#" class="user-menu-toggle" id="userMenuToggle" onclick="toggleUserMenu()">
-                            <img id="userAvatar" src="" alt="User Avatar" class="user-avatar" style="width: 28px; height: 28px; border-radius: 50%; margin-right: 0.5rem; object-fit: cover; border: 2px solid rgba(212, 175, 55, 0.5);">
+                            <img id="userAvatar" src="" alt="User Avatar" class="user-avatar">
                             <span id="userName">Usuario</span>
                             <span class="dropdown-arrow">▼</span>
                         </a>
                         <div class="user-menu" id="userMenu">
                             <a href="/profile" onclick="closeUserMenu()">Mi Perfil</a>
-                            <a href="/admin" onclick="closeUserMenu()" id="adminMenuItem" style="display: none;">Administración</a>
+                            <a href="/admin" onclick="closeUserMenu()" id="adminMenuItem" class="nav-hidden">Administración</a>
                             <a href="#" onclick="Auth.logout()">Cerrar Sesión</a>
                         </div>
                     </div>
@@ -43,11 +43,11 @@
             <ul>
                 <li><a href="/home" onclick="closeMobileMenu()">Inicio</a></li>
                 <li><a href="/order" onclick="closeMobileMenu()">Ordenar Caja</a></li>
-                <li id="submitMenuItemMobile" style="display: none;"><a href="/submit" onclick="closeMobileMenu()">Enviar Respuestas</a></li>
+                <li id="submitMenuItemMobile" class="nav-hidden"><a href="/submit" onclick="closeMobileMenu()">Enviar Respuestas</a></li>
                 <li><a href="/leaderboard" onclick="closeMobileMenu()">Ranking</a></li>
                 <li class="auth-nav-mobile" id="authNavMobile">
                     <a href="#" onclick="Auth.login(); closeMobileMenu()" id="loginBtnMobile">Iniciar Sesión</a>
-                    <div class="user-dropdown-mobile" id="userDropdownMobile" style="display: none;">
+                    <div class="user-dropdown-mobile hidden" id="userDropdownMobile">
                         <a href="/profile" onclick="closeMobileMenu()" id="profileBtnMobile">Mi Perfil</a>
                         <a href="#" onclick="Auth.logout(); closeMobileMenu()" id="logoutBtnMobile">Cerrar Sesión</a>
                     </div>
@@ -135,46 +135,46 @@
             <div class="container">
                 <h2 class="section-title">Ordenar Caja Detective</h2>
                 <div class="form-container">
-                    <h3 style="color: #d4af37; text-align: center; margin-bottom: 1rem;">💰 Precio: ₡18,000</h3>
-                    <p style="text-align: center; margin-bottom: 2rem; opacity: 0.9;">
+                    <h3 class="order-pricing">💰 Precio: ₡18,000</h3>
+                    <p class="order-description">
                         Incluye 4 cafés costarricenses misteriosos de 80g cada uno + guía de cata + acceso al juego online
                     </p>
                     
                     <!-- Authenticated User Content -->
-                    <div id="orderAuthenticatedContent" style="display: none; text-align: center;">
+                    <div id="orderAuthenticatedContent" class="order-content--authenticated">
                         <button onclick="openWhatsAppOrder()" class="cta-button">
                             📱 Ordenar por WhatsApp
                         </button>
-                        <p style="margin-top: 1rem; opacity: 0.7; font-size: 0.9rem;">
+                        <p class="order-note">
                             Te contactaremos para coordinar la entrega y el pago
                         </p>
                     </div>
                     
                     <!-- Unauthenticated User Content -->
-                    <div id="orderUnauthenticatedContent" style="display: block; text-align: center;">
-                        <div style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1)); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 12px; padding: 2rem; margin: 2rem 0;">
-                            <h4 style="color: #d4af37; margin-bottom: 1rem;">🔐 Inicia Sesión para Ordenar</h4>
-                            <p style="color: rgba(244, 241, 232, 0.9); margin-bottom: 1.5rem;">
+                    <div id="orderUnauthenticatedContent" class="order-content--unauthenticated">
+                        <div class="login-prompt">
+                            <h4 class="login-prompt__title">🔐 Inicia Sesión para Ordenar</h4>
+                            <p class="login-prompt__description">
                                 Para poder ordenar tu caja detective, necesitas tener una cuenta. Esto nos permite:
                             </p>
-                            <div style="text-align: left; margin: 1.5rem 0;">
-                                <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
+                            <div class="login-prompt__benefits">
+                                <div class="login-prompt__benefits-item">
                                     ✓ Gestionar tus pedidos y entregas
                                 </div>
-                                <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
+                                <div class="login-prompt__benefits-item">
                                     ✓ Guardar tu progreso como detective
                                 </div>
-                                <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
+                                <div class="login-prompt__benefits-item">
                                     ✓ Acceder a tu historial de casos
                                 </div>
-                                <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
+                                <div class="login-prompt__benefits-item">
                                     ✓ Participar en el ranking de detectives
                                 </div>
                             </div>
                             <button onclick="Auth.login()" class="cta-button">
                                 🚀 Iniciar Sesión con Google
                             </button>
-                            <p style="margin-top: 1rem; opacity: 0.7; font-size: 0.9rem;">
+                            <p class="login-prompt__note">
                                 Es rápido, seguro y gratuito
                             </p>
                         </div>
@@ -191,30 +191,30 @@
                 <h2 class="section-title">Enviar Respuestas del Caso</h2>
                 
                 <!-- Scoring Information Box -->
-                <div id="scoringInfoBox" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05)); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-                    <h3 style="color: #d4af37; margin: 0 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="font-size: 1.2rem;">🎯</span>
+                <div id="scoringInfoBox" class="scoring-info">
+                    <h3 class="scoring-info__title">
+                        <span class="scoring-info__title-icon">🎯</span>
                         Sistema de Puntuación
                     </h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                    <div class="scoring-info__grid">
                         <div>
-                            <h4 style="color: #d4af37; margin: 0 0 0.5rem 0; font-size: 0.95rem;">📊 Puntos por Café</h4>
-                            <div id="coffeeQuestionsList" style="font-size: 0.9rem; line-height: 1.4;">
-                                <div style="opacity: 0.7; font-style: italic;">Cargando preguntas del caso...</div>
+                            <h4 class="scoring-info__section-title">📊 Puntos por Café</h4>
+                            <div id="coffeeQuestionsList" class="scoring-info__list">
+                                <div class="scoring-info__list--loading">Cargando preguntas del caso...</div>
                             </div>
                         </div>
                         <div>
-                            <h4 style="color: #d4af37; margin: 0 0 0.5rem 0; font-size: 0.95rem;">⭐ Puntos Bonus</h4>
-                            <div id="bonusQuestionsList" style="font-size: 0.9rem; line-height: 1.4;">
-                                <div style="opacity: 0.7; font-style: italic;">Cargando preguntas bonus...</div>
+                            <h4 class="scoring-info__section-title">⭐ Puntos Bonus</h4>
+                            <div id="bonusQuestionsList" class="scoring-info__list">
+                                <div class="scoring-info__list--loading">Cargando preguntas bonus...</div>
                             </div>
-                            <div id="maxScoreDisplay" style="margin-top: 0.8rem; padding: 0.5rem; background: rgba(212, 175, 55, 0.1); border-radius: 6px; text-align: center;">
-                                <strong style="color: #d4af37; font-size: 1rem;">🏆 Máximo: -- puntos</strong>
+                            <div id="maxScoreDisplay" class="scoring-info__max-score">
+                                <strong>🏆 Máximo: -- puntos</strong>
                             </div>
                         </div>
                     </div>
-                    <div style="background: rgba(212, 175, 55, 0.08); padding: 0.8rem; border-radius: 8px; border-left: 4px solid #d4af37;">
-                        <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">
+                    <div class="scoring-info__tip">
+                        <p>
                             <strong>💡 Consejo:</strong> El puntaje se adapta automáticamente según las preguntas habilitadas para este caso. 
                             ¡Cada respuesta correcta contribuye a tu precisión total!
                         </p>
@@ -230,25 +230,25 @@
                     </div>
                     <div class="form-group">
                         <label>Caso Activo:</label>
-                        <div id="activeCaseDisplay" style="background: rgba(212, 175, 55, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.3); margin-bottom: 1rem;">
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span style="font-size: 1.2rem;">📦</span>
-                                <span id="activeCaseName" style="font-weight: bold; color: #d4af37;">Cargando caso activo...</span>
+                        <div id="activeCaseDisplay" class="active-case-display">
+                            <div class="active-case-display__header">
+                                <span class="active-case-display__header-icon">📦</span>
+                                <span id="activeCaseName" class="active-case-display__header-name">Cargando caso activo...</span>
                             </div>
-                            <div id="activeCaseDescription" style="margin-top: 0.5rem; opacity: 0.8; font-size: 0.9rem;"></div>
+                            <div id="activeCaseDescription" class="active-case-display__description"></div>
                         </div>
                     </div>
                     
                     <form id="submitForm">
                         <div class="form-group">
                             <label for="orderId">ID de Orden (6 caracteres):</label>
-                            <input type="text" id="orderId" placeholder="Ej: ABC123" maxlength="6" required style="text-transform: uppercase;">
-                            <small style="color: rgba(244, 241, 232, 0.7); font-size: 0.9rem; margin-top: 0.5rem; display: block;">
+                            <input type="text" id="orderId" placeholder="Ej: ABC123" maxlength="6" required class="text-uppercase-input">
+                            <small class="form-helper">
                                 Este código fue enviado con tu orden de café. Es necesario para validar tu compra.
                             </small>
                         </div>
                         
-                        <h3 style="color: #d4af37; margin: 2rem 0 1rem 0;">☕ Café #1</h3>
+                        <h3 class="coffee-heading">☕ Café #1</h3>
                         <div class="form-group">
                             <label for="coffee1_region">Región de Costa Rica:</label>
                             <select id="coffee1_region" required>
@@ -276,7 +276,7 @@
                             <input type="text" id="coffee1_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
                         </div>
 
-                        <h3 style="color: #d4af37; margin: 2rem 0 1rem 0;">☕ Café #2</h3>
+                        <h3 class="coffee-heading">☕ Café #2</h3>
                         <div class="form-group">
                             <label for="coffee2_region">Región de Costa Rica:</label>
                             <select id="coffee2_region" required>
@@ -304,7 +304,7 @@
                             <input type="text" id="coffee2_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
                         </div>
 
-                        <h3 style="color: #d4af37; margin: 2rem 0 1rem 0;">☕ Café #3</h3>
+                        <h3 class="coffee-heading">☕ Café #3</h3>
                         <div class="form-group">
                             <label for="coffee3_region">Región de Costa Rica:</label>
                             <select id="coffee3_region" required>
@@ -332,7 +332,7 @@
                             <input type="text" id="coffee3_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
                         </div>
 
-                        <h3 style="color: #d4af37; margin: 2rem 0 1rem 0;">☕ Café #4</h3>
+                        <h3 class="coffee-heading">☕ Café #4</h3>
                         <div class="form-group">
                             <label for="coffee4_region">Región de Costa Rica:</label>
                             <select id="coffee4_region" required>
@@ -360,7 +360,7 @@
                             <input type="text" id="coffee4_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
                         </div>
 
-                        <h3 style="color: #d4af37; margin: 2rem 0 1rem 0;">🔍 Preguntas Bonus</h3>
+                        <h3 class="coffee-heading">🔍 Preguntas Bonus</h3>
                         <div class="form-group">
                             <label for="favorite_coffee">¿Cuál fue tu café favorito y por qué?</label>
                             <textarea id="favorite_coffee" rows="3"></textarea>
@@ -386,9 +386,9 @@
                 <h2 class="section-title">Ranking de Detectives</h2>
                 
                 <!-- Current Case Leaderboard -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <h3 style="color: #d4af37; margin-bottom: 1rem;">🏆 Caso Actual</h3>
-                    <div id="currentCaseInfo" style="margin-bottom: 1rem; opacity: 0.8;">
+                <div class="card leaderboard-section">
+                    <h3 class="leaderboard-section__title">🏆 Caso Actual</h3>
+                    <div id="currentCaseInfo" class="leaderboard-section__info">
                         <p>Cargando información del caso...</p>
                     </div>
                     <div id="currentCaseLeaderboard" class="leaderboard">
@@ -398,16 +398,16 @@
                 
                 <!-- Global/Historical Leaderboard -->
                 <div class="card">
-                    <h3 style="color: #d4af37; margin-bottom: 1rem;">🌟 Ranking Global</h3>
-                    <p style="margin-bottom: 1rem; opacity: 0.8;">Puntuación acumulada de todos los casos resueltos</p>
+                    <h3 class="leaderboard-section__title">🌟 Ranking Global</h3>
+                    <p class="leaderboard-section__description">Puntuación acumulada de todos los casos resueltos</p>
                     <div id="globalLeaderboard" class="leaderboard">
                         <!-- Global leaderboard entries will be loaded dynamically -->
                     </div>
                 </div>
                 
-                <div style="text-align: center; margin-top: 2rem;">
-                    <p style="color: #d4af37; font-size: 1.1rem;">🏆 Rankings actualizados en tiempo real</p>
-                    <p style="margin-top: 1rem; opacity: 0.8;">¡Completa más casos para subir en el ranking!</p>
+                <div class="leaderboard-footer">
+                    <p class="leaderboard-footer__title">🏆 Rankings actualizados en tiempo real</p>
+                    <p class="leaderboard-footer__description">¡Completa más casos para subir en el ranking!</p>
                 </div>
             </div>
         </section>
@@ -421,7 +421,7 @@
                 <div class="cards-grid">
                     <div class="card">
                         <h3>👤 Información Personal</h3>
-                        <div class="form-container" style="background: transparent; border: none; margin: 0; backdrop-filter: none;">
+                        <div class="form-container profile-form-transparent">
                             <div class="form-group">
                                 <label for="profileName">Nombre del Detective:</label>
                                 <input type="text" id="profileName" placeholder="Ingresa tu nombre">
@@ -438,23 +438,23 @@
                         <h3>📊 Mis Estadísticas</h3>
                         
                         <!-- Global Stats -->
-                        <div style="margin-bottom: 2rem;">
-                            <h4 style="color: #d4af37; margin-bottom: 1rem;">🌟 Estadísticas Globales</h4>
-                            <div style="text-align: center;">
-                                <div style="margin: 1rem 0;">
-                                    <div style="font-size: 2rem; color: #d4af37; font-weight: bold;" data-stat="points">0</div>
+                        <div class="stats-section">
+                            <h4 class="stats-section__title">🌟 Estadísticas Globales</h4>
+                            <div class="stats-section__container">
+                                <div class="stats-section__item">
+                                    <div class="stats-section__value stats-section__value--large" data-stat="points">0</div>
                                     <div>Puntos Totales</div>
                                 </div>
-                                <div style="margin: 1rem 0;">
-                                    <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="global-rank"># --</div>
+                                <div class="stats-section__item">
+                                    <div class="stats-section__value" data-stat="global-rank"># --</div>
                                     <div>Ranking Global</div>
                                 </div>
-                                <div style="margin: 1rem 0;">
-                                    <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="cases">0</div>
+                                <div class="stats-section__item">
+                                    <div class="stats-section__value" data-stat="cases">0</div>
                                     <div>Casos Completados</div>
                                 </div>
-                                <div style="margin: 1rem 0;">
-                                    <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="accuracy">0%</div>
+                                <div class="stats-section__item">
+                                    <div class="stats-section__value" data-stat="accuracy">0%</div>
                                     <div>Precisión Promedio</div>
                                 </div>
                             </div>
@@ -462,18 +462,18 @@
                         
                         <!-- Current Case Stats -->
                         <div>
-                            <h4 style="color: #d4af37; margin-bottom: 1rem;">🏆 Caso Actual</h4>
-                            <div style="text-align: center;">
-                                <div style="margin: 1rem 0;">
-                                    <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="current-rank"># --</div>
+                            <h4 class="stats-section__title">🏆 Caso Actual</h4>
+                            <div class="stats-section__container">
+                                <div class="stats-section__item">
+                                    <div class="stats-section__value" data-stat="current-rank"># --</div>
                                     <div>Posición en Caso Actual</div>
                                 </div>
-                                <div style="margin: 1rem 0;">
-                                    <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="current-score">--</div>
+                                <div class="stats-section__item">
+                                    <div class="stats-section__value" data-stat="current-score">--</div>
                                     <div>Mejor Puntuación</div>
                                 </div>
-                                <div style="margin: 1rem 0;">
-                                    <div style="font-size: 1.5rem; color: #d4af37; font-weight: bold;" data-stat="current-accuracy">--%</div>
+                                <div class="stats-section__item">
+                                    <div class="stats-section__value" data-stat="current-accuracy">--%</div>
                                     <div>Precisión en Caso Actual</div>
                                 </div>
                             </div>
@@ -481,28 +481,28 @@
                     </div>
                 </div>
 
-                <div class="card" style="margin-top: 2rem;">
+                <div class="card margin-top-2">
                     <h3>🏅 Mis Insignias</h3>
-                    <div id="userBadgesContainer" style="text-align: center; margin: 1rem 0;">
+                    <div id="userBadgesContainer" class="profile-badges__container">
                         <span class="badge">🔍 Primer Caso</span>
                         <span class="badge">🌍 Experto en Orígenes</span>
                         <span class="badge">☕ Catador Nivel 1</span>
                         <span class="badge">🎯 Precisión 70%</span>
                     </div>
-                    <div style="margin-top: 1rem; opacity: 0.8; text-align: center;">
+                    <div class="profile-badges__upcoming">
                         <p>Próximas insignias por desbloquear:</p>
-                        <div style="margin: 0.5rem 0;">
-                            <span style="opacity: 0.5;">🏆 Detective Maestro (necesitas 2,000 pts)</span><br>
-                            <span style="opacity: 0.5;">🔥 Experto en Tuestes (necesitas 5 casos)</span><br>
-                            <span style="opacity: 0.5;">💎 Catador Nivel 2 (necesitas 80% precisión)</span>
+                        <div class="profile-badges__upcoming-title">
+                            <span class="profile-badges__upcoming-item">🏆 Detective Maestro (necesitas 2,000 pts)</span><br>
+                            <span class="profile-badges__upcoming-item">🔥 Experto en Tuestes (necesitas 5 casos)</span><br>
+                            <span class="profile-badges__upcoming-item">💎 Catador Nivel 2 (necesitas 80% precisión)</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="card" style="margin-top: 2rem;">
+                <div class="card margin-top-2">
                     <h3>📋 Historial de Casos</h3>
-                    <div id="caseHistoryContainer" style="margin: 1rem 0;">
-                        <div style="text-align: center; opacity: 0.7;">
+                    <div id="caseHistoryContainer" class="profile-history__container">
+                        <div class="profile-history__loading">
                             <p>Cargando historial de casos...</p>
                         </div>
                     </div>
@@ -523,384 +523,384 @@
                     
                     <!-- Case Creation Form -->
                     <div id="caseManagementSection">
-                        <div class="form-group">
-                            <button type="button" onclick="showCreateCaseForm()" class="cta-button" style="position: relative; z-index: 10; pointer-events: auto;">Crear Nuevo Caso</button>
-                            <button type="button" onclick="loadAllCases()" class="cta-button" style="background: #666; margin-left: 1rem; position: relative; z-index: 10; pointer-events: auto;">Ver Todos los Casos</button>
+                        <div class="form-group admin-section__buttons">
+                            <button type="button" onclick="showCreateCaseForm()" class="cta-button admin-section__button">Crear Nuevo Caso</button>
+                            <button type="button" onclick="loadAllCases()" class="cta-button cta-button--secondary admin-section__button">Ver Todos los Casos</button>
                         </div>
 
                         <!-- Create Case Form -->
-                        <div id="createCaseForm" style="display: none; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin: 1rem 0; position: relative; z-index: 10;">
+                        <div id="createCaseForm" class="admin-section__form">
                             <h4>Crear Nuevo Caso</h4>
                             <div class="form-group">
                                 <label for="caseName">Nombre del Caso:</label>
-                                <input type="text" id="caseName" placeholder="ej: Misterio del Valle Central" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <input type="text" id="caseName" placeholder="ej: Misterio del Valle Central" class="admin-section__input">
                             </div>
                             <div class="form-group">
                                 <label for="caseDescription">Descripción:</label>
-                                <textarea id="caseDescription" rows="3" placeholder="Descripción del caso de café..." style="position: relative; z-index: 15; pointer-events: auto;"></textarea>
+                                <textarea id="caseDescription" rows="3" placeholder="Descripción del caso de café..." class="admin-section__input"></textarea>
                             </div>
 
                             <!-- Coffee 1 -->
-                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">☕ Café #1</h5>
+                            <h5 class="admin-section__coffee-heading">☕ Café #1</h5>
                             <div class="form-group">
                                 <label for="coffee1Name">Nombre del Café:</label>
-                                <input type="text" id="coffee1Name" placeholder="ej: Finca La Esperanza" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <input type="text" id="coffee1Name" placeholder="ej: Finca La Esperanza" class="admin-section__input">
                             </div>
                             <div class="form-group">
                                 <label for="coffee1Region">Región:</label>
-                                <select id="coffee1Region" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="coffee1Region" class="admin-section__input">
                                     <option value="">Selecciona una región</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="coffee1Variety">Variedad:</label>
-                                <select id="coffee1Variety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="coffee1Variety" class="admin-section__input">
                                     <option value="">Selecciona una variedad</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="coffee1Process">Proceso:</label>
-                                <select id="coffee1Process" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="coffee1Process" class="admin-section__input">
                                     <option value="">Selecciona un proceso</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="coffee1Notes">Notas de Cata:</label>
-                                <input type="text" id="coffee1Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" style="position: relative; z-index: 15; pointer-events: auto;">
-                                <small style="color: rgba(244, 241, 232, 0.7); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                                <input type="text" id="coffee1Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" class="admin-section__input">
+                                <small class="form-helper form-helper--small">
                                     Las notas reales del café, separadas por comas
                                 </small>
                             </div>
 
                             <!-- Coffee 2 -->
-                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">☕ Café #2</h5>
+                            <h5 class="admin-section__coffee-heading">☕ Café #2</h5>
                             <div class="form-group">
                                 <label for="coffee2Name">Nombre del Café:</label>
-                                <input type="text" id="coffee2Name" placeholder="ej: Finca El Mirador" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <input type="text" id="coffee2Name" placeholder="ej: Finca El Mirador" class="admin-section__input">
                             </div>
                             <div class="form-group">
                                 <label for="coffee2Region">Región:</label>
-                                <select id="coffee2Region" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="coffee2Region" class="admin-section__input">
                                     <option value="">Selecciona una región</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="coffee2Variety">Variedad:</label>
-                                <select id="coffee2Variety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="coffee2Variety" class="admin-section__input">
                                     <option value="">Selecciona una variedad</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="coffee2Process">Proceso:</label>
-                                <select id="coffee2Process" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="coffee2Process" class="admin-section__input">
                                     <option value="">Selecciona un proceso</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="coffee2Notes">Notas de Cata:</label>
-                                <input type="text" id="coffee2Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" style="position: relative; z-index: 15; pointer-events: auto;">
-                                <small style="color: rgba(244, 241, 232, 0.7); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                                <input type="text" id="coffee2Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" class="admin-section__input">
+                                <small class="form-helper form-helper--small">
                                     Las notas reales del café, separadas por comas
                                 </small>
                             </div>
 
                             <!-- Coffee 3 -->
-                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">☕ Café #3</h5>
+                            <h5 class="admin-section__coffee-heading">☕ Café #3</h5>
                             <div class="form-group">
                                 <label for="coffee3Name">Nombre del Café:</label>
-                                <input type="text" id="coffee3Name" placeholder="ej: Finca Las Nubes" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <input type="text" id="coffee3Name" placeholder="ej: Finca Las Nubes" class="admin-section__input">
                             </div>
                             <div class="form-group">
                                 <label for="coffee3Region">Región:</label>
-                                <select id="coffee3Region" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="coffee3Region" class="admin-section__input">
                                     <option value="">Selecciona una región</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="coffee3Variety">Variedad:</label>
-                                <select id="coffee3Variety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="coffee3Variety" class="admin-section__input">
                                     <option value="">Selecciona una variedad</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="coffee3Process">Proceso:</label>
-                                <select id="coffee3Process" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="coffee3Process" class="admin-section__input">
                                     <option value="">Selecciona un proceso</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="coffee3Notes">Notas de Cata:</label>
-                                <input type="text" id="coffee3Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" style="position: relative; z-index: 15; pointer-events: auto;">
-                                <small style="color: rgba(244, 241, 232, 0.7); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                                <input type="text" id="coffee3Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" class="admin-section__input">
+                                <small class="form-helper form-helper--small">
                                     Las notas reales del café, separadas por comas
                                 </small>
                             </div>
 
                             <!-- Coffee 4 -->
-                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">☕ Café #4</h5>
+                            <h5 class="admin-section__coffee-heading">☕ Café #4</h5>
                             <div class="form-group">
                                 <label for="coffee4Name">Nombre del Café:</label>
-                                <input type="text" id="coffee4Name" placeholder="ej: Finca El Volcán" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <input type="text" id="coffee4Name" placeholder="ej: Finca El Volcán" class="admin-section__input">
                             </div>
                             <div class="form-group">
                                 <label for="coffee4Region">Región:</label>
-                                <select id="coffee4Region" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="coffee4Region" class="admin-section__input">
                                     <option value="">Selecciona una región</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="coffee4Variety">Variedad:</label>
-                                <select id="coffee4Variety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="coffee4Variety" class="admin-section__input">
                                     <option value="">Selecciona una variedad</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="coffee4Process">Proceso:</label>
-                                <select id="coffee4Process" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="coffee4Process" class="admin-section__input">
                                     <option value="">Selecciona un proceso</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="coffee4Notes">Notas de Cata:</label>
-                                <input type="text" id="coffee4Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" style="position: relative; z-index: 15; pointer-events: auto;">
-                                <small style="color: rgba(244, 241, 232, 0.7); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                                <input type="text" id="coffee4Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" class="admin-section__input">
+                                <small class="form-helper form-helper--small">
                                     Las notas reales del café, separadas por comas
                                 </small>
                             </div>
 
                             <!-- Question Configuration -->
-                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">❓ Configuración de Preguntas</h5>
-                            <p style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona qué preguntas hacer a los usuarios durante la evaluación:</p>
+                            <h5 class="admin-section__coffee-heading">❓ Configuración de Preguntas</h5>
+                            <p class="admin-section__description">Selecciona qué preguntas hacer a los usuarios durante la evaluación:</p>
                             
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin-bottom: 1rem;">
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="questionRegion" checked style="position: relative; z-index: 15; pointer-events: auto;">
+                            <div class="admin-section__grid">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="questionRegion" checked class="admin-section__input">
                                     <span>Región</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="questionVariety" checked style="position: relative; z-index: 15; pointer-events: auto;">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="questionVariety" checked class="admin-section__input">
                                     <span>Variedad</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="questionProcess" checked style="position: relative; z-index: 15; pointer-events: auto;">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="questionProcess" checked class="admin-section__input">
                                     <span>Proceso</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="questionTasteNote1" checked style="position: relative; z-index: 15; pointer-events: auto;">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="questionTasteNote1" checked class="admin-section__input">
                                     <span>Primera Nota de Sabor</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="questionTasteNote2" checked style="position: relative; z-index: 15; pointer-events: auto;">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="questionTasteNote2" checked class="admin-section__input">
                                     <span>Segunda Nota de Sabor</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="questionFavoriteCoffee" checked style="position: relative; z-index: 15; pointer-events: auto;">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="questionFavoriteCoffee" checked class="admin-section__input">
                                     <span>Café Favorito</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="questionBrewingMethod" checked style="position: relative; z-index: 15; pointer-events: auto;">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="questionBrewingMethod" checked class="admin-section__input">
                                     <span>Método de Preparación</span>
                                 </label>
                             </div>
 
                             <div class="form-group">
                                 <label>
-                                    <input type="checkbox" id="caseIsActive" style="position: relative; z-index: 15; pointer-events: auto;"> Activar caso inmediatamente
+                                    <input type="checkbox" id="caseIsActive" class="admin-section__input"> Activar caso inmediatamente
                                 </label>
                             </div>
 
-                            <button type="button" onclick="createCase()" class="cta-button" style="margin-right: 1rem; position: relative; z-index: 15; pointer-events: auto;">Crear Caso</button>
-                            <button type="button" onclick="cancelCreateCase()" class="cta-button" style="background: #666; position: relative; z-index: 15; pointer-events: auto;">Cancelar</button>
+                            <button type="button" onclick="createCase()" class="cta-button admin-section__button">Crear Caso</button>
+                            <button type="button" onclick="cancelCreateCase()" class="cta-button admin-section__button--cancel">Cancelar</button>
                         </div>
 
                         <!-- Edit Case Form -->
-                        <div id="editCaseForm" style="display: none; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin: 1rem 0; position: relative; z-index: 10;">
+                        <div id="editCaseForm" class="admin-section__form">
                             <h4>Editar Caso</h4>
                             <input type="hidden" id="editCaseId">
                             <div class="form-group">
                                 <label for="editCaseName">Nombre del Caso:</label>
-                                <input type="text" id="editCaseName" placeholder="ej: Misterio del Valle Central" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <input type="text" id="editCaseName" placeholder="ej: Misterio del Valle Central" class="admin-section__input">
                             </div>
                             <div class="form-group">
                                 <label for="editCaseDescription">Descripción:</label>
-                                <textarea id="editCaseDescription" rows="3" placeholder="Descripción del caso de café..." style="position: relative; z-index: 15; pointer-events: auto;"></textarea>
+                                <textarea id="editCaseDescription" rows="3" placeholder="Descripción del caso de café..." class="admin-section__input"></textarea>
                             </div>
 
                             <!-- Coffee 1 -->
-                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">☕ Café #1</h5>
+                            <h5 class="admin-section__coffee-heading">☕ Café #1</h5>
                             <div class="form-group">
                                 <label for="editCoffee1Name">Nombre del Café:</label>
-                                <input type="text" id="editCoffee1Name" placeholder="ej: Finca La Esperanza" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <input type="text" id="editCoffee1Name" placeholder="ej: Finca La Esperanza" class="admin-section__input">
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee1Region">Región:</label>
-                                <select id="editCoffee1Region" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="editCoffee1Region" class="admin-section__input">
                                     <option value="">Selecciona una región</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee1Variety">Variedad:</label>
-                                <select id="editCoffee1Variety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="editCoffee1Variety" class="admin-section__input">
                                     <option value="">Selecciona una variedad</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee1Process">Proceso:</label>
-                                <select id="editCoffee1Process" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="editCoffee1Process" class="admin-section__input">
                                     <option value="">Selecciona un proceso</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee1Notes">Notas de Cata:</label>
-                                <input type="text" id="editCoffee1Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" style="position: relative; z-index: 15; pointer-events: auto;">
-                                <small style="color: rgba(244, 241, 232, 0.7); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                                <input type="text" id="editCoffee1Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" class="admin-section__input">
+                                <small class="form-helper form-helper--small">
                                     Las notas reales del café, separadas por comas
                                 </small>
                             </div>
 
                             <!-- Coffee 2 -->
-                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">☕ Café #2</h5>
+                            <h5 class="admin-section__coffee-heading">☕ Café #2</h5>
                             <div class="form-group">
                                 <label for="editCoffee2Name">Nombre del Café:</label>
-                                <input type="text" id="editCoffee2Name" placeholder="ej: Finca El Mirador" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <input type="text" id="editCoffee2Name" placeholder="ej: Finca El Mirador" class="admin-section__input">
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee2Region">Región:</label>
-                                <select id="editCoffee2Region" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="editCoffee2Region" class="admin-section__input">
                                     <option value="">Selecciona una región</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee2Variety">Variedad:</label>
-                                <select id="editCoffee2Variety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="editCoffee2Variety" class="admin-section__input">
                                     <option value="">Selecciona una variedad</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee2Process">Proceso:</label>
-                                <select id="editCoffee2Process" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="editCoffee2Process" class="admin-section__input">
                                     <option value="">Selecciona un proceso</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee2Notes">Notas de Cata:</label>
-                                <input type="text" id="editCoffee2Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" style="position: relative; z-index: 15; pointer-events: auto;">
-                                <small style="color: rgba(244, 241, 232, 0.7); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                                <input type="text" id="editCoffee2Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" class="admin-section__input">
+                                <small class="form-helper form-helper--small">
                                     Las notas reales del café, separadas por comas
                                 </small>
                             </div>
 
                             <!-- Coffee 3 -->
-                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">☕ Café #3</h5>
+                            <h5 class="admin-section__coffee-heading">☕ Café #3</h5>
                             <div class="form-group">
                                 <label for="editCoffee3Name">Nombre del Café:</label>
-                                <input type="text" id="editCoffee3Name" placeholder="ej: Finca Las Nubes" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <input type="text" id="editCoffee3Name" placeholder="ej: Finca Las Nubes" class="admin-section__input">
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee3Region">Región:</label>
-                                <select id="editCoffee3Region" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="editCoffee3Region" class="admin-section__input">
                                     <option value="">Selecciona una región</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee3Variety">Variedad:</label>
-                                <select id="editCoffee3Variety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="editCoffee3Variety" class="admin-section__input">
                                     <option value="">Selecciona una variedad</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee3Process">Proceso:</label>
-                                <select id="editCoffee3Process" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="editCoffee3Process" class="admin-section__input">
                                     <option value="">Selecciona un proceso</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee3Notes">Notas de Cata:</label>
-                                <input type="text" id="editCoffee3Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" style="position: relative; z-index: 15; pointer-events: auto;">
-                                <small style="color: rgba(244, 241, 232, 0.7); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                                <input type="text" id="editCoffee3Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" class="admin-section__input">
+                                <small class="form-helper form-helper--small">
                                     Las notas reales del café, separadas por comas
                                 </small>
                             </div>
 
                             <!-- Coffee 4 -->
-                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">☕ Café #4</h5>
+                            <h5 class="admin-section__coffee-heading">☕ Café #4</h5>
                             <div class="form-group">
                                 <label for="editCoffee4Name">Nombre del Café:</label>
-                                <input type="text" id="editCoffee4Name" placeholder="ej: Finca El Volcán" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <input type="text" id="editCoffee4Name" placeholder="ej: Finca El Volcán" class="admin-section__input">
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee4Region">Región:</label>
-                                <select id="editCoffee4Region" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="editCoffee4Region" class="admin-section__input">
                                     <option value="">Selecciona una región</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee4Variety">Variedad:</label>
-                                <select id="editCoffee4Variety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="editCoffee4Variety" class="admin-section__input">
                                     <option value="">Selecciona una variedad</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee4Process">Proceso:</label>
-                                <select id="editCoffee4Process" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="editCoffee4Process" class="admin-section__input">
                                     <option value="">Selecciona un proceso</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="editCoffee4Notes">Notas de Cata:</label>
-                                <input type="text" id="editCoffee4Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" style="position: relative; z-index: 15; pointer-events: auto;">
-                                <small style="color: rgba(244, 241, 232, 0.7); font-size: 0.85rem; margin-top: 0.5rem; display: block;">
+                                <input type="text" id="editCoffee4Notes" placeholder="ej: Chocolate, Cítrico, Caramelo (separar con comas)" class="admin-section__input">
+                                <small class="form-helper form-helper--small">
                                     Las notas reales del café, separadas por comas
                                 </small>
                             </div>
 
                             <!-- Question Configuration -->
-                            <h5 style="color: #d4af37; margin: 1rem 0 0.5rem 0;">❓ Configuración de Preguntas</h5>
-                            <p style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 1rem;">Selecciona qué preguntas hacer a los usuarios durante la evaluación:</p>
+                            <h5 class="admin-section__coffee-heading">❓ Configuración de Preguntas</h5>
+                            <p class="admin-section__description">Selecciona qué preguntas hacer a los usuarios durante la evaluación:</p>
                             
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin-bottom: 1rem;">
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="editQuestionRegion" style="position: relative; z-index: 15; pointer-events: auto;">
+                            <div class="admin-section__grid">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="editQuestionRegion" class="admin-section__input">
                                     <span>Región</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="editQuestionVariety" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="editQuestionVariety" class="admin-section__input">
                                     <span>Variedad</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="editQuestionProcess" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="editQuestionProcess" class="admin-section__input">
                                     <span>Proceso</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="editQuestionTasteNote1" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="editQuestionTasteNote1" class="admin-section__input">
                                     <span>Primera Nota de Sabor</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="editQuestionTasteNote2" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="editQuestionTasteNote2" class="admin-section__input">
                                     <span>Segunda Nota de Sabor</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="editQuestionFavoriteCoffee" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="editQuestionFavoriteCoffee" class="admin-section__input">
                                     <span>Café Favorito</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 0.5rem; background: rgba(212, 175, 55, 0.1); padding: 0.5rem; border-radius: 4px;">
-                                    <input type="checkbox" id="editQuestionBrewingMethod" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <label class="admin-section__checkbox-label">
+                                    <input type="checkbox" id="editQuestionBrewingMethod" class="admin-section__input">
                                     <span>Método de Preparación</span>
                                 </label>
                             </div>
 
                             <div class="form-group">
                                 <label>
-                                    <input type="checkbox" id="editCaseIsActive" style="position: relative; z-index: 15; pointer-events: auto;"> Caso activo
+                                    <input type="checkbox" id="editCaseIsActive" class="admin-section__input"> Caso activo
                                 </label>
                             </div>
 
-                            <button type="button" onclick="updateCase()" class="cta-button" style="margin-right: 1rem; position: relative; z-index: 15; pointer-events: auto;">Actualizar Caso</button>
-                            <button type="button" onclick="cancelEditCase()" class="cta-button" style="background: #666; position: relative; z-index: 15; pointer-events: auto;">Cancelar</button>
+                            <button type="button" onclick="updateCase()" class="cta-button admin-section__button">Actualizar Caso</button>
+                            <button type="button" onclick="cancelEditCase()" class="cta-button admin-section__button--cancel">Cancelar</button>
                         </div>
 
                         <!-- Cases List -->
-                        <div id="casesList" style="margin-top: 2rem;">
+                        <div id="casesList" class="admin-section__list">
                             <!-- Cases will be loaded here -->
                         </div>
                     </div>
@@ -913,36 +913,36 @@
                     <!-- Order Creation Form -->
                     <div id="orderManagementSection">
                         <div class="form-group">
-                            <button type="button" onclick="showCreateOrderForm()" class="cta-button" style="position: relative; z-index: 10; pointer-events: auto;">Crear Nueva Orden</button>
-                            <button type="button" onclick="loadAllOrders()" class="cta-button" style="background: #666; margin-left: 1rem; position: relative; z-index: 10; pointer-events: auto;">Ver Todas las Órdenes</button>
+                            <button type="button" onclick="showCreateOrderForm()" class="cta-button admin-section__button">Crear Nueva Orden</button>
+                            <button type="button" onclick="loadAllOrders()" class="cta-button cta-button--secondary admin-section__button">Ver Todas las Órdenes</button>
                         </div>
 
                         <!-- Create Order Form -->
-                        <div id="createOrderForm" style="display: none; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin: 1rem 0; position: relative; z-index: 10;">
+                        <div id="createOrderForm" class="admin-section__form">
                             <h4>Crear Nueva Orden</h4>
                             <div class="form-group">
                                 <label for="orderUserSelect">Usuario:</label>
-                                <select id="orderUserSelect" required style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="orderUserSelect" required class="admin-section__input">
                                     <option value="">Selecciona un usuario</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="orderCaseSelect">Caso:</label>
-                                <select id="orderCaseSelect" required style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="orderCaseSelect" required class="admin-section__input">
                                     <option value="">Selecciona un caso</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="orderContactInfo">Información de Contacto:</label>
-                                <textarea id="orderContactInfo" rows="3" placeholder="Teléfono, WhatsApp, dirección, etc." style="position: relative; z-index: 15; pointer-events: auto;"></textarea>
+                                <textarea id="orderContactInfo" rows="3" placeholder="Teléfono, WhatsApp, dirección, etc." class="admin-section__input"></textarea>
                             </div>
                             <div class="form-group">
                                 <label for="orderAmount">Monto Total (₡):</label>
-                                <input type="number" id="orderAmount" placeholder="18000" min="0" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <input type="number" id="orderAmount" placeholder="18000" min="0" class="admin-section__input">
                             </div>
                             <div class="form-group">
                                 <label for="orderStatus">Estado:</label>
-                                <select id="orderStatus" style="position: relative; z-index: 15; pointer-events: auto;">
+                                <select id="orderStatus" class="admin-section__input">
                                     <option value="pending">Pendiente</option>
                                     <option value="confirmed">Confirmada</option>
                                     <option value="shipped">Enviada</option>
@@ -950,12 +950,12 @@
                                 </select>
                             </div>
 
-                            <button type="button" onclick="createOrder()" class="cta-button" style="margin-right: 1rem; position: relative; z-index: 15; pointer-events: auto;">Crear Orden</button>
-                            <button type="button" onclick="cancelCreateOrder()" class="cta-button" style="background: #666; position: relative; z-index: 15; pointer-events: auto;">Cancelar</button>
+                            <button type="button" onclick="createOrder()" class="cta-button admin-section__button">Crear Orden</button>
+                            <button type="button" onclick="cancelCreateOrder()" class="cta-button admin-section__button--cancel">Cancelar</button>
                         </div>
 
                         <!-- Orders List -->
-                        <div id="ordersList" style="margin-top: 2rem;">
+                        <div id="ordersList" class="admin-section__list">
                             <!-- Orders will be loaded here -->
                         </div>
                     </div>
@@ -968,7 +968,7 @@
                     <!-- Category Selector -->
                     <div class="form-group">
                         <label for="adminCategorySelect">Categoría:</label>
-                        <select id="adminCategorySelect" onchange="loadCatalogItems()" style="position: relative; z-index: 10; pointer-events: auto;">
+                        <select id="adminCategorySelect" onchange="loadCatalogItems()" class="admin-section__select">
                             <option value="">Selecciona una categoría</option>
                             <option value="region">Regiones</option>
                             <option value="variety">Variedades</option>
@@ -978,46 +978,46 @@
                     </div>
 
                     <!-- Add New Item Form -->
-                    <div id="addItemForm" style="display: none; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin: 1rem 0; position: relative; z-index: 10;">
+                    <div id="addItemForm" class="admin-section__form">
                         <h4>Agregar Nuevo Item</h4>
                         <div class="form-group">
                             <label for="newItemValue">Valor (ID interno):</label>
-                            <input type="text" id="newItemValue" placeholder="ej: central_valley" style="position: relative; z-index: 15; pointer-events: auto;">
+                            <input type="text" id="newItemValue" placeholder="ej: central_valley" class="admin-section__input">
                         </div>
                         <div class="form-group">
                             <label for="newItemLabel">Etiqueta (Nombre mostrado):</label>
-                            <input type="text" id="newItemLabel" placeholder="ej: Valle Central" style="position: relative; z-index: 15; pointer-events: auto;">
+                            <input type="text" id="newItemLabel" placeholder="ej: Valle Central" class="admin-section__input">
                         </div>
                         <div class="form-group">
                             <label for="newItemOrder">Orden de Visualización:</label>
-                            <input type="number" id="newItemOrder" value="0" min="0" style="position: relative; z-index: 15; pointer-events: auto;">
+                            <input type="number" id="newItemOrder" value="0" min="0" class="admin-section__input">
                         </div>
                         <div class="form-group">
                             <label>
-                                <input type="checkbox" id="newItemActive" checked style="position: relative; z-index: 15; pointer-events: auto;"> Activo
+                                <input type="checkbox" id="newItemActive" checked class="admin-section__input"> Activo
                             </label>
                         </div>
-                        <button type="button" onclick="createCatalogItem()" class="cta-button" style="margin-right: 1rem; position: relative; z-index: 15; pointer-events: auto;">Crear Item</button>
-                        <button type="button" onclick="cancelAddItem()" class="cta-button" style="background: #666; position: relative; z-index: 15; pointer-events: auto;">Cancelar</button>
+                        <button type="button" onclick="createCatalogItem()" class="cta-button admin-section__button">Crear Item</button>
+                        <button type="button" onclick="cancelAddItem()" class="cta-button admin-section__button--cancel">Cancelar</button>
                     </div>
 
                     <!-- Actions -->
-                    <div style="margin: 1rem 0; position: relative; z-index: 5;">
-                        <button type="button" onclick="showAddItemForm()" class="cta-button" id="addItemBtn" style="display: none; position: relative; z-index: 10; pointer-events: auto;">Agregar Nuevo Item</button>
-                        <button type="button" onclick="loadCatalogItems()" class="cta-button" style="background: #666; margin-left: 1rem; position: relative; z-index: 10; pointer-events: auto; display: none;" id="refreshBtn">Actualizar Lista</button>
+                    <div class="margin-vertical-1 z-10">
+                        <button type="button" onclick="showAddItemForm()" class="cta-button hidden" id="addItemBtn">Agregar Nuevo Item</button>
+                        <button type="button" onclick="loadCatalogItems()" class="cta-button cta-button--secondary hidden" id="refreshBtn">Actualizar Lista</button>
                     </div>
 
                     <!-- Catalog Items List -->
-                    <div id="catalogItemsList" style="margin-top: 2rem;">
+                    <div id="catalogItemsList" class="admin-section__list">
                         <!-- Items will be loaded here -->
                     </div>
                 </div>
 
                 <!-- Success/Error Messages -->
-                <div id="adminSuccess" class="success-message" style="margin-top: 1rem;">
+                <div id="adminSuccess" class="success-message margin-top-1">
                     Operación completada exitosamente
                 </div>
-                <div id="adminError" class="error-message" style="margin-top: 1rem;">
+                <div id="adminError" class="error-message margin-top-1">
                     Error en la operación
                 </div>
             </div>
@@ -1028,11 +1028,11 @@
     <div id="thankyou" class="page">
         <section class="section">
             <div class="container">
-                <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
-                    <div style="margin-bottom: 2rem;">
-                        <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
-                        <h2 style="color: #d4af37; margin-bottom: 1rem;">¡Respuestas Enviadas Exitosamente!</h2>
-                        <p style="color: rgba(244, 241, 232, 0.9); font-size: 1.1rem; margin-bottom: 2rem;">
+                <div class="card thank-you-page__card">
+                    <div class="thank-you-page__content">
+                        <div class="thank-you-page__icon">🎉</div>
+                        <h2 class="thank-you-page__title">¡Respuestas Enviadas Exitosamente!</h2>
+                        <p class="thank-you-page__description">
                             Gracias por participar en este caso detective. Tu análisis ha sido registrado.
                         </p>
                     </div>
@@ -1060,9 +1060,6 @@
                             <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
                                 ✓ Actualiza tu perfil con tu experiencia
                             </div>
-                            <div style="margin-bottom: 0.8rem; color: rgba(244, 241, 232, 0.9);">
-                                ✓ Pide tu próxima caja de café misterioso
-                            </div>
                         </div>
                     </div>
 
@@ -1072,9 +1069,6 @@
                         </a>
                         <a href="/profile" class="cta-button">
                             👤 Mi Perfil
-                        </a>
-                        <a href="/order" class="cta-button">
-                            ☕ Ordenar Más Café
                         </a>
                     </div>
                 </div>

@@ -1,0 +1,146 @@
+// Utility classes and helper styles
+// These are commonly used inline styles converted to reusable classes
+
+// Display utilities
+.hidden {
+    display: none;
+}
+
+.block {
+    display: block !important;
+}
+
+.flex {
+    display: flex !important;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.text-left {
+    text-align: left !important;
+}
+
+// Spacing utilities
+.margin-0 {
+    margin: 0 !important;
+}
+
+.margin-top-1 {
+    margin-top: 1rem !important;
+}
+
+.margin-top-2 {
+    margin-top: 2rem !important;
+}
+
+.margin-bottom-1 {
+    margin-bottom: 1rem !important;
+}
+
+.margin-bottom-2 {
+    margin-bottom: 2rem !important;
+}
+
+.margin-vertical-1 {
+    margin: 1rem 0 !important;
+}
+
+// Font sizes
+.text-sm {
+    font-size: 0.9rem;
+}
+
+.text-xs {
+    font-size: 0.85rem;
+}
+
+.text-lg {
+    font-size: 1.1rem;
+}
+
+.text-xl {
+    font-size: 1.5rem;
+}
+
+.text-2xl {
+    font-size: 2rem;
+}
+
+// Font weights
+.font-bold {
+    font-weight: bold;
+}
+
+.font-italic {
+    font-style: italic;
+}
+
+// Opacity utilities
+.opacity-50 {
+    opacity: 0.5;
+}
+
+.opacity-70 {
+    opacity: 0.7;
+}
+
+.opacity-80 {
+    opacity: 0.8;
+}
+
+.opacity-90 {
+    opacity: 0.9;
+}
+
+// Z-index utilities
+.z-10 {
+    z-index: 10;
+    position: relative;
+}
+
+.z-15 {
+    z-index: 15;
+    position: relative;
+}
+
+// Pointer events
+.pointer-events-auto {
+    pointer-events: auto;
+}
+
+.pointer-events-none {
+    pointer-events: none;
+}
+
+// Transform utilities
+.uppercase {
+    text-transform: uppercase;
+}
+
+// Border radius
+.rounded {
+    border-radius: 8px;
+}
+
+.rounded-lg {
+    border-radius: 12px;
+}
+
+// Flex utilities
+.flex-col {
+    flex-direction: column;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.gap-1 {
+    gap: 1rem;
+}
+
+.gap-half {
+    gap: 0.5rem;
+}
