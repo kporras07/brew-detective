@@ -8,7 +8,7 @@ const API_CONFIG = {
     
     ENDPOINTS: {
         // API endpoints
-        CASES: '/api/v1/cases',
+        CASES: '/api/v1/cases/public',
         ACTIVE_CASE: '/api/v1/cases/active',
         ACTIVE_CASE_PUBLIC: '/api/v1/cases/active/public', // Secure endpoint without answers
         SUBMISSIONS: '/api/v1/submissions',

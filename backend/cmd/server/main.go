@@ -59,9 +59,9 @@ func main() {
 	api := router.Group("/api/v1")
 	{
 		// Public routes
-		api.GET("/cases", handlers.GetCases)
-		api.GET("/cases/active", handlers.GetActiveCase)
-		api.GET("/cases/:id", handlers.GetCaseByID)
+		api.GET("/cases/public", handlers.GetCasesPublic)
+		api.GET("/cases/active/public", handlers.GetActiveCasePublic)
+		api.GET("/cases/:id/public", handlers.GetCaseByIDPublic)
 		api.GET("/leaderboard", handlers.GetLeaderboard)
 		api.GET("/leaderboard/current", handlers.GetCurrentCaseLeaderboard)
 		api.GET("/catalog", handlers.GetAllCatalog)
@@ -98,7 +98,9 @@ func main() {
 
 			// Case management
 			admin.GET("/cases", handlers.GetAllCases)
+			admin.GET("/cases/active", handlers.GetActiveCase)
 			admin.GET("/cases/:id", handlers.GetCaseByID)
+			admin.GET("/cases/list", handlers.GetCases)
 			admin.POST("/cases", handlers.CreateCase)
 			admin.PUT("/cases/:id", handlers.UpdateCase)
 			admin.DELETE("/cases/:id", handlers.DeleteCase)

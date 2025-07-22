@@ -21,9 +21,18 @@ A Golang REST API backend for the Brew Detective coffee tasting game, built with
 
 ## API Endpoints
 
-### Cases
-- `GET /api/v1/cases` - Get all active coffee cases
-- `GET /api/v1/cases/:id` - Get specific case details
+### Public Cases (No Answers)
+- `GET /api/v1/cases/public` - Get all active coffee cases (safe data only)
+- `GET /api/v1/cases/active/public` - Get current active case (safe data only)  
+- `GET /api/v1/cases/:id/public` - Get specific case details (safe data only)
+
+### Admin Cases (Full Data) 🔒
+- `GET /api/v1/admin/cases` - Get all cases with answers (admin only)
+- `GET /api/v1/admin/cases/active` - Get active case with answers (admin only)
+- `GET /api/v1/admin/cases/:id` - Get specific case with answers (admin only)
+- `POST /api/v1/admin/cases` - Create new case (admin only)
+- `PUT /api/v1/admin/cases/:id` - Update case (admin only)
+- `DELETE /api/v1/admin/cases/:id` - Delete case (admin only)
 
 ### Submissions
 - `POST /api/v1/submissions` - Submit a case solution

@@ -35,6 +35,17 @@ type CoffeeCase struct {
 	IsActive         bool              `firestore:"is_active" json:"is_active"`
 }
 
+// PublicCoffeeCase represents a coffee case with only public information (no answers)
+type PublicCoffeeCase struct {
+	ID               string           `json:"id"`
+	Name             string           `json:"name"`
+	Description      string           `json:"description"`
+	EnabledQuestions EnabledQuestions `json:"enabled_questions"`
+	CoffeeIDs        []string         `json:"coffee_ids"`
+	CoffeeCount      int              `json:"coffee_count"`
+	IsActive         bool             `json:"is_active"`
+}
+
 // EnabledQuestions defines which questions are enabled for this case
 type EnabledQuestions struct {
 	Region         bool `firestore:"region" json:"region"`

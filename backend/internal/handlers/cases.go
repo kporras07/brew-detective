@@ -264,7 +264,7 @@ func GetCaseByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"case": coffeeCase})
 }
 
-// GetActiveCase returns the current active coffee case
+// GetActiveCase returns the current active coffee case (admin only - includes answers)
 func GetActiveCase(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -291,4 +291,135 @@ func GetActiveCase(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"case": coffeeCase})
+}
+
+// GetActiveCasePublic returns the current active coffee case without answers (public endpoint)
+func GetActiveCasePublic(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	iter := database.FirestoreClient.Collection(database.CasesCollection).
+		Where("is_active", "==", true).
+		Limit(1).
+		Documents(ctx)
+
+	doc, err := iter.Next()
+	if err == iterator.Done {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No active case found"})
+		return
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch active case"})
+		return
+	}
+
+	var coffeeCase models.CoffeeCase
+	if err := doc.DataTo(&coffeeCase); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse case data"})
+		return
+	}
+
+	// Create sanitized public version without coffee answers
+	coffeeIDs := make([]string, len(coffeeCase.Coffees))
+	for i, coffee := range coffeeCase.Coffees {
+		coffeeIDs[i] = coffee.ID
+	}
+
+	publicCase := models.PublicCoffeeCase{
+		ID:               coffeeCase.ID,
+		Name:             coffeeCase.Name,
+		Description:      coffeeCase.Description,
+		EnabledQuestions: coffeeCase.EnabledQuestions,
+		CoffeeIDs:        coffeeIDs,
+		CoffeeCount:      len(coffeeCase.Coffees),
+		IsActive:         coffeeCase.IsActive,
+	}
+
+	c.JSON(http.StatusOK, gin.H{"case": publicCase})
+}
+
+// GetCasesPublic returns all active coffee cases without answers (public endpoint)
+func GetCasesPublic(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	iter := database.FirestoreClient.Collection(database.CasesCollection).
+		Where("is_active", "==", true).
+		Documents(ctx)
+
+	var publicCases []models.PublicCoffeeCase
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cases"})
+			return
+		}
+
+		var coffeeCase models.CoffeeCase
+		if err := doc.DataTo(&coffeeCase); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse case data"})
+			return
+		}
+
+		// Create sanitized public version without coffee answers
+		coffeeIDs := make([]string, len(coffeeCase.Coffees))
+		for i, coffee := range coffeeCase.Coffees {
+			coffeeIDs[i] = coffee.ID
+		}
+
+		publicCase := models.PublicCoffeeCase{
+			ID:               coffeeCase.ID,
+			Name:             coffeeCase.Name,
+			Description:      coffeeCase.Description,
+			EnabledQuestions: coffeeCase.EnabledQuestions,
+			CoffeeIDs:        coffeeIDs,
+			CoffeeCount:      len(coffeeCase.Coffees),
+			IsActive:         coffeeCase.IsActive,
+		}
+
+		publicCases = append(publicCases, publicCase)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"cases": publicCases})
+}
+
+// GetCaseByIDPublic returns a specific coffee case without answers (public endpoint)
+func GetCaseByIDPublic(c *gin.Context) {
+	caseID := c.Param("id")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	doc, err := database.FirestoreClient.Collection(database.CasesCollection).Doc(caseID).Get(ctx)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Case not found"})
+		return
+	}
+
+	var coffeeCase models.CoffeeCase
+	if err := doc.DataTo(&coffeeCase); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse case data"})
+		return
+	}
+
+	// Create sanitized public version without coffee answers
+	coffeeIDs := make([]string, len(coffeeCase.Coffees))
+	for i, coffee := range coffeeCase.Coffees {
+		coffeeIDs[i] = coffee.ID
+	}
+
+	publicCase := models.PublicCoffeeCase{
+		ID:               coffeeCase.ID,
+		Name:             coffeeCase.Name,
+		Description:      coffeeCase.Description,
+		EnabledQuestions: coffeeCase.EnabledQuestions,
+		CoffeeIDs:        coffeeIDs,
+		CoffeeCount:      len(coffeeCase.Coffees),
+		IsActive:         coffeeCase.IsActive,
+	}
+
+	c.JSON(http.StatusOK, gin.H{"case": publicCase})
 }

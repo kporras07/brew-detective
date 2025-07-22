@@ -324,7 +324,8 @@ async function loadActiveCase() {
                 id: activeCase.id,
                 name: activeCase.name,
                 description: activeCase.description,
-                coffeeIds: activeCase.coffeeIds || [],
+                // Handle both camelCase and snake_case from different endpoints
+                coffeeIds: activeCase.coffeeIds || activeCase.coffee_ids || [],
                 questions: activeCase.enabled_questions || {
                     region: true,
                     variety: true,
@@ -418,8 +419,8 @@ function customizeSubmissionForm() {
 
 // Update scoring information box based on enabled questions
 function updateScoringInfo() {
-    const questions = window.activeCaseQuestions;
-    if (!questions) return;
+    const questions = window.activeCaseData?.questions || {};
+    if (!questions || Object.keys(questions).length === 0) return;
     
     const coffeeQuestionsList = document.getElementById('coffeeQuestionsList');
     const bonusQuestionsList = document.getElementById('bonusQuestionsList');
@@ -508,6 +509,10 @@ document.getElementById('submitForm').addEventListener('submit', async function(
     // Get coffee IDs from active case data
     const activeCaseData = window.activeCaseData;
     if (!activeCaseData || !activeCaseData.coffeeIds || activeCaseData.coffeeIds.length < 4) {
+        // Debug information for troubleshooting
+        console.error('Submit error - Active case data:', activeCaseData);
+        console.error('Coffee IDs available:', activeCaseData?.coffeeIds);
+        
         document.getElementById('submitError').style.display = 'block';
         document.getElementById('submitError').innerHTML = 'Error: No se pudo obtener la información del caso activo. Por favor recarga la página.';
         return;
