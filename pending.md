@@ -1,3 +1,5 @@
 # Pending
 
-- What about badges?
+- Defer badges implementation
+- Buy domains
+- Use correct domains...
