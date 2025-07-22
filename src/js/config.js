@@ -124,7 +124,20 @@ const API = {
             }
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // Try to get error message from response body
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    if (errorData.error) {
+                        errorMessage = errorData.error;
+                    }
+                } catch (parseError) {
+                    // If we can't parse the error response, use the default message
+                }
+                
+                const error = new Error(errorMessage);
+                error.status = response.status;
+                throw error;
             }
             
             return await response.json();

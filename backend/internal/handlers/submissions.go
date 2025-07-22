@@ -40,9 +40,10 @@ func SubmitCase(c *gin.Context) {
 	}
 	submission.CaseID = activeCase.ID
 
-	// Validate order ID
-	if !validateOrderID(submission.OrderID) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or already used order ID"})
+	// Validate order ID with detailed error messages
+	orderValidation := validateOrderIDDetailed(submission.OrderID)
+	if !orderValidation.IsValid {
+		c.JSON(http.StatusBadRequest, gin.H{"error": orderValidation.ErrorMessage})
 		return
 	}
 
@@ -393,7 +394,68 @@ func updateBadges(user *models.User) {
 	}
 }
 
-// validateOrderID validates if an order ID is valid and unused
+// OrderValidationResult holds the result of order ID validation
+type OrderValidationResult struct {
+	IsValid      bool
+	ErrorMessage string
+}
+
+// validateOrderIDDetailed validates an order ID and returns detailed error information
+func validateOrderIDDetailed(orderID string) OrderValidationResult {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Query orders collection to find order with this order ID
+	query := database.FirestoreClient.Collection(database.OrdersCollection).
+		Where("order_id", "==", orderID).
+		Limit(1)
+
+	docs, err := query.Documents(ctx).GetAll()
+	if err != nil {
+		return OrderValidationResult{
+			IsValid:      false,
+			ErrorMessage: "Error al validar el código de pedido. Intenta nuevamente.",
+		}
+	}
+	
+	if len(docs) == 0 {
+		return OrderValidationResult{
+			IsValid:      false,
+			ErrorMessage: "Código de pedido no válido. Verifica que hayas ingresado el código correctamente.",
+		}
+	}
+
+	var order models.Order
+	if err := docs[0].DataTo(&order); err != nil {
+		return OrderValidationResult{
+			IsValid:      false,
+			ErrorMessage: "Error al procesar el código de pedido. Contacta al soporte.",
+		}
+	}
+
+	// Check if already used for submission
+	if order.IsSubmissionUsed {
+		return OrderValidationResult{
+			IsValid:      false,
+			ErrorMessage: "Este código de pedido ya fue utilizado para enviar respuestas. Cada código solo puede usarse una vez.",
+		}
+	}
+
+	// Order must be in delivered status to allow submission
+	if order.Status != "delivered" {
+		return OrderValidationResult{
+			IsValid:      false,
+			ErrorMessage: "Tu pedido aún no ha sido entregado. Solo puedes enviar respuestas después de recibir tu café.",
+		}
+	}
+
+	return OrderValidationResult{
+		IsValid:      true,
+		ErrorMessage: "",
+	}
+}
+
+// validateOrderID validates if an order ID is valid and unused (legacy function)
 func validateOrderID(orderID string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

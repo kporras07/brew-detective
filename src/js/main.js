@@ -591,8 +591,16 @@ document.getElementById('submitForm').addEventListener('submit', async function(
     } catch (error) {
         console.error('Submission failed:', error);
         document.getElementById('submitError').style.display = 'block';
-        document.getElementById('submitError').innerHTML = 
-            'Error al enviar respuestas. Por favor verifica tu conexión e intenta nuevamente.';
+        
+        // Use the detailed error message from the backend if available
+        let errorMessage = error.message;
+        
+        // If it's a generic HTTP error or connection issue, provide fallback
+        if (!errorMessage || errorMessage.includes('HTTP error! status:') || errorMessage.includes('Failed to fetch')) {
+            errorMessage = 'Error al enviar respuestas. Por favor verifica tu conexión e intenta nuevamente.';
+        }
+        
+        document.getElementById('submitError').innerHTML = errorMessage;
     }
 });
 
