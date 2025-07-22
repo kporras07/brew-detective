@@ -47,14 +47,14 @@ async function updateAuthUI() {
             const freshUserData = await API.get(API_CONFIG.ENDPOINTS.PROFILE);
             user = freshUserData;
             Auth.setUser(user); // Update cached user data
-            console.log('Fetched fresh user data:', user); // Debug
+            // Fresh user data fetched
         } catch (error) {
             console.error('Failed to fetch fresh user data:', error);
             // Continue with cached user data
         }
     }
 
-    console.log('Updating auth UI:', { isAuthenticated, user }); // Debug
+    // Updating authentication UI
 
     // Desktop navigation
     const loginBtn = document.getElementById('loginBtn');
@@ -67,10 +67,10 @@ async function updateAuthUI() {
     const userDropdownMobile = document.getElementById('userDropdownMobile');
     const submitMenuItemMobile = document.getElementById('submitMenuItemMobile');
 
-    console.log('Elements found:', { loginBtn, userDropdown, userName }); // Debug
+    // DOM elements located
 
     if (isAuthenticated && user) {
-        console.log('User is authenticated, showing user dropdown'); // Debug
+        // User authenticated, updating UI
         
         // Desktop: Hide login button, show user dropdown
         if (loginBtn) {
@@ -78,11 +78,11 @@ async function updateAuthUI() {
         }
         if (userDropdown) {
             userDropdown.classList.remove('hidden');
-            console.log('User dropdown shown'); // Debug
+            // User dropdown displayed
         }
         if (userName) {
             userName.textContent = user.name || user.email;
-            console.log('User name set to:', user.name || user.email); // Debug
+            // User name updated
         }
         
         // Update user avatar
@@ -90,7 +90,7 @@ async function updateAuthUI() {
         if (userAvatar && user.picture) {
             userAvatar.src = user.picture;
             userAvatar.style.display = 'inline-block';
-            console.log('User avatar set to:', user.picture); // Debug
+            // User avatar updated
         }
 
         // Mobile: Hide login button, show user dropdown
@@ -112,13 +112,12 @@ async function updateAuthUI() {
         // Show admin menu item for admin users
         const adminMenuItem = document.getElementById('adminMenuItem');
         if (adminMenuItem) {
-            console.log('Checking admin access for user:', user); // Debug
-            console.log('User type:', user.type); // Debug
+            // Checking admin access
             if (user.type === 'admin') {
-                console.log('User is admin, showing admin menu'); // Debug
+                // Admin menu displayed
                 adminMenuItem.style.display = 'block';
             } else {
-                console.log('User is not admin, hiding admin menu'); // Debug
+                // Admin menu hidden
                 adminMenuItem.style.display = 'none';
             }
         }
@@ -132,7 +131,7 @@ async function updateAuthUI() {
         // Update order page authentication status
         updateOrderPageAuth();
     } else {
-        console.log('User not authenticated, showing login button'); // Debug
+        // User not authenticated, showing login
         
         // Desktop: Show login button, hide user dropdown
         if (loginBtn) {
@@ -443,90 +442,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     await updateAuthUI();
 });
 
-// Manual test function for debugging
-window.testAuthUI = function() {
-    console.log('=== AUTH UI TEST ===');
-    console.log('Auth.isAuthenticated():', Auth.isAuthenticated());
-    console.log('Auth.getUser():', Auth.getUser());
-    console.log('Auth.getToken():', Auth.getToken() ? 'Present' : 'Missing');
-    
-    const elements = {
-        loginBtn: document.getElementById('loginBtn'),
-        userDropdown: document.getElementById('userDropdown'),
-        userName: document.getElementById('userName'),
-        adminMenuItem: document.getElementById('adminMenuItem'),
-        loginBtnMobile: document.getElementById('loginBtnMobile'),
-        userDropdownMobile: document.getElementById('userDropdownMobile')
-    };
-    
-    console.log('DOM Elements:', elements);
-    
-    Object.keys(elements).forEach(key => {
-        const el = elements[key];
-        if (el) {
-            console.log(`${key} styles:`, {
-                display: el.style.display,
-                visibility: el.style.visibility,
-                opacity: el.style.opacity
-            });
-        }
-    });
-    
-    console.log('=== END TEST ===');
-};
+// Debug functions removed for security
 
-// Manual refresh function to update user data and UI
-window.refreshUserData = async function() {
-    console.log('=== REFRESHING USER DATA ===');
-    await updateAuthUI();
-    console.log('=== REFRESH COMPLETE ===');
-};
 
-// Debug function for admin dropdown
-window.testAdminDropdown = function() {
-    const dropdown = document.getElementById('adminCategorySelect');
-    console.log('Admin dropdown element:', dropdown);
-    console.log('Admin dropdown value:', dropdown ? dropdown.value : 'Not found');
-    console.log('Admin dropdown styles:', dropdown ? {
-        display: dropdown.style.display,
-        pointerEvents: dropdown.style.pointerEvents,
-        zIndex: dropdown.style.zIndex,
-        position: dropdown.style.position
-    } : 'Not found');
-    
-    if (dropdown) {
-        console.log('Attempting to programmatically change value...');
-        dropdown.value = 'region';
-        dropdown.dispatchEvent(new Event('change'));
-        console.log('Value changed to:', dropdown.value);
-    }
-};
 
-// Debug function for admin buttons
-window.testAdminButtons = function() {
-    const addBtn = document.getElementById('addItemBtn');
-    const refreshBtn = document.getElementById('refreshBtn');
-    
-    console.log('Add Item Button:', addBtn);
-    console.log('Add Item Button styles:', addBtn ? {
-        display: addBtn.style.display,
-        pointerEvents: addBtn.style.pointerEvents,
-        zIndex: addBtn.style.zIndex,
-        position: addBtn.style.position,
-        visibility: addBtn.style.visibility
-    } : 'Not found');
-    
-    console.log('Refresh Button:', refreshBtn);
-    console.log('Refresh Button styles:', refreshBtn ? {
-        display: refreshBtn.style.display,
-        pointerEvents: refreshBtn.style.pointerEvents,
-        zIndex: refreshBtn.style.zIndex,
-        position: refreshBtn.style.position,
-        visibility: refreshBtn.style.visibility
-    } : 'Not found');
-    
-    if (addBtn) {
-        console.log('Attempting to programmatically click Add Item button...');
-        addBtn.click();
-    }
-};

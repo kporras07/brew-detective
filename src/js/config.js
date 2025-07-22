@@ -10,6 +10,7 @@ const API_CONFIG = {
         // API endpoints
         CASES: '/api/v1/cases',
         ACTIVE_CASE: '/api/v1/cases/active',
+        ACTIVE_CASE_PUBLIC: '/api/v1/cases/active/public', // Secure endpoint without answers
         SUBMISSIONS: '/api/v1/submissions',
         LEADERBOARD: '/api/v1/leaderboard',
         LEADERBOARD_CURRENT: '/api/v1/leaderboard/current',

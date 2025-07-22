@@ -270,6 +270,25 @@ function loadProfile() {
         });
 }
 
+// Sanitize case data to remove sensitive information (answers)
+function sanitizeCaseData(caseData) {
+    if (!caseData) return null;
+    
+    // Create a safe version with only public information
+    const safeCaseData = {
+        id: caseData.id,
+        name: caseData.name,
+        description: caseData.description,
+        is_active: caseData.is_active,
+        enabled_questions: caseData.enabled_questions,
+        // Only include coffee IDs, not the full coffee objects with answers
+        coffeeIds: caseData.coffees ? caseData.coffees.map(coffee => coffee.id) : [],
+        coffee_count: caseData.coffees ? caseData.coffees.length : 0
+    };
+    
+    return safeCaseData;
+}
+
 // Load active case information
 async function loadActiveCase() {
     const activeCaseName = document.getElementById('activeCaseName');
@@ -282,27 +301,49 @@ async function loadActiveCase() {
         activeCaseName.textContent = 'Cargando caso activo...';
         activeCaseDescription.textContent = '';
         
-        const response = await API.get(API_CONFIG.ENDPOINTS.ACTIVE_CASE);
-        const activeCase = response.case;
+        // Try secure endpoint first, fallback to regular endpoint with sanitization
+        let response, activeCase;
+        
+        try {
+            // Try the secure public endpoint (no answers included)
+            response = await API.get(API_CONFIG.ENDPOINTS.ACTIVE_CASE_PUBLIC);
+            activeCase = response.case;
+        } catch (error) {
+            console.warn('Secure endpoint not available, using fallback with sanitization');
+            // Fallback to regular endpoint but sanitize the response
+            response = await API.get(API_CONFIG.ENDPOINTS.ACTIVE_CASE);
+            activeCase = sanitizeCaseData(response.case);
+        }
         
         if (activeCase) {
             activeCaseName.textContent = activeCase.name;
             activeCaseDescription.textContent = activeCase.description;
             
-            // Store entire active case globally for form customization
-            window.activeCase = activeCase;
-            window.activeCaseQuestions = activeCase.enabled_questions || {
-                region: true,
-                variety: true,
-                process: true,
-                taste_note_1: true,
-                taste_note_2: true,
-                favorite_coffee: true,
-                brewing_method: true
+            // Store the already-sanitized case data globally
+            window.activeCaseData = {
+                id: activeCase.id,
+                name: activeCase.name,
+                description: activeCase.description,
+                coffeeIds: activeCase.coffeeIds || [],
+                questions: activeCase.enabled_questions || {
+                    region: true,
+                    variety: true,
+                    process: true,
+                    taste_note_1: true,
+                    taste_note_2: true,
+                    favorite_coffee: true,
+                    brewing_method: true
+                }
             };
             
-            console.log('Active case loaded:', activeCase);
-            console.log('Coffee IDs:', activeCase.coffees?.map(c => ({ id: c.id, name: c.name })));
+            // Explicitly remove any potentially unsafe data
+            delete window.activeCase;
+            delete window.activeCaseQuestions;
+            if (response.case && response.case.coffees) {
+                delete response.case.coffees; // Remove coffee details if they exist
+            }
+            
+            // Case loaded successfully
             
             // Customize submission form based on enabled questions
             customizeSubmissionForm();
@@ -464,12 +505,19 @@ document.getElementById('submitForm').addEventListener('submit', async function(
     document.getElementById('submitSuccess').style.display = 'none';
     document.getElementById('submitError').style.display = 'none';
     
-    // Get coffee IDs from active case
-    const activeCase = window.activeCase;
-    if (!activeCase || !activeCase.coffees || activeCase.coffees.length < 4) {
+    // Get coffee IDs from active case data
+    const activeCaseData = window.activeCaseData;
+    if (!activeCaseData || !activeCaseData.coffeeIds || activeCaseData.coffeeIds.length < 4) {
         document.getElementById('submitError').style.display = 'block';
         document.getElementById('submitError').innerHTML = 'Error: No se pudo obtener la información del caso activo. Por favor recarga la página.';
         return;
+    }
+    
+    // Security check: Ensure no coffee answer data is accessible
+    if (window.activeCase || window.activeCaseQuestions) {
+        delete window.activeCase;
+        delete window.activeCaseQuestions;
+        console.warn('Removed potentially unsafe case data from global scope');
     }
     
     // Collect form data with actual coffee UUIDs
@@ -477,7 +525,7 @@ document.getElementById('submitForm').addEventListener('submit', async function(
         order_id: document.getElementById('orderId').value.toUpperCase(),
         coffee_answers: [
             {
-                coffee_id: activeCase.coffees[0].id,
+                coffee_id: activeCaseData.coffeeIds[0],
                 region: document.getElementById('coffee1_region').value,
                 variety: document.getElementById('coffee1_variety').value,
                 process: document.getElementById('coffee1_process').value,
@@ -485,7 +533,7 @@ document.getElementById('submitForm').addEventListener('submit', async function(
                 taste_note_2: document.getElementById('coffee1_note2').value
             },
             {
-                coffee_id: activeCase.coffees[1].id,
+                coffee_id: activeCaseData.coffeeIds[1],
                 region: document.getElementById('coffee2_region').value,
                 variety: document.getElementById('coffee2_variety').value,
                 process: document.getElementById('coffee2_process').value,
@@ -493,7 +541,7 @@ document.getElementById('submitForm').addEventListener('submit', async function(
                 taste_note_2: document.getElementById('coffee2_note2').value
             },
             {
-                coffee_id: activeCase.coffees[2].id,
+                coffee_id: activeCaseData.coffeeIds[2],
                 region: document.getElementById('coffee3_region').value,
                 variety: document.getElementById('coffee3_variety').value,
                 process: document.getElementById('coffee3_process').value,
@@ -501,7 +549,7 @@ document.getElementById('submitForm').addEventListener('submit', async function(
                 taste_note_2: document.getElementById('coffee3_note2').value
             },
             {
-                coffee_id: activeCase.coffees[3].id,
+                coffee_id: activeCaseData.coffeeIds[3],
                 region: document.getElementById('coffee4_region').value,
                 variety: document.getElementById('coffee4_variety').value,
                 process: document.getElementById('coffee4_process').value,
@@ -513,7 +561,7 @@ document.getElementById('submitForm').addEventListener('submit', async function(
         brewing_method: document.getElementById('brewing_method').value
     };
     
-    console.log('Submission with coffee IDs:', submission.coffee_answers.map(ca => ({ coffee_id: ca.coffee_id })));
+    // Submitting case with coffee answers
     
     try {
         const response = await API.post(API_CONFIG.ENDPOINTS.SUBMISSIONS, submission);
@@ -1012,7 +1060,7 @@ async function loadCaseFormDropdowns() {
         const data = await API.get(API_CONFIG.ENDPOINTS.CATALOG);
         const catalog = data.catalog;
         
-        console.log('Catalog data loaded:', catalog);
+        // Catalog data loaded successfully
         
         // Populate dropdowns for each coffee
         for (let i = 1; i <= 4; i++) {
@@ -1259,7 +1307,7 @@ async function editCase(caseId) {
 
 function populateEditForm(caseData) {
     try {
-        console.log('Populating edit form with case data:', caseData);
+        // Populating edit form with case data
         
         // Check if edit form is visible
         const editForm = document.getElementById('editCaseForm');
@@ -1304,10 +1352,7 @@ function populateEditForm(caseData) {
         const nameElement = document.getElementById(`editCoffee${i}Name`);
         const notesElement = document.getElementById(`editCoffee${i}Notes`);
         
-        console.log(`Coffee ${i} elements found:`, {
-            name: !!nameElement,
-            notes: !!notesElement
-        });
+        // Coffee elements validated
         
         if (coffee) {
             if (nameElement) {
@@ -1370,22 +1415,22 @@ function populateEditForm(caseData) {
 
 function setEditFormDropdownValues(caseData) {
     try {
-        console.log('Setting edit form dropdown values for case:', caseData);
+        // Setting edit form dropdown values
         
         // Set coffee dropdown values after dropdowns are populated
         for (let i = 1; i <= 4; i++) {
         const coffee = caseData.coffees && caseData.coffees[i-1];
         if (coffee) {
-            console.log(`Coffee ${i} data:`, coffee);
+            // Setting coffee data for form
             
             const regionSelect = document.getElementById(`editCoffee${i}Region`);
             const varietySelect = document.getElementById(`editCoffee${i}Variety`);
             const processSelect = document.getElementById(`editCoffee${i}Process`);
             
-            console.log(`Coffee ${i} - Region: '${coffee.region}', Variety: '${coffee.variety}', Process: '${coffee.process}'`);
+            // Processing coffee attributes
             
             if (regionSelect) {
-                console.log(`Region dropdown options:`, Array.from(regionSelect.options).map(o => ({value: o.value, text: o.textContent})));
+                // Setting region dropdown
                 
                 // Try to set by value first
                 regionSelect.value = coffee.region || '';
@@ -1397,14 +1442,14 @@ function setEditFormDropdownValues(caseData) {
                     );
                     if (matchingOption) {
                         regionSelect.value = matchingOption.value;
-                        console.log(`Found region by label match: '${coffee.region}' -> '${matchingOption.value}'`);
+                        // Found region match
                     }
                 }
                 
-                console.log(`Set region to: '${regionSelect.value}', coffee.region was: '${coffee.region}'`);
+                // Region set successfully
             }
             if (varietySelect) {
-                console.log(`Variety dropdown options:`, Array.from(varietySelect.options).map(o => ({value: o.value, text: o.textContent})));
+                // Setting variety dropdown
                 
                 // Try to set by value first
                 varietySelect.value = coffee.variety || '';
@@ -1416,14 +1461,14 @@ function setEditFormDropdownValues(caseData) {
                     );
                     if (matchingOption) {
                         varietySelect.value = matchingOption.value;
-                        console.log(`Found variety by label match: '${coffee.variety}' -> '${matchingOption.value}'`);
+                        // Found variety match
                     }
                 }
                 
-                console.log(`Set variety to: '${varietySelect.value}', coffee.variety was: '${coffee.variety}'`);
+                // Variety set successfully
             }
             if (processSelect) {
-                console.log(`Process dropdown options:`, Array.from(processSelect.options).map(o => ({value: o.value, text: o.textContent})));
+                // Setting process dropdown
                 
                 // Try to set by value first
                 processSelect.value = coffee.process || '';
@@ -1435,11 +1480,11 @@ function setEditFormDropdownValues(caseData) {
                     );
                     if (matchingOption) {
                         processSelect.value = matchingOption.value;
-                        console.log(`Found process by label match: '${coffee.process}' -> '${matchingOption.value}'`);
+                        // Found process match
                     }
                 }
                 
-                console.log(`Set process to: '${processSelect.value}', coffee.process was: '${coffee.process}'`);
+                // Process set successfully
             }
         }
     }
@@ -1452,14 +1497,14 @@ function setEditFormDropdownValues(caseData) {
 
 async function loadEditFormDropdowns() {
     try {
-        console.log('Loading edit form dropdowns...');
+        // Loading edit form dropdowns
         const data = await API.get(API_CONFIG.ENDPOINTS.CATALOG);
         const catalog = data.catalog;
-        console.log('Edit form catalog data:', catalog);
+        // Catalog data loaded for edit form
         
         // Populate dropdowns for each coffee in edit form
         for (let i = 1; i <= 4; i++) {
-            console.log(`Populating edit form dropdowns for coffee ${i}`);
+            // Populating edit form dropdowns for coffee
             populateCaseDropdown(`editCoffee${i}Region`, catalog.region || []);
             populateCaseDropdown(`editCoffee${i}Variety`, catalog.variety || []);
             populateCaseDropdown(`editCoffee${i}Process`, catalog.process || []);
@@ -1469,14 +1514,10 @@ async function loadEditFormDropdowns() {
             const varietySelect = document.getElementById(`editCoffee${i}Variety`);
             const processSelect = document.getElementById(`editCoffee${i}Process`);
             
-            console.log(`Coffee ${i} dropdowns populated:`, {
-                region: regionSelect ? regionSelect.options.length : 'not found',
-                variety: varietySelect ? varietySelect.options.length : 'not found', 
-                process: processSelect ? processSelect.options.length : 'not found'
-            });
+            // Coffee dropdowns populated successfully
         }
         
-        console.log('Edit form dropdowns loading complete');
+        // Edit form dropdowns loading complete
         
     } catch (error) {
         console.error('Failed to load catalog data for edit form:', error);
@@ -1499,7 +1540,7 @@ async function updateCase() {
         const response = await API.get(`${API_CONFIG.ENDPOINTS.ADMIN_CASES}/${caseId}`);
         const originalCase = response.case;
         originalCoffeeIds = originalCase.coffees ? originalCase.coffees.map(c => c.id) : [];
-        console.log('Original coffee IDs:', originalCoffeeIds);
+        // Processing coffee IDs for update
     } catch (error) {
         console.error('Error getting original case data:', error);
         // If we can't get original IDs, we'll use generated ones as fallback
