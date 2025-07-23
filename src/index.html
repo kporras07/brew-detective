@@ -7,6 +7,18 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
+    <!-- GitHub Pages SPA routing script -->
+    <script>
+        // Handle GitHub Pages SPA redirects
+        (function() {
+            var redirect = sessionStorage.redirect;
+            delete sessionStorage.redirect;
+            if (redirect && redirect !== location.pathname + location.search + location.hash) {
+                history.replaceState(null, null, redirect);
+            }
+        })();
+    </script>
+
     <!-- Header -->
     <header>
         <nav class="container">

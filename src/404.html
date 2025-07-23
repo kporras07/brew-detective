@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brew Detective</title>
+    <script>
+        // GitHub Pages SPA redirect
+        // Store the current path and redirect to index.html
+        sessionStorage.redirect = location.pathname + location.search + location.hash;
+        history.replaceState(null, null, '/');
+    </script>
+</head>
+<body>
+    <!-- This page handles GitHub Pages SPA routing -->
+    <script>
+        // Immediately redirect to index.html
+        window.location.replace('/');
+    </script>
+</body>
+</html>
