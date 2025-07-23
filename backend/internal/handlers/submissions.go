@@ -349,8 +349,8 @@ func updateUserStats(userID string, score int, accuracy float64) {
 	user.Accuracy = (user.Accuracy*float64(user.CasesCount-1) + accuracy) / float64(user.CasesCount)
 	user.UpdatedAt = time.Now()
 
-	// Update badges based on achievements
-	updateBadges(&user)
+	// Badges temporarily disabled
+	// updateBadges(&user)
 
 	userRef.Set(ctx, user)
 }

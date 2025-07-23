@@ -664,10 +664,7 @@ async function loadCurrentCaseLeaderboard() {
                 <div class="rank">${medal} ${rank}</div>
                 <div class="detective-name">
                     ${entry.detective_name || 'Detective Anónimo'}
-                    ${entry.badges && entry.badges.length > 0 ? 
-                        entry.badges.map(badge => `<span class="badge">${badge}</span>`).join('') : 
-                        '<span class="badge">Detective Novato</span>'
-                    }
+                    <!-- Badges temporarily disabled -->
                 </div>
                 <div class="score">${entry.points || 0} pts (${Math.round(entry.accuracy * 100)}%)</div>
             `;
@@ -723,10 +720,7 @@ async function loadGlobalLeaderboard() {
                 <div class="rank">${medal} ${rank}</div>
                 <div class="detective-name">
                     ${entry.detective_name || 'Detective Anónimo'}
-                    ${entry.badges && entry.badges.length > 0 ? 
-                        entry.badges.map(badge => `<span class="badge">${badge}</span>`).join('') : 
-                        '<span class="badge">Detective Novato</span>'
-                    }
+                    <!-- Badges temporarily disabled -->
                 </div>
                 <div class="score">${entry.points || 0} pts (${entry.cases_count || 0} casos)</div>
             `;

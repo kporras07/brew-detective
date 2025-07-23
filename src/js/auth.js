@@ -251,8 +251,8 @@ async function updateUserStats(user) {
             if (currentAccuracyDisplay) currentAccuracyDisplay.textContent = '--%';
         }
         
-        // Update badges if they exist
-        updateUserBadges(user);
+        // Badges temporarily disabled
+        // updateUserBadges(user);
         
     } catch (error) {
         console.error('Failed to load user stats:', error);
