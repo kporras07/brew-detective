@@ -1,7 +1,7 @@
 // API Configuration
 const API_CONFIG = {
     // Production backend URL on Cloud Run
-    BASE_URL: 'https://brew-detective-backend-1087966598090.us-central1.run.app',
+    BASE_URL: 'https://api.brewdetective.coffee',
     
     // For local development
     // BASE_URL: 'http://localhost:8888',

@@ -41,7 +41,7 @@ spec:
               name: jwt-secret
               key: latest
         - name: GOOGLE_REDIRECT_URL
-          value: "https://brew-detective-backend-1087966598090.us-central1.run.app/auth/google/callback"
+          value: "https://api.brewdetective.coffee/auth/google/callback"
         - name: GIN_MODE
           value: "release"
         - name: FRONTEND_URL

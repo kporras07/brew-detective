@@ -3,7 +3,7 @@
 A web-based coffee tasting game focused on Costa Rican specialty coffee. Test your palate by analyzing mystery coffee samples and compete with other coffee detectives!
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-green)](https://kporras07.github.io/brew-detective)
-[![Backend API](https://img.shields.io/badge/Backend%20API-Google%20Cloud%20Run-blue)](https://brew-detective-backend-1087966598090.us-central1.run.app)
+[![Backend API](https://img.shields.io/badge/Backend%20API-Google%20Cloud%20Run-blue)](https://api.brewdetective.coffee)
 
 ## 🎯 Features
 
@@ -35,7 +35,7 @@ A web-based coffee tasting game focused on Costa Rican specialty coffee. Test yo
 ## 🚀 Live Demo
 
 - **Frontend**: [https://kporras07.github.io/brew-detective](https://kporras07.github.io/brew-detective)
-- **Backend API**: [https://brew-detective-backend-1087966598090.us-central1.run.app](https://brew-detective-backend-1087966598090.us-central1.run.app)
+- **Backend API**: [https://api.brewdetective.coffee](https://api.brewdetective.coffee)
 
 ## 🛠️ Development Setup
 

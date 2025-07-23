@@ -32,4 +32,4 @@ gcloud run services describe $SERVICE_NAME \
     --format="table(metadata.name,status.url,status.conditions[0].type,status.conditions[0].status)"
 
 echo ""
-echo "🌐 Service URL: https://brew-detective-backend-1087966598090.us-central1.run.app"
+echo "🌐 Service URL: https://api.brewdetective.coffee"
