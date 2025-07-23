@@ -28,10 +28,10 @@ func main() {
 	// Configure CORS for GitHub Pages
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{
-		"https://kporras07.github.io", // Replace with your GitHub Pages domain
-		"http://localhost:3000",       // For local development
-		"http://localhost:8080",       // For local development
-		"http://127.0.0.1:8080",       // Alternative localhost
+		"https://brewdetective.coffee", // Replace with your GitHub Pages domain
+		"http://localhost:3000",        // For local development
+		"http://localhost:8080",        // For local development
+		"http://127.0.0.1:8080",        // Alternative localhost
 	}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}

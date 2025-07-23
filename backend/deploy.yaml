@@ -45,7 +45,7 @@ spec:
         - name: GIN_MODE
           value: "release"
         - name: FRONTEND_URL
-          value: "https://kporras07.github.io/brew-detective"
+          value: "https://brewdetective.coffee"
         resources:
           limits:
             cpu: 1000m
