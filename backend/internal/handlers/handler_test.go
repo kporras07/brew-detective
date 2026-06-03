@@ -1995,6 +1995,405 @@ func TestCreateOrderInvalidJSON(t *testing.T) {
 
 // --- CreateCase: invalid JSON ---
 
+// --- Store error-path tests ---
+
+func TestGetCasesStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.Err = fmt.Errorf("db error")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.GET("/cases/list", h.GetCases)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/cases/list", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestGetCasesPublicStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.Err = fmt.Errorf("db error")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.GET("/cases/public", h.GetCasesPublic)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/cases/public", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestDeleteCaseStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	h := newTestHandler(mock)
+	mock.Cases["c1"] = &models.CoffeeCase{ID: "c1", Name: "Case 1"}
+	mock.DeleteCaseErr = fmt.Errorf("delete failed")
+
+	r := setupRouter(h)
+	r.DELETE("/cases/:id", h.DeleteCase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/cases/c1", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestCreateCaseStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.CreateCaseErr = fmt.Errorf("create failed")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.POST("/cases", h.CreateCase)
+
+	body := jsonBody(map[string]interface{}{
+		"name": "New Case", "description": "A test case",
+	})
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/cases", body)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestUpdateCaseStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	h := newTestHandler(mock)
+	mock.Cases["c1"] = &models.CoffeeCase{ID: "c1", Name: "Case 1"}
+	mock.UpdateCaseErr = fmt.Errorf("update failed")
+
+	r := setupRouter(h)
+	r.PUT("/cases/:id", h.UpdateCase)
+
+	body := jsonBody(map[string]interface{}{"name": "Updated"})
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PUT", "/cases/c1", body)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestGetAllCasesStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.Err = fmt.Errorf("db error")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.GET("/admin/cases", h.GetAllCases)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/admin/cases", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestDeleteCatalogItemStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.DeleteCatalogItemErr = fmt.Errorf("delete failed")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.DELETE("/catalog/:id", h.DeleteCatalogItem)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/catalog/i1", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestGetAllCatalogStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.Err = fmt.Errorf("db error")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.GET("/catalog", h.GetAllCatalog)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/catalog", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestGetAllUsersStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.Err = fmt.Errorf("db error")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.GET("/admin/users", h.GetAllUsers)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/admin/users", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestCreateCatalogItemStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.CreateCatalogItemErr = fmt.Errorf("create failed")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.POST("/catalog", h.CreateCatalogItem)
+
+	body := jsonBody(map[string]interface{}{
+		"value": "test", "label": "Test", "category": "region",
+	})
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/catalog", body)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestUpdateCatalogItemStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.UpdateCatalogItemErr = fmt.Errorf("update failed")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.PUT("/catalog/:id", h.UpdateCatalogItem)
+
+	body := jsonBody(map[string]interface{}{"label": "Updated"})
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PUT", "/catalog/i1", body)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestGetCatalogByCategoryStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.Err = fmt.Errorf("db error")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.GET("/catalog/:category", h.GetCatalogByCategory)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/catalog/region", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestGetAllCatalogItemsStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.Err = fmt.Errorf("db error")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.GET("/admin/catalog", h.GetAllCatalogItems)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/admin/catalog", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestGetLeaderboardStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.Err = fmt.Errorf("db error")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.GET("/leaderboard", h.GetLeaderboard)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/leaderboard", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestUpdateUserProfileStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	h := newTestHandler(mock)
+	mock.Users["u1"] = &models.User{ID: "u1", Name: "Alice", Email: "alice@test.com"}
+	mock.SetUserErr = fmt.Errorf("write failed")
+
+	r := setupRouter(h)
+	r.PUT("/users/:id", h.UpdateUserProfile)
+
+	body := jsonBody(map[string]string{"name": "Updated"})
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PUT", "/users/u1", body)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestUpdateOrderStatusStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	h := newTestHandler(mock)
+	mock.Orders["o1"] = &models.Order{ID: "o1", OrderID: "ABC123", Status: "pending"}
+	mock.SetOrderErr = fmt.Errorf("write failed")
+
+	r := setupRouter(h)
+	r.PUT("/orders/:id/status", h.UpdateOrderStatus)
+
+	body := jsonBody(map[string]string{"status": "delivered"})
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PUT", "/orders/o1/status", body)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestCreateOrderStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.CreateOrderErr = fmt.Errorf("create failed")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.POST("/orders", h.CreateOrder)
+
+	body := jsonBody(map[string]interface{}{
+		"case_id": "case1", "user_id": "user1", "total_amount": 5000,
+	})
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/orders", body)
+	req.Header.Set("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestGetAllOrdersStoreError(t *testing.T) {
+	mock := store.NewMockStore()
+	mock.Err = fmt.Errorf("db error")
+	h := newTestHandler(mock)
+
+	r := setupRouter(h)
+	r.GET("/admin/orders", h.GetAllOrders)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/admin/orders", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+func TestGetCurrentCaseLeaderboardSubmissionsError(t *testing.T) {
+	mock := store.NewMockStore()
+	h := newTestHandler(mock)
+	mock.Cases["c1"] = &models.CoffeeCase{ID: "c1", Name: "Active", IsActive: true}
+	mock.ListSubmissionsByCaseErr = fmt.Errorf("submissions fetch failed")
+
+	r := setupRouter(h)
+	r.GET("/leaderboard/current", h.GetCurrentCaseLeaderboard)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/leaderboard/current", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", w.Code)
+	}
+}
+
+// --- updateUserStats tests ---
+
+func TestUpdateUserStats(t *testing.T) {
+	t.Run("updates stats for existing user", func(t *testing.T) {
+		mock := store.NewMockStore()
+		h := newTestHandler(mock)
+		mock.Users["u1"] = &models.User{ID: "u1", Points: 100, CasesCount: 2, Accuracy: 0.8}
+
+		h.updateUserStats("u1", 50, 0.9)
+
+		user := mock.Users["u1"]
+		if user.Points != 150 {
+			t.Errorf("expected points=150, got %d", user.Points)
+		}
+		if user.CasesCount != 3 {
+			t.Errorf("expected cases_count=3, got %d", user.CasesCount)
+		}
+	})
+
+	t.Run("no-op for empty userID", func(t *testing.T) {
+		mock := store.NewMockStore()
+		h := newTestHandler(mock)
+
+		h.updateUserStats("", 50, 0.9)
+		// Should not panic or add any user
+		if len(mock.Users) != 0 {
+			t.Error("expected no users created")
+		}
+	})
+
+	t.Run("no-op for missing user", func(t *testing.T) {
+		mock := store.NewMockStore()
+		h := newTestHandler(mock)
+
+		h.updateUserStats("nonexistent", 50, 0.9)
+		// Should not panic
+	})
+
+	t.Run("handles SetUser error gracefully", func(t *testing.T) {
+		mock := store.NewMockStore()
+		h := newTestHandler(mock)
+		mock.Users["u1"] = &models.User{ID: "u1", Points: 100, CasesCount: 1, Accuracy: 0.5}
+		mock.SetUserErr = fmt.Errorf("write failed")
+
+		// Should not panic
+		h.updateUserStats("u1", 50, 0.9)
+	})
+}
+
 func TestCreateCaseInvalidJSON(t *testing.T) {
 	mock := store.NewMockStore()
 	h := newTestHandler(mock)

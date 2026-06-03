@@ -88,7 +88,7 @@ func main() {
 
 		// Admin routes
 		admin := api.Group("/admin")
-		admin.Use(auth.AdminMiddleware())
+		admin.Use(auth.AdminMiddleware(s))
 		{
 			admin.GET("/catalog", h.GetAllCatalogItems)
 			admin.POST("/catalog", h.CreateCatalogItem)

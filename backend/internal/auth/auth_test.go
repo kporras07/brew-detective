@@ -6,6 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"brew-detective-backend/internal/models"
+	"brew-detective-backend/internal/store"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -13,6 +16,33 @@ import (
 func init() {
 	// Set a test JWT secret for all auth tests
 	jwtSecret = []byte("test-secret-key-for-unit-tests")
+}
+
+func TestGenerateOAuthState(t *testing.T) {
+	t.Run("returns 64-character hex string", func(t *testing.T) {
+		state := generateOAuthState()
+		if len(state) != 64 {
+			t.Errorf("expected 64-char hex string, got %d chars: %s", len(state), state)
+		}
+		// Verify it's valid hex
+		for _, c := range state {
+			if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
+				t.Errorf("expected hex characters, found %c in %s", c, state)
+				break
+			}
+		}
+	})
+
+	t.Run("generates unique values", func(t *testing.T) {
+		states := make(map[string]bool)
+		for i := 0; i < 100; i++ {
+			s := generateOAuthState()
+			if states[s] {
+				t.Fatalf("duplicate state generated: %s", s)
+			}
+			states[s] = true
+		}
+	})
 }
 
 func TestGenerateJWT(t *testing.T) {
@@ -217,6 +247,123 @@ func TestAuthMiddleware(t *testing.T) {
 		name, exists := c.Get("name")
 		if !exists || name != "Test User" {
 			t.Errorf("expected name %q, got %v", "Test User", name)
+		}
+	})
+}
+
+func TestAdminMiddleware(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	t.Run("rejects request without Authorization header", func(t *testing.T) {
+		mock := store.NewMockStore()
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest("GET", "/", nil)
+
+		handler := AdminMiddleware(mock)
+		handler(c)
+
+		if w.Code != http.StatusUnauthorized {
+			t.Errorf("expected %d, got %d", http.StatusUnauthorized, w.Code)
+		}
+		if !c.IsAborted() {
+			t.Error("expected request to be aborted")
+		}
+	})
+
+	t.Run("rejects invalid Authorization format", func(t *testing.T) {
+		mock := store.NewMockStore()
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest("GET", "/", nil)
+		c.Request.Header.Set("Authorization", "InvalidFormat")
+
+		handler := AdminMiddleware(mock)
+		handler(c)
+
+		if w.Code != http.StatusUnauthorized {
+			t.Errorf("expected %d, got %d", http.StatusUnauthorized, w.Code)
+		}
+	})
+
+	t.Run("rejects invalid token", func(t *testing.T) {
+		mock := store.NewMockStore()
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest("GET", "/", nil)
+		c.Request.Header.Set("Authorization", "Bearer invalid-token")
+
+		handler := AdminMiddleware(mock)
+		handler(c)
+
+		if w.Code != http.StatusUnauthorized {
+			t.Errorf("expected %d, got %d", http.StatusUnauthorized, w.Code)
+		}
+	})
+
+	t.Run("rejects user not found in store", func(t *testing.T) {
+		mock := store.NewMockStore()
+		token, _ := GenerateJWT("user123", "test@example.com", "Test User")
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest("GET", "/", nil)
+		c.Request.Header.Set("Authorization", "Bearer "+token)
+
+		handler := AdminMiddleware(mock)
+		handler(c)
+
+		if w.Code != http.StatusUnauthorized {
+			t.Errorf("expected %d, got %d", http.StatusUnauthorized, w.Code)
+		}
+	})
+
+	t.Run("rejects non-admin user", func(t *testing.T) {
+		mock := store.NewMockStore()
+		mock.Users["user123"] = &models.User{ID: "user123", Type: "regular"}
+		token, _ := GenerateJWT("user123", "test@example.com", "Test User")
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest("GET", "/", nil)
+		c.Request.Header.Set("Authorization", "Bearer "+token)
+
+		handler := AdminMiddleware(mock)
+		handler(c)
+
+		if w.Code != http.StatusForbidden {
+			t.Errorf("expected %d, got %d", http.StatusForbidden, w.Code)
+		}
+		if !c.IsAborted() {
+			t.Error("expected request to be aborted")
+		}
+	})
+
+	t.Run("allows admin user and sets context", func(t *testing.T) {
+		mock := store.NewMockStore()
+		mock.Users["user123"] = &models.User{ID: "user123", Type: "admin", Email: "admin@test.com", Name: "Admin"}
+		token, _ := GenerateJWT("user123", "admin@test.com", "Admin")
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest("GET", "/", nil)
+		c.Request.Header.Set("Authorization", "Bearer "+token)
+
+		handler := AdminMiddleware(mock)
+		handler(c)
+
+		if c.IsAborted() {
+			t.Error("expected request to not be aborted")
+		}
+
+		userID, _ := c.Get("userID")
+		if userID != "user123" {
+			t.Errorf("expected userID %q, got %v", "user123", userID)
+		}
+
+		userType, _ := c.Get("userType")
+		if userType != "admin" {
+			t.Errorf("expected userType %q, got %v", "admin", userType)
 		}
 	})
 }

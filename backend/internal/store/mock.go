@@ -15,8 +15,25 @@ type MockStore struct {
 	Submissions map[string]*models.Submission
 	CatalogItems map[string]*models.CatalogItem
 
-	// Error injection for testing error paths
+	// Error injection for testing error paths.
+	// Global error — affects all operations.
 	Err error
+
+	// Per-method error overrides (take precedence over Err when non-nil).
+	// Useful when a handler calls multiple store methods sequentially and
+	// only the second one should fail.
+	DeleteCaseErr            error
+	UpdateCaseErr            error
+	SetUserErr               error
+	UpdateOrderFieldsErr     error
+	ListSubmissionsByCaseErr error
+	CreateCaseErr            error
+	CreateCatalogItemErr     error
+	DeleteCatalogItemErr     error
+	UpdateCatalogItemErr     error
+	CreateOrderErr           error
+	CreateSubmissionErr       error
+	SetOrderErr              error
 }
 
 // NewMockStore creates a new MockStore with empty maps.
@@ -44,6 +61,9 @@ func (m *MockStore) GetUser(_ context.Context, id string) (*models.User, error) 
 }
 
 func (m *MockStore) SetUser(_ context.Context, user *models.User) error {
+	if m.SetUserErr != nil {
+		return m.SetUserErr
+	}
 	if m.Err != nil {
 		return m.Err
 	}
@@ -76,6 +96,9 @@ func (m *MockStore) GetCase(_ context.Context, id string) (*models.CoffeeCase, e
 }
 
 func (m *MockStore) CreateCase(_ context.Context, c *models.CoffeeCase) error {
+	if m.CreateCaseErr != nil {
+		return m.CreateCaseErr
+	}
 	if m.Err != nil {
 		return m.Err
 	}
@@ -84,6 +107,9 @@ func (m *MockStore) CreateCase(_ context.Context, c *models.CoffeeCase) error {
 }
 
 func (m *MockStore) UpdateCase(_ context.Context, id string, updates map[string]interface{}) error {
+	if m.UpdateCaseErr != nil {
+		return m.UpdateCaseErr
+	}
 	if m.Err != nil {
 		return m.Err
 	}
@@ -94,6 +120,9 @@ func (m *MockStore) UpdateCase(_ context.Context, id string, updates map[string]
 }
 
 func (m *MockStore) DeleteCase(_ context.Context, id string) error {
+	if m.DeleteCaseErr != nil {
+		return m.DeleteCaseErr
+	}
 	if m.Err != nil {
 		return m.Err
 	}
@@ -159,6 +188,9 @@ func (m *MockStore) GetOrder(_ context.Context, id string) (*models.Order, error
 }
 
 func (m *MockStore) CreateOrder(_ context.Context, order *models.Order) error {
+	if m.CreateOrderErr != nil {
+		return m.CreateOrderErr
+	}
 	if m.Err != nil {
 		return m.Err
 	}
@@ -167,6 +199,9 @@ func (m *MockStore) CreateOrder(_ context.Context, order *models.Order) error {
 }
 
 func (m *MockStore) SetOrder(_ context.Context, order *models.Order) error {
+	if m.SetOrderErr != nil {
+		return m.SetOrderErr
+	}
 	if m.Err != nil {
 		return m.Err
 	}
@@ -205,6 +240,9 @@ func (m *MockStore) GetOrderByOrderID(_ context.Context, orderID string) (*model
 }
 
 func (m *MockStore) UpdateOrderFields(_ context.Context, docID string, updates map[string]interface{}) error {
+	if m.UpdateOrderFieldsErr != nil {
+		return m.UpdateOrderFieldsErr
+	}
 	if m.Err != nil {
 		return m.Err
 	}
@@ -214,6 +252,9 @@ func (m *MockStore) UpdateOrderFields(_ context.Context, docID string, updates m
 // --- Submissions ---
 
 func (m *MockStore) CreateSubmission(_ context.Context, submission *models.Submission) error {
+	if m.CreateSubmissionErr != nil {
+		return m.CreateSubmissionErr
+	}
 	if m.Err != nil {
 		return m.Err
 	}
@@ -242,6 +283,9 @@ func (m *MockStore) ListSubmissionsByUser(_ context.Context, userID string, limi
 }
 
 func (m *MockStore) ListSubmissionsByCase(_ context.Context, caseID string) ([]models.Submission, error) {
+	if m.ListSubmissionsByCaseErr != nil {
+		return nil, m.ListSubmissionsByCaseErr
+	}
 	if m.Err != nil {
 		return nil, m.Err
 	}
@@ -286,6 +330,9 @@ func (m *MockStore) ListActiveCatalog(_ context.Context) ([]models.CatalogItem, 
 }
 
 func (m *MockStore) CreateCatalogItem(_ context.Context, item *models.CatalogItem) error {
+	if m.CreateCatalogItemErr != nil {
+		return m.CreateCatalogItemErr
+	}
 	if m.Err != nil {
 		return m.Err
 	}
@@ -294,6 +341,9 @@ func (m *MockStore) CreateCatalogItem(_ context.Context, item *models.CatalogIte
 }
 
 func (m *MockStore) UpdateCatalogItem(_ context.Context, id string, updates map[string]interface{}) error {
+	if m.UpdateCatalogItemErr != nil {
+		return m.UpdateCatalogItemErr
+	}
 	if m.Err != nil {
 		return m.Err
 	}
@@ -301,6 +351,9 @@ func (m *MockStore) UpdateCatalogItem(_ context.Context, id string, updates map[
 }
 
 func (m *MockStore) DeleteCatalogItem(_ context.Context, id string) error {
+	if m.DeleteCatalogItemErr != nil {
+		return m.DeleteCatalogItemErr
+	}
 	if m.Err != nil {
 		return m.Err
 	}

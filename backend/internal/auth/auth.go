@@ -9,8 +9,7 @@ import (
 	"os"
 	"time"
 
-	"brew-detective-backend/internal/database"
-	"brew-detective-backend/internal/models"
+	"brew-detective-backend/internal/store"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -210,8 +209,9 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-// AdminMiddleware ensures the user is authenticated and has admin privileges
-func AdminMiddleware() gin.HandlerFunc {
+// AdminMiddleware ensures the user is authenticated and has admin privileges.
+// It uses the provided Store to look up user data instead of accessing Firestore directly.
+func AdminMiddleware(s store.Store) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// First check if user is authenticated
 		authHeader := c.GetHeader("Authorization")
@@ -237,18 +237,9 @@ func AdminMiddleware() gin.HandlerFunc {
 		}
 
 		// Check if user has admin privileges
-		userRef := database.FirestoreClient.Collection(database.UsersCollection).Doc(claims.UserID)
-		doc, err := userRef.Get(c.Request.Context())
-		
-		if err != nil || !doc.Exists() {
+		user, err := s.GetUser(c.Request.Context(), claims.UserID)
+		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
-			c.Abort()
-			return
-		}
-
-		var user models.User
-		if err := doc.DataTo(&user); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse user data"})
 			c.Abort()
 			return
 		}
