@@ -39,3 +39,9 @@ src/css/*.map
 # Test coverage
 coverage.out
 coverage.html
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
