@@ -35,3 +35,7 @@ Thumbs.db
 
 # CSS source maps (optional - comment out if you want to include them)
 src/css/*.map
+
+# Test coverage
+coverage.out
+coverage.html

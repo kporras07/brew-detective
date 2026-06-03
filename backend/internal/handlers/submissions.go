@@ -8,17 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"brew-detective-backend/internal/database"
 	"brew-detective-backend/internal/models"
 
-	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"google.golang.org/api/iterator"
 )
 
 // SubmitCase handles case submission
-func SubmitCase(c *gin.Context) {
+func (h *Handler) SubmitCase(c *gin.Context) {
 	var submission models.Submission
 
 	if err := c.ShouldBindJSON(&submission); err != nil {
@@ -26,14 +23,13 @@ func SubmitCase(c *gin.Context) {
 		return
 	}
 
-	// Validate required fields
 	if submission.OrderID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Order ID is required"})
 		return
 	}
 
 	// Get the current active case
-	activeCase, err := getActiveCase()
+	activeCase, err := h.Store.GetActiveCase(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No active case available", "details": err.Error()})
 		return
@@ -41,13 +37,12 @@ func SubmitCase(c *gin.Context) {
 	submission.CaseID = activeCase.ID
 
 	// Validate order ID with detailed error messages
-	orderValidation := validateOrderIDDetailed(submission.OrderID)
+	orderValidation := h.validateOrderIDDetailed(c.Request.Context(), submission.OrderID)
 	if !orderValidation.IsValid {
 		c.JSON(http.StatusBadRequest, gin.H{"error": orderValidation.ErrorMessage})
 		return
 	}
 
-	// Get user ID from auth context
 	userID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User authentication required"})
@@ -55,31 +50,24 @@ func SubmitCase(c *gin.Context) {
 	}
 	submission.UserID = userID.(string)
 
-	// Generate submission ID and set timestamps
 	submission.ID = uuid.New().String()
 	submission.SubmittedAt = time.Now()
 
 	// Calculate score and accuracy
-	score, accuracy := calculateScore(&submission)
+	score, accuracy := calculateScoreWithCase(&submission, activeCase)
 	submission.Score = score
 	submission.Accuracy = accuracy
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Save submission to Firestore
-	_, err = database.FirestoreClient.Collection(database.SubmissionsCollection).
-		Doc(submission.ID).Set(ctx, submission)
-	if err != nil {
+	if err := h.Store.CreateSubmission(c.Request.Context(), &submission); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save submission"})
 		return
 	}
 
 	// Mark order ID as used
-	markOrderIDAsUsed(submission.OrderID, submission.UserID)
+	h.markOrderIDAsUsed(c.Request.Context(), submission.OrderID, submission.UserID)
 
-	// Update user stats if user exists
-	go updateUserStats(submission.UserID, score, accuracy)
+	// Update user stats
+	go h.updateUserStats(submission.UserID, score, accuracy)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message":       "Submission successful",
@@ -89,22 +77,19 @@ func SubmitCase(c *gin.Context) {
 	})
 }
 
-// calculateScore calculates the score and accuracy for a submission
-func calculateScore(submission *models.Submission) (int, float64) {
+// calculateScoreWithCase calculates the score and accuracy for a submission against a given case
+func calculateScoreWithCase(submission *models.Submission, activeCase *models.CoffeeCase) (int, float64) {
 	fmt.Printf("🔍 [SCORING DEBUG] Starting score calculation for submission ID: %s\n", submission.ID)
-	
-	// Get the active case to determine enabled questions
-	activeCase, err := getActiveCase()
-	if err != nil {
-		fmt.Printf("❌ [SCORING DEBUG] Failed to get active case: %v\n", err)
-		// Fallback to default scoring if case not found
+
+	if activeCase == nil {
+		fmt.Printf("❌ [SCORING DEBUG] No case provided, using default scoring\n")
 		return calculateScoreDefault(submission)
 	}
-	
+
 	fmt.Printf("✅ [SCORING DEBUG] Active case found: %s (ID: %s)\n", activeCase.Name, activeCase.ID)
-	fmt.Printf("📋 [SCORING DEBUG] Enabled questions: Region=%t, Variety=%t, Process=%t, TasteNote1=%t, TasteNote2=%t, FavoriteCoffee=%t, BrewingMethod=%t\n", 
+	fmt.Printf("📋 [SCORING DEBUG] Enabled questions: Region=%t, Variety=%t, Process=%t, TasteNote1=%t, TasteNote2=%t, FavoriteCoffee=%t, BrewingMethod=%t\n",
 		activeCase.EnabledQuestions.Region, activeCase.EnabledQuestions.Variety, activeCase.EnabledQuestions.Process,
-		activeCase.EnabledQuestions.TasteNote1, activeCase.EnabledQuestions.TasteNote2, 
+		activeCase.EnabledQuestions.TasteNote1, activeCase.EnabledQuestions.TasteNote2,
 		activeCase.EnabledQuestions.FavoriteCoffee, activeCase.EnabledQuestions.BrewingMethod)
 	fmt.Printf("☕ [SCORING DEBUG] Case has %d coffees\n", len(activeCase.Coffees))
 
@@ -129,7 +114,7 @@ func calculateScore(submission *models.Submission) (int, float64) {
 	totalQuestions := len(submission.CoffeeAnswers) * enabledQuestionsPerCoffee
 	fmt.Printf("📊 [SCORING DEBUG] Enabled questions per coffee: %d\n", enabledQuestionsPerCoffee)
 	fmt.Printf("📊 [SCORING DEBUG] Total questions: %d coffees × %d questions = %d\n", len(submission.CoffeeAnswers), enabledQuestionsPerCoffee, totalQuestions)
-	
+
 	if totalQuestions == 0 {
 		fmt.Printf("⚠️ [SCORING DEBUG] No questions enabled, returning 0 score\n")
 		return 0, 0.0
@@ -137,12 +122,12 @@ func calculateScore(submission *models.Submission) (int, float64) {
 
 	correctAnswers := 0
 	basePoints := 100
-	
+
 	fmt.Printf("👤 [SCORING DEBUG] User submitted %d coffee answers\n", len(submission.CoffeeAnswers))
 
 	for i, answer := range submission.CoffeeAnswers {
 		fmt.Printf("\n☕ [SCORING DEBUG] === Processing Coffee #%d (ID: %s) ===\n", i+1, answer.CoffeeID)
-		
+
 		// Find the correct coffee data for this answer
 		var correctCoffee *models.CoffeeItem
 		for _, coffee := range activeCase.Coffees {
@@ -151,21 +136,20 @@ func calculateScore(submission *models.Submission) (int, float64) {
 				break
 			}
 		}
-		
+
 		if correctCoffee == nil {
 			fmt.Printf("❌ [SCORING DEBUG] Coffee ID %s not found in case, skipping\n", answer.CoffeeID)
-			continue // Skip if coffee not found
+			continue
 		}
-		
+
 		fmt.Printf("✅ [SCORING DEBUG] Found correct coffee: %s\n", correctCoffee.Name)
-		fmt.Printf("📋 [SCORING DEBUG] Correct data - Region: '%s', Variety: '%s', Process: '%s', TastingNotes: '%s'\n", 
+		fmt.Printf("📋 [SCORING DEBUG] Correct data - Region: '%s', Variety: '%s', Process: '%s', TastingNotes: '%s'\n",
 			correctCoffee.Region, correctCoffee.Variety, correctCoffee.Process, correctCoffee.TastingNotes)
-		fmt.Printf("👤 [SCORING DEBUG] User answers - Region: '%s', Variety: '%s', Process: '%s', Note1: '%s', Note2: '%s'\n", 
+		fmt.Printf("👤 [SCORING DEBUG] User answers - Region: '%s', Variety: '%s', Process: '%s', Note1: '%s', Note2: '%s'\n",
 			answer.Region, answer.Variety, answer.Process, answer.TasteNote1, answer.TasteNote2)
-		
-		// Compare user answers against correct coffee data
+
 		coffeeCorrectAnswers := 0
-		
+
 		if activeCase.EnabledQuestions.Region && answer.Region != "" {
 			userRegion := strings.TrimSpace(answer.Region)
 			correctRegion := strings.TrimSpace(correctCoffee.Region)
@@ -178,7 +162,7 @@ func calculateScore(submission *models.Submission) (int, float64) {
 		} else if activeCase.EnabledQuestions.Region {
 			fmt.Printf("🌍 [SCORING DEBUG] Region question enabled but user answer is empty\n")
 		}
-		
+
 		if activeCase.EnabledQuestions.Variety && answer.Variety != "" {
 			userVariety := strings.TrimSpace(answer.Variety)
 			correctVariety := strings.TrimSpace(correctCoffee.Variety)
@@ -191,7 +175,7 @@ func calculateScore(submission *models.Submission) (int, float64) {
 		} else if activeCase.EnabledQuestions.Variety {
 			fmt.Printf("🌱 [SCORING DEBUG] Variety question enabled but user answer is empty\n")
 		}
-		
+
 		if activeCase.EnabledQuestions.Process && answer.Process != "" {
 			userProcess := strings.TrimSpace(answer.Process)
 			correctProcess := strings.TrimSpace(correctCoffee.Process)
@@ -204,11 +188,10 @@ func calculateScore(submission *models.Submission) (int, float64) {
 		} else if activeCase.EnabledQuestions.Process {
 			fmt.Printf("⚙️ [SCORING DEBUG] Process question enabled but user answer is empty\n")
 		}
-		
-		// Handle comma-separated tasting notes (avoid double points for same note)
+
 		var awardedTastingNotes []string
 		fmt.Printf("🍫 [SCORING DEBUG] Starting tasting notes evaluation...\n")
-		
+
 		if activeCase.EnabledQuestions.TasteNote1 && answer.TasteNote1 != "" {
 			fmt.Printf("🍫 [SCORING DEBUG] TasteNote1 check: user='%s' vs correct='%s'\n", answer.TasteNote1, correctCoffee.TastingNotes)
 			if matchedNote := getMatchedTastingNote(answer.TasteNote1, correctCoffee.TastingNotes); matchedNote != "" {
@@ -222,11 +205,10 @@ func calculateScore(submission *models.Submission) (int, float64) {
 		} else if activeCase.EnabledQuestions.TasteNote1 {
 			fmt.Printf("🍫 [SCORING DEBUG] TasteNote1 question enabled but user answer is empty\n")
 		}
-		
+
 		if activeCase.EnabledQuestions.TasteNote2 && answer.TasteNote2 != "" {
 			fmt.Printf("🍫 [SCORING DEBUG] TasteNote2 check: user='%s' vs correct='%s'\n", answer.TasteNote2, correctCoffee.TastingNotes)
 			if matchedNote := getMatchedTastingNote(answer.TasteNote2, correctCoffee.TastingNotes); matchedNote != "" {
-				// Check if we already awarded points for this exact note
 				alreadyAwarded := false
 				for _, awarded := range awardedTastingNotes {
 					if strings.EqualFold(awarded, matchedNote) {
@@ -247,14 +229,13 @@ func calculateScore(submission *models.Submission) (int, float64) {
 		} else if activeCase.EnabledQuestions.TasteNote2 {
 			fmt.Printf("🍫 [SCORING DEBUG] TasteNote2 question enabled but user answer is empty\n")
 		}
-		
+
 		fmt.Printf("📊 [SCORING DEBUG] Coffee #%d results: %d/%d correct answers\n", i+1, coffeeCorrectAnswers, enabledQuestionsPerCoffee)
 	}
 
-	// Add bonus points for non-coffee questions
 	bonusPoints := 0
 	fmt.Printf("\n🎁 [SCORING DEBUG] === Bonus Questions Evaluation ===\n")
-	
+
 	if activeCase.EnabledQuestions.FavoriteCoffee && submission.FavoriteCoffee != "" {
 		bonusPoints += 50
 		fmt.Printf("✅ [SCORING DEBUG] FavoriteCoffee bonus: +50 points (answer: '%s')\n", submission.FavoriteCoffee)
@@ -263,7 +244,7 @@ func calculateScore(submission *models.Submission) (int, float64) {
 	} else {
 		fmt.Printf("⚪ [SCORING DEBUG] FavoriteCoffee question disabled\n")
 	}
-	
+
 	if activeCase.EnabledQuestions.BrewingMethod && submission.BrewingMethod != "" {
 		bonusPoints += 50
 		fmt.Printf("✅ [SCORING DEBUG] BrewingMethod bonus: +50 points (answer: '%s')\n", submission.BrewingMethod)
@@ -274,13 +255,13 @@ func calculateScore(submission *models.Submission) (int, float64) {
 	}
 
 	accuracy := float64(correctAnswers) / float64(totalQuestions)
-	score := int(float64(basePoints) * accuracy * float64(len(submission.CoffeeAnswers))) + bonusPoints
+	score := int(float64(basePoints)*accuracy*float64(len(submission.CoffeeAnswers))) + bonusPoints
 
 	fmt.Printf("\n🏆 [SCORING DEBUG] === FINAL CALCULATION ===\n")
 	fmt.Printf("📊 [SCORING DEBUG] Correct answers: %d/%d\n", correctAnswers, totalQuestions)
 	fmt.Printf("📊 [SCORING DEBUG] Accuracy: %.4f (%.1f%%)\n", accuracy, accuracy*100)
-	fmt.Printf("📊 [SCORING DEBUG] Base calculation: %d points × %.4f accuracy × %d coffees = %.2f\n", 
-		basePoints, accuracy, len(submission.CoffeeAnswers), float64(basePoints) * accuracy * float64(len(submission.CoffeeAnswers)))
+	fmt.Printf("📊 [SCORING DEBUG] Base calculation: %d points × %.4f accuracy × %d coffees = %.2f\n",
+		basePoints, accuracy, len(submission.CoffeeAnswers), float64(basePoints)*accuracy*float64(len(submission.CoffeeAnswers)))
 	fmt.Printf("📊 [SCORING DEBUG] Bonus points: %d\n", bonusPoints)
 	fmt.Printf("🏆 [SCORING DEBUG] FINAL SCORE: %d points\n", score)
 
@@ -289,7 +270,7 @@ func calculateScore(submission *models.Submission) (int, float64) {
 
 // calculateScoreDefault provides fallback scoring when case info is not available
 func calculateScoreDefault(submission *models.Submission) (int, float64) {
-	totalQuestions := len(submission.CoffeeAnswers) * 3 // region, variety, process
+	totalQuestions := len(submission.CoffeeAnswers) * 3
 	if totalQuestions == 0 {
 		return 0, 0.0
 	}
@@ -316,7 +297,7 @@ func calculateScoreDefault(submission *models.Submission) (int, float64) {
 }
 
 // updateUserStats updates user statistics
-func updateUserStats(userID string, score int, accuracy float64) {
+func (h *Handler) updateUserStats(userID string, score int, accuracy float64) {
 	if userID == "" {
 		return
 	}
@@ -324,52 +305,31 @@ func updateUserStats(userID string, score int, accuracy float64) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	userRef := database.FirestoreClient.Collection(database.UsersCollection).Doc(userID)
-
-	// Get current user data
-	doc, err := userRef.Get(ctx)
+	user, err := h.Store.GetUser(ctx, userID)
 	if err != nil {
-		// User doesn't exist - submissions should only work for existing users
 		return
 	}
 
-	if !doc.Exists() {
-		// User doesn't exist - submissions should only work for existing users
-		return
-	}
-
-	var user models.User
-	if err := doc.DataTo(&user); err != nil {
-		return
-	}
-
-	// Update user stats
 	user.Points += score
 	user.CasesCount++
 	user.Accuracy = (user.Accuracy*float64(user.CasesCount-1) + accuracy) / float64(user.CasesCount)
 	user.UpdatedAt = time.Now()
 
-	// Badges temporarily disabled
-	// updateBadges(&user)
-
-	userRef.Set(ctx, user)
+	h.Store.SetUser(ctx, user)
 }
 
 // updateBadges updates user badges based on achievements
 func updateBadges(user *models.User) {
 	badges := make(map[string]bool)
 
-	// Convert existing badges to map for easy lookup
 	for _, badge := range user.Badges {
 		badges[badge] = true
 	}
 
-	// First case badge
 	if user.CasesCount >= 1 && !badges["🔍 Primer Caso"] {
 		badges["🔍 Primer Caso"] = true
 	}
 
-	// Accuracy badges
 	if user.Accuracy >= 0.7 && !badges["🎯 Precisión 70%"] {
 		badges["🎯 Precisión 70%"] = true
 	}
@@ -377,17 +337,14 @@ func updateBadges(user *models.User) {
 		badges["💎 Catador Nivel 2"] = true
 	}
 
-	// Points badges
 	if user.Points >= 2000 && !badges["🏆 Detective Maestro"] {
 		badges["🏆 Detective Maestro"] = true
 	}
 
-	// Cases count badges
 	if user.CasesCount >= 5 && !badges["🔥 Experto en Tuestes"] {
 		badges["🔥 Experto en Tuestes"] = true
 	}
 
-	// Convert back to slice
 	user.Badges = make([]string, 0, len(badges))
 	for badge := range badges {
 		user.Badges = append(user.Badges, badge)
@@ -400,40 +357,15 @@ type OrderValidationResult struct {
 	ErrorMessage string
 }
 
-// validateOrderIDDetailed validates an order ID and returns detailed error information
-func validateOrderIDDetailed(orderID string) OrderValidationResult {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	// Query orders collection to find order with this order ID
-	query := database.FirestoreClient.Collection(database.OrdersCollection).
-		Where("order_id", "==", orderID).
-		Limit(1)
-
-	docs, err := query.Documents(ctx).GetAll()
+func (h *Handler) validateOrderIDDetailed(ctx context.Context, orderID string) OrderValidationResult {
+	order, err := h.Store.GetOrderByOrderID(ctx, orderID)
 	if err != nil {
-		return OrderValidationResult{
-			IsValid:      false,
-			ErrorMessage: "Error al validar el código de pedido. Intenta nuevamente.",
-		}
-	}
-	
-	if len(docs) == 0 {
 		return OrderValidationResult{
 			IsValid:      false,
 			ErrorMessage: "Código de pedido no válido. Verifica que hayas ingresado el código correctamente.",
 		}
 	}
 
-	var order models.Order
-	if err := docs[0].DataTo(&order); err != nil {
-		return OrderValidationResult{
-			IsValid:      false,
-			ErrorMessage: "Error al procesar el código de pedido. Contacta al soporte.",
-		}
-	}
-
-	// Check if already used for submission
 	if order.IsSubmissionUsed {
 		return OrderValidationResult{
 			IsValid:      false,
@@ -441,7 +373,6 @@ func validateOrderIDDetailed(orderID string) OrderValidationResult {
 		}
 	}
 
-	// Order must be in delivered status to allow submission
 	if order.Status != "delivered" {
 		return OrderValidationResult{
 			IsValid:      false,
@@ -455,104 +386,35 @@ func validateOrderIDDetailed(orderID string) OrderValidationResult {
 	}
 }
 
-// validateOrderID validates if an order ID is valid and unused (legacy function)
-func validateOrderID(orderID string) bool {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	// Query orders collection to find order with this order ID
-	query := database.FirestoreClient.Collection(database.OrdersCollection).
-		Where("order_id", "==", orderID).
-		Limit(1)
-
-	docs, err := query.Documents(ctx).GetAll()
-	if err != nil || len(docs) == 0 {
-		return false // Order ID doesn't exist
-	}
-
-	var order models.Order
-	if err := docs[0].DataTo(&order); err != nil {
-		return false
-	}
-
-	// Check if already used for submission
-	if order.IsSubmissionUsed {
-		return false
-	}
-
-	// Order must be in delivered status to allow submission
-	if order.Status != "delivered" {
-		return false
-	}
-
-	return true
-}
-
-// markOrderIDAsUsed marks an order ID as used for submission
-func markOrderIDAsUsed(orderID string, userID string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	// Query orders collection to find order with this order ID
-	query := database.FirestoreClient.Collection(database.OrdersCollection).
-		Where("order_id", "==", orderID).
-		Limit(1)
-
-	docs, err := query.Documents(ctx).GetAll()
-	if err != nil || len(docs) == 0 {
-		return // Order not found
+func (h *Handler) markOrderIDAsUsed(ctx context.Context, orderID string, userID string) {
+	order, err := h.Store.GetOrderByOrderID(ctx, orderID)
+	if err != nil {
+		return
 	}
 
 	now := time.Now()
-	updates := []firestore.Update{
-		{Path: "is_submission_used", Value: true},
-		{Path: "submission_used_by", Value: userID},
-		{Path: "submission_used_at", Value: now},
-		{Path: "updated_at", Value: now},
+	updates := map[string]interface{}{
+		"is_submission_used": true,
+		"submission_used_by": userID,
+		"submission_used_at": now,
+		"updated_at":         now,
 	}
 
-	docs[0].Ref.Update(ctx, updates)
-}
-
-// getActiveCase gets the current active case
-func getActiveCase() (*models.CoffeeCase, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	iter := database.FirestoreClient.Collection(database.CasesCollection).
-		Where("is_active", "==", true).
-		Limit(1).
-		Documents(ctx)
-
-	doc, err := iter.Next()
-	if err == iterator.Done {
-		return nil, err
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	var coffeeCase models.CoffeeCase
-	if err := doc.DataTo(&coffeeCase); err != nil {
-		return nil, err
-	}
-
-	return &coffeeCase, nil
+	h.Store.UpdateOrderFields(ctx, order.ID, updates)
 }
 
 // GetUserSubmissions returns submissions for a specific user
-func GetUserSubmissions(c *gin.Context) {
+func (h *Handler) GetUserSubmissions(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User authentication required"})
 		return
 	}
 
-	// Get query parameters for pagination
 	limitStr := c.Query("limit")
 	offsetStr := c.Query("offset")
 
-	limit := 10 // Default limit
+	limit := 10
 	if limitStr != "" {
 		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 50 {
 			limit = l
@@ -566,51 +428,20 @@ func GetUserSubmissions(c *gin.Context) {
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	submissions, err := h.Store.ListSubmissionsByUser(c.Request.Context(), userID.(string), limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch submissions", "details": err.Error()})
+		return
+	}
 
-	// Query submissions for this user, ordered by most recent first
-	query := database.FirestoreClient.Collection(database.SubmissionsCollection).
-		Where("user_id", "==", userID.(string)).
-		OrderBy("submitted_at", firestore.Desc).
-		Limit(limit).
-		Offset(offset)
-
-	iter := query.Documents(ctx)
-
-	var submissions []map[string]interface{}
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch submissions", "details": err.Error()})
-			return
+	var submissionResponses []map[string]interface{}
+	for _, submission := range submissions {
+		caseName := "Caso Desconocido"
+		if coffeeCase, err := h.Store.GetCase(c.Request.Context(), submission.CaseID); err == nil {
+			caseName = coffeeCase.Name
 		}
 
-		var submission models.Submission
-		if err := doc.DataTo(&submission); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse submission"})
-			return
-		}
-
-		// Get case information for this submission
-		caseRef := database.FirestoreClient.Collection(database.CasesCollection).Doc(submission.CaseID)
-		caseDoc, err := caseRef.Get(ctx)
-		var caseName string
-		if err == nil && caseDoc.Exists() {
-			var coffeeCase models.CoffeeCase
-			if err := caseDoc.DataTo(&coffeeCase); err == nil {
-				caseName = coffeeCase.Name
-			}
-		}
-		if caseName == "" {
-			caseName = "Caso Desconocido"
-		}
-
-		// Create response object with submission and case info
-		submissionResponse := map[string]interface{}{
+		submissionResponses = append(submissionResponses, map[string]interface{}{
 			"id":           submission.ID,
 			"case_id":      submission.CaseID,
 			"case_name":    caseName,
@@ -618,53 +449,47 @@ func GetUserSubmissions(c *gin.Context) {
 			"accuracy":     submission.Accuracy,
 			"submitted_at": submission.SubmittedAt,
 			"status":       "completed",
-		}
-
-		submissions = append(submissions, submissionResponse)
+		})
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"submissions": submissions,
+		"submissions": submissionResponses,
 		"limit":       limit,
 		"offset":      offset,
-		"count":       len(submissions),
+		"count":       len(submissionResponses),
 	})
 }
 
 // getMatchedTastingNote returns the matched note from correct notes, or empty string if no match
 func getMatchedTastingNote(userNote, correctNotes string) string {
 	fmt.Printf("🔍 [TASTING DEBUG] Checking note: user='%s' vs correct='%s'\n", userNote, correctNotes)
-	
+
 	if userNote == "" || correctNotes == "" {
 		fmt.Printf("⚠️ [TASTING DEBUG] Empty input - userNote='%s', correctNotes='%s'\n", userNote, correctNotes)
 		return ""
 	}
-	
-	// Clean and normalize user input
+
 	userNote = strings.TrimSpace(strings.ToLower(userNote))
 	fmt.Printf("🧹 [TASTING DEBUG] Normalized user note: '%s'\n", userNote)
-	
-	// Split correct notes by comma and check each one
+
 	correctNotesSlice := strings.Split(correctNotes, ",")
 	fmt.Printf("📝 [TASTING DEBUG] Split correct notes into %d parts: %v\n", len(correctNotesSlice), correctNotesSlice)
-	
+
 	for i, note := range correctNotesSlice {
 		originalNote := note
 		note = strings.TrimSpace(strings.ToLower(note))
 		fmt.Printf("🔍 [TASTING DEBUG] Checking note #%d: original='%s', normalized='%s'\n", i+1, originalNote, note)
-		
+
 		if note == "" {
 			fmt.Printf("⚠️ [TASTING DEBUG] Note #%d is empty after normalization, skipping\n", i+1)
 			continue
 		}
-		
-		// Check for exact match
+
 		if userNote == note {
 			fmt.Printf("✅ [TASTING DEBUG] EXACT MATCH found: '%s' == '%s'\n", userNote, note)
 			return note
 		}
-		
-		// Check for partial match (user note contains correct note or vice versa)
+
 		if strings.Contains(userNote, note) {
 			fmt.Printf("✅ [TASTING DEBUG] PARTIAL MATCH found: user '%s' contains correct '%s'\n", userNote, note)
 			return note
@@ -673,15 +498,15 @@ func getMatchedTastingNote(userNote, correctNotes string) string {
 			fmt.Printf("✅ [TASTING DEBUG] PARTIAL MATCH found: correct '%s' contains user '%s'\n", note, userNote)
 			return note
 		}
-		
+
 		fmt.Printf("❌ [TASTING DEBUG] No match for note #%d\n", i+1)
 	}
-	
+
 	fmt.Printf("❌ [TASTING DEBUG] No matches found for user note '%s'\n", userNote)
 	return ""
 }
 
-// matchesTastingNotes checks if a user's tasting note matches any of the comma-separated correct notes (legacy function)
+// matchesTastingNotes checks if a user's tasting note matches any of the comma-separated correct notes
 func matchesTastingNotes(userNote, correctNotes string) bool {
 	return getMatchedTastingNote(userNote, correctNotes) != ""
 }

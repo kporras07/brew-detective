@@ -7,6 +7,7 @@ import (
 	"brew-detective-backend/internal/auth"
 	"brew-detective-backend/internal/database"
 	"brew-detective-backend/internal/handlers"
+	"brew-detective-backend/internal/store"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -22,16 +23,21 @@ func main() {
 	// Initialize Auth
 	auth.InitAuth()
 
+	// Create store and handler
+	s := store.NewFirestoreStore(database.FirestoreClient)
+	a := &auth.GoogleAuthenticator{}
+	h := handlers.NewHandler(s, a)
+
 	// Initialize Gin router
 	router := gin.Default()
 
 	// Configure CORS for GitHub Pages
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{
-		"https://brewdetective.coffee", // Replace with your GitHub Pages domain
-		"http://localhost:3000",        // For local development
-		"http://localhost:8080",        // For local development
-		"http://127.0.0.1:8080",        // Alternative localhost
+		"https://brewdetective.coffee",
+		"http://localhost:3000",
+		"http://localhost:8080",
+		"http://127.0.0.1:8080",
 	}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
@@ -44,74 +50,64 @@ func main() {
 		c.JSON(200, gin.H{"status": "ok", "service": "brew-detective-backend"})
 	})
 
-	// Firestore test endpoint
-	router.GET("/test/firestore", handlers.TestFirestore)
-
 	// Auth routes
 	authRoutes := router.Group("/auth")
 	{
-		authRoutes.GET("/google", handlers.GoogleLogin)
-		authRoutes.GET("/google/callback", handlers.GoogleCallback)
-		authRoutes.POST("/logout", handlers.Logout)
+		authRoutes.GET("/google", h.GoogleLogin)
+		authRoutes.GET("/google/callback", h.GoogleCallback)
+		authRoutes.POST("/logout", h.Logout)
 	}
 
 	// API routes
 	api := router.Group("/api/v1")
 	{
 		// Public routes
-		api.GET("/cases/public", handlers.GetCasesPublic)
-		api.GET("/cases/active/public", handlers.GetActiveCasePublic)
-		api.GET("/cases/:id/public", handlers.GetCaseByIDPublic)
-		api.GET("/leaderboard", handlers.GetLeaderboard)
-		api.GET("/leaderboard/current", handlers.GetCurrentCaseLeaderboard)
-		api.GET("/catalog", handlers.GetAllCatalog)
-		api.GET("/catalog/:category", handlers.GetCatalogByCategory)
+		api.GET("/cases/public", h.GetCasesPublic)
+		api.GET("/cases/active/public", h.GetActiveCasePublic)
+		api.GET("/cases/:id/public", h.GetCaseByIDPublic)
+		api.GET("/leaderboard", h.GetLeaderboard)
+		api.GET("/leaderboard/current", h.GetCurrentCaseLeaderboard)
+		api.GET("/catalog", h.GetAllCatalog)
+		api.GET("/catalog/:category", h.GetCatalogByCategory)
 
 		// Protected routes
 		protected := api.Group("/")
 		protected.Use(auth.AuthMiddleware())
 		{
-			// User profile
-			protected.GET("/profile", handlers.GetProfile)
-			protected.GET("/users/:id", handlers.GetUserProfile)
-			protected.PUT("/users/:id", handlers.UpdateUserProfile)
+			protected.GET("/profile", h.GetProfile)
+			protected.GET("/users/:id", h.GetUserProfile)
+			protected.PUT("/users/:id", h.UpdateUserProfile)
 
-			// Submissions
-			protected.POST("/submissions", handlers.SubmitCase)
-			protected.GET("/submissions", handlers.GetUserSubmissions)
+			protected.POST("/submissions", h.SubmitCase)
+			protected.GET("/submissions", h.GetUserSubmissions)
 
-			// Orders
-			protected.POST("/orders", handlers.CreateOrder)
-			protected.GET("/orders/:id", handlers.GetOrder)
-			protected.PUT("/orders/:id/status", handlers.UpdateOrderStatus)
+			protected.POST("/orders", h.CreateOrder)
+			protected.GET("/orders/:id", h.GetOrder)
+			protected.PUT("/orders/:id/status", h.UpdateOrderStatus)
 		}
 
 		// Admin routes
 		admin := api.Group("/admin")
-		admin.Use(auth.AdminMiddleware())
+		admin.Use(auth.AdminMiddleware(s))
 		{
-			// Catalog management
-			admin.GET("/catalog", handlers.GetAllCatalogItems)
-			admin.POST("/catalog", handlers.CreateCatalogItem)
-			admin.PUT("/catalog/:id", handlers.UpdateCatalogItem)
-			admin.DELETE("/catalog/:id", handlers.DeleteCatalogItem)
+			admin.GET("/catalog", h.GetAllCatalogItems)
+			admin.POST("/catalog", h.CreateCatalogItem)
+			admin.PUT("/catalog/:id", h.UpdateCatalogItem)
+			admin.DELETE("/catalog/:id", h.DeleteCatalogItem)
 
-			// Case management
-			admin.GET("/cases", handlers.GetAllCases)
-			admin.GET("/cases/active", handlers.GetActiveCase)
-			admin.GET("/cases/:id", handlers.GetCaseByID)
-			admin.GET("/cases/list", handlers.GetCases)
-			admin.POST("/cases", handlers.CreateCase)
-			admin.PUT("/cases/:id", handlers.UpdateCase)
-			admin.DELETE("/cases/:id", handlers.DeleteCase)
+			admin.GET("/cases", h.GetAllCases)
+			admin.GET("/cases/active", h.GetActiveCase)
+			admin.GET("/cases/:id", h.GetCaseByID)
+			admin.GET("/cases/list", h.GetCases)
+			admin.POST("/cases", h.CreateCase)
+			admin.PUT("/cases/:id", h.UpdateCase)
+			admin.DELETE("/cases/:id", h.DeleteCase)
 
-			// Order management
-			admin.GET("/orders", handlers.GetAllOrders)
-			admin.POST("/orders", handlers.CreateOrder)
-			admin.PUT("/orders/:id/status", handlers.UpdateOrderStatus)
+			admin.GET("/orders", h.GetAllOrders)
+			admin.POST("/orders", h.CreateOrder)
+			admin.PUT("/orders/:id/status", h.UpdateOrderStatus)
 
-			// User management
-			admin.GET("/users", handlers.GetAllUsers)
+			admin.GET("/users", h.GetAllUsers)
 		}
 	}
 

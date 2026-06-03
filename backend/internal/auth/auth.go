@@ -9,8 +9,7 @@ import (
 	"os"
 	"time"
 
-	"brew-detective-backend/internal/database"
-	"brew-detective-backend/internal/models"
+	"brew-detective-backend/internal/store"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -41,6 +40,59 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
+// Authenticator abstracts the OAuth and JWT operations so handlers can be tested
+// without hitting Google.
+type Authenticator interface {
+	GenerateOAuthURL() string
+	GetUserFromOAuthCode(code string) (*GoogleUser, error)
+	GenerateJWT(userID, email, name string) (string, error)
+}
+
+// GoogleAuthenticator is the real implementation backed by Google OAuth.
+type GoogleAuthenticator struct{}
+
+func (g *GoogleAuthenticator) GenerateOAuthURL() string {
+	state := generateOAuthState()
+	return googleOauthConfig.AuthCodeURL(state)
+}
+
+func (g *GoogleAuthenticator) GetUserFromOAuthCode(code string) (*GoogleUser, error) {
+	return GetUserDataFromGoogle(code)
+}
+
+func (g *GoogleAuthenticator) GenerateJWT(userID, email, name string) (string, error) {
+	return generateJWT(userID, email, name)
+}
+
+// generateOAuthState creates a cryptographically secure random state string.
+func generateOAuthState() string {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		timestamp := time.Now().UnixNano()
+		for i := range b {
+			b[i] = byte((timestamp + int64(i)) % 256)
+		}
+	}
+	return fmt.Sprintf("%x", b)
+}
+
+// generateJWT is the internal implementation used by both the package-level
+// function and the Authenticator interface.
+func generateJWT(userID, email, name string) (string, error) {
+	claims := &Claims{
+		UserID: userID,
+		Email:  email,
+		Name:   name,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtSecret)
+}
+
 func InitAuth() {
 	clientID := os.Getenv("GOOGLE_CLIENT_ID")
 	clientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
@@ -67,22 +119,7 @@ func InitAuth() {
 }
 
 func GenerateOAuthState(c *gin.Context) string {
-	b := make([]byte, 32) // 32 bytes for better security
-	// Fill with cryptographically secure random data
-	if _, err := rand.Read(b); err != nil {
-		// Fallback to time-based generation if crypto/rand fails
-		timestamp := time.Now().UnixNano()
-		for i := range b {
-			b[i] = byte((timestamp + int64(i)) % 256)
-		}
-	}
-	state := fmt.Sprintf("%x", b)
-	
-	// For OAuth flows, we don't use cookies due to cross-domain issues
-	// The state is validated by the OAuth provider and returned in the callback
-	// In a production app with user sessions, you'd store this in a session store
-	
-	return state
+	return generateOAuthState()
 }
 
 func GetGoogleOauthConfig() *oauth2.Config {
@@ -116,18 +153,7 @@ func GetUserDataFromGoogle(code string) (*GoogleUser, error) {
 }
 
 func GenerateJWT(userID, email, name string) (string, error) {
-	claims := &Claims{
-		UserID: userID,
-		Email:  email,
-		Name:   name,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtSecret)
+	return generateJWT(userID, email, name)
 }
 
 func ValidateJWT(tokenString string) (*Claims, error) {
@@ -183,8 +209,9 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-// AdminMiddleware ensures the user is authenticated and has admin privileges
-func AdminMiddleware() gin.HandlerFunc {
+// AdminMiddleware ensures the user is authenticated and has admin privileges.
+// It uses the provided Store to look up user data instead of accessing Firestore directly.
+func AdminMiddleware(s store.Store) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// First check if user is authenticated
 		authHeader := c.GetHeader("Authorization")
@@ -210,18 +237,9 @@ func AdminMiddleware() gin.HandlerFunc {
 		}
 
 		// Check if user has admin privileges
-		userRef := database.FirestoreClient.Collection(database.UsersCollection).Doc(claims.UserID)
-		doc, err := userRef.Get(c.Request.Context())
-		
-		if err != nil || !doc.Exists() {
+		user, err := s.GetUser(c.Request.Context(), claims.UserID)
+		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
-			c.Abort()
-			return
-		}
-
-		var user models.User
-		if err := doc.DataTo(&user); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse user data"})
 			c.Abort()
 			return
 		}
