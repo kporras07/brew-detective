@@ -14,7 +14,7 @@ services:
       - webnet
 
   web-dev:
-    image: node:18-alpine
+    image: node:24-alpine
     container_name: web-dev-tools
     working_dir: /app
     volumes:
