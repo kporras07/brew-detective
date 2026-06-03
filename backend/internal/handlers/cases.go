@@ -1,25 +1,18 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
-	"brew-detective-backend/internal/database"
 	"brew-detective-backend/internal/models"
 
-	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"google.golang.org/api/iterator"
 )
 
-// Admin case management functions
-
-// CreateCase creates a new coffee case (admin only)
-func CreateCase(c *gin.Context) {
+func (h *Handler) CreateCase(c *gin.Context) {
 	var newCase models.CoffeeCase
 
 	if err := c.ShouldBindJSON(&newCase); err != nil {
@@ -27,36 +20,26 @@ func CreateCase(c *gin.Context) {
 		return
 	}
 
-	// Validate required fields
 	if newCase.Name == "" || newCase.Description == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Name and description are required"})
 		return
 	}
 
-	// Generate case ID and set timestamps
 	newCase.ID = uuid.New().String()
 	newCase.CreatedAt = time.Now()
 	newCase.UpdatedAt = time.Now()
 
-	// Generate UUIDs for each coffee if they don't have proper ones
 	for i := range newCase.Coffees {
 		if newCase.Coffees[i].ID == "" || strings.HasPrefix(newCase.Coffees[i].ID, "coffee_") {
 			newCase.Coffees[i].ID = uuid.New().String()
 		}
 	}
 
-	// Default to inactive when created
 	if !newCase.IsActive {
 		newCase.IsActive = false
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Save case to Firestore
-	_, err := database.FirestoreClient.Collection(database.CasesCollection).
-		Doc(newCase.ID).Set(ctx, newCase)
-	if err != nil {
+	if err := h.Store.CreateCase(c.Request.Context(), &newCase); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create case"})
 		return
 	}
@@ -67,8 +50,7 @@ func CreateCase(c *gin.Context) {
 	})
 }
 
-// UpdateCase updates an existing coffee case (admin only)
-func UpdateCase(c *gin.Context) {
+func (h *Handler) UpdateCase(c *gin.Context) {
 	caseID := c.Param("id")
 
 	var updates map[string]interface{}
@@ -94,32 +76,16 @@ func UpdateCase(c *gin.Context) {
 		}
 	}
 
-	// Add updated timestamp
 	updates["updated_at"] = time.Now()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
 	// Check if case exists
-	doc, err := database.FirestoreClient.Collection(database.CasesCollection).Doc(caseID).Get(ctx)
-	if err != nil || !doc.Exists() {
+	_, err := h.Store.GetCase(c.Request.Context(), caseID)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Case not found"})
 		return
 	}
 
-	// Convert map to firestore updates
-	var firestoreUpdates []firestore.Update
-	for key, value := range updates {
-		firestoreUpdates = append(firestoreUpdates, firestore.Update{
-			Path:  key,
-			Value: value,
-		})
-	}
-
-	// Update the case
-	_, err = database.FirestoreClient.Collection(database.CasesCollection).
-		Doc(caseID).Update(ctx, firestoreUpdates)
-	if err != nil {
+	if err := h.Store.UpdateCase(c.Request.Context(), caseID, updates); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update case"})
 		return
 	}
@@ -127,23 +93,17 @@ func UpdateCase(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Case updated successfully"})
 }
 
-// DeleteCase deletes a coffee case (admin only)
-func DeleteCase(c *gin.Context) {
+func (h *Handler) DeleteCase(c *gin.Context) {
 	caseID := c.Param("id")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
 	// Check if case exists
-	doc, err := database.FirestoreClient.Collection(database.CasesCollection).Doc(caseID).Get(ctx)
-	if err != nil || !doc.Exists() {
+	_, err := h.Store.GetCase(c.Request.Context(), caseID)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Case not found"})
 		return
 	}
 
-	// Delete the case
-	_, err = database.FirestoreClient.Collection(database.CasesCollection).Doc(caseID).Delete(ctx)
-	if err != nil {
+	if err := h.Store.DeleteCase(c.Request.Context(), caseID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete case"})
 		return
 	}
@@ -151,13 +111,11 @@ func DeleteCase(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Case deleted successfully"})
 }
 
-// GetAllCases returns all coffee cases with pagination (admin only)
-func GetAllCases(c *gin.Context) {
-	// Get query parameters for pagination
+func (h *Handler) GetAllCases(c *gin.Context) {
 	limitStr := c.Query("limit")
 	offsetStr := c.Query("offset")
 
-	limit := 20 // Default limit
+	limit := 20
 	if limitStr != "" {
 		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 100 {
 			limit = l
@@ -171,35 +129,10 @@ func GetAllCases(c *gin.Context) {
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Query all cases ordered by creation date (newest first)
-	query := database.FirestoreClient.Collection(database.CasesCollection).
-		OrderBy("created_at", firestore.Desc).
-		Limit(limit).
-		Offset(offset)
-
-	iter := query.Documents(ctx)
-
-	var cases []models.CoffeeCase
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cases", "details": err.Error()})
-			return
-		}
-
-		var coffeeCase models.CoffeeCase
-		if err := doc.DataTo(&coffeeCase); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse case data"})
-			return
-		}
-
-		cases = append(cases, coffeeCase)
+	cases, err := h.Store.ListCases(c.Request.Context(), limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cases", "details": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -210,208 +143,81 @@ func GetAllCases(c *gin.Context) {
 	})
 }
 
-// GetCases returns all active coffee cases
-func GetCases(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	iter := database.FirestoreClient.Collection(database.CasesCollection).
-		Where("is_active", "==", true).
-		Documents(ctx)
-
-	var cases []models.CoffeeCase
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cases"})
-			return
-		}
-
-		var coffeeCase models.CoffeeCase
-		if err := doc.DataTo(&coffeeCase); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse case data"})
-			return
-		}
-
-		cases = append(cases, coffeeCase)
+func (h *Handler) GetCases(c *gin.Context) {
+	cases, err := h.Store.ListActiveCases(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cases"})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"cases": cases})
 }
 
-// GetCaseByID returns a specific coffee case
-func GetCaseByID(c *gin.Context) {
+func (h *Handler) GetCaseByID(c *gin.Context) {
 	caseID := c.Param("id")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	doc, err := database.FirestoreClient.Collection(database.CasesCollection).Doc(caseID).Get(ctx)
+	coffeeCase, err := h.Store.GetCase(c.Request.Context(), caseID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Case not found"})
 		return
 	}
 
-	var coffeeCase models.CoffeeCase
-	if err := doc.DataTo(&coffeeCase); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse case data"})
+	c.JSON(http.StatusOK, gin.H{"case": coffeeCase})
+}
+
+func (h *Handler) GetActiveCase(c *gin.Context) {
+	coffeeCase, err := h.Store.GetActiveCase(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No active case found"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"case": coffeeCase})
 }
 
-// GetActiveCase returns the current active coffee case (admin only - includes answers)
-func GetActiveCase(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	iter := database.FirestoreClient.Collection(database.CasesCollection).
-		Where("is_active", "==", true).
-		Limit(1).
-		Documents(ctx)
-
-	doc, err := iter.Next()
-	if err == iterator.Done {
+func (h *Handler) GetActiveCasePublic(c *gin.Context) {
+	coffeeCase, err := h.Store.GetActiveCase(c.Request.Context())
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "No active case found"})
 		return
 	}
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch active case"})
-		return
-	}
 
-	var coffeeCase models.CoffeeCase
-	if err := doc.DataTo(&coffeeCase); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse case data"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"case": coffeeCase})
+	c.JSON(http.StatusOK, gin.H{"case": toPublicCase(coffeeCase)})
 }
 
-// GetActiveCasePublic returns the current active coffee case without answers (public endpoint)
-func GetActiveCasePublic(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	iter := database.FirestoreClient.Collection(database.CasesCollection).
-		Where("is_active", "==", true).
-		Limit(1).
-		Documents(ctx)
-
-	doc, err := iter.Next()
-	if err == iterator.Done {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No active case found"})
-		return
-	}
+func (h *Handler) GetCasesPublic(c *gin.Context) {
+	cases, err := h.Store.ListActiveCases(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch active case"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cases"})
 		return
 	}
-
-	var coffeeCase models.CoffeeCase
-	if err := doc.DataTo(&coffeeCase); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse case data"})
-		return
-	}
-
-	// Create sanitized public version without coffee answers
-	coffeeIDs := make([]string, len(coffeeCase.Coffees))
-	for i, coffee := range coffeeCase.Coffees {
-		coffeeIDs[i] = coffee.ID
-	}
-
-	publicCase := models.PublicCoffeeCase{
-		ID:               coffeeCase.ID,
-		Name:             coffeeCase.Name,
-		Description:      coffeeCase.Description,
-		EnabledQuestions: coffeeCase.EnabledQuestions,
-		CoffeeIDs:        coffeeIDs,
-		CoffeeCount:      len(coffeeCase.Coffees),
-		IsActive:         coffeeCase.IsActive,
-	}
-
-	c.JSON(http.StatusOK, gin.H{"case": publicCase})
-}
-
-// GetCasesPublic returns all active coffee cases without answers (public endpoint)
-func GetCasesPublic(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	iter := database.FirestoreClient.Collection(database.CasesCollection).
-		Where("is_active", "==", true).
-		Documents(ctx)
 
 	var publicCases []models.PublicCoffeeCase
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cases"})
-			return
-		}
-
-		var coffeeCase models.CoffeeCase
-		if err := doc.DataTo(&coffeeCase); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse case data"})
-			return
-		}
-
-		// Create sanitized public version without coffee answers
-		coffeeIDs := make([]string, len(coffeeCase.Coffees))
-		for i, coffee := range coffeeCase.Coffees {
-			coffeeIDs[i] = coffee.ID
-		}
-
-		publicCase := models.PublicCoffeeCase{
-			ID:               coffeeCase.ID,
-			Name:             coffeeCase.Name,
-			Description:      coffeeCase.Description,
-			EnabledQuestions: coffeeCase.EnabledQuestions,
-			CoffeeIDs:        coffeeIDs,
-			CoffeeCount:      len(coffeeCase.Coffees),
-			IsActive:         coffeeCase.IsActive,
-		}
-
-		publicCases = append(publicCases, publicCase)
+	for _, coffeeCase := range cases {
+		publicCases = append(publicCases, toPublicCase(&coffeeCase))
 	}
 
 	c.JSON(http.StatusOK, gin.H{"cases": publicCases})
 }
 
-// GetCaseByIDPublic returns a specific coffee case without answers (public endpoint)
-func GetCaseByIDPublic(c *gin.Context) {
+func (h *Handler) GetCaseByIDPublic(c *gin.Context) {
 	caseID := c.Param("id")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	doc, err := database.FirestoreClient.Collection(database.CasesCollection).Doc(caseID).Get(ctx)
+	coffeeCase, err := h.Store.GetCase(c.Request.Context(), caseID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Case not found"})
 		return
 	}
 
-	var coffeeCase models.CoffeeCase
-	if err := doc.DataTo(&coffeeCase); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse case data"})
-		return
-	}
+	c.JSON(http.StatusOK, gin.H{"case": toPublicCase(coffeeCase)})
+}
 
-	// Create sanitized public version without coffee answers
+func toPublicCase(coffeeCase *models.CoffeeCase) models.PublicCoffeeCase {
 	coffeeIDs := make([]string, len(coffeeCase.Coffees))
 	for i, coffee := range coffeeCase.Coffees {
 		coffeeIDs[i] = coffee.ID
 	}
-
-	publicCase := models.PublicCoffeeCase{
+	return models.PublicCoffeeCase{
 		ID:               coffeeCase.ID,
 		Name:             coffeeCase.Name,
 		Description:      coffeeCase.Description,
@@ -420,6 +226,4 @@ func GetCaseByIDPublic(c *gin.Context) {
 		CoffeeCount:      len(coffeeCase.Coffees),
 		IsActive:         coffeeCase.IsActive,
 	}
-
-	c.JSON(http.StatusOK, gin.H{"case": publicCase})
 }
