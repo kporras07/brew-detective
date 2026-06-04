@@ -678,17 +678,17 @@ async function loadCurrentCaseLeaderboard() {
         });
 
         if (leaderboard.length === 0) {
-            container.textContent = 'No hay detectives en este caso aún. ¡Sé el primero en resolverlo!';
+            container.innerHTML = '<p style="text-align: center; padding: 2rem;">No hay detectives en este caso aún. ¡Sé el primero en resolverlo!</p>';
             if (infoContainer) {
-                infoContainer.textContent = 'No hay participantes en el caso actual';
+                infoContainer.innerHTML = '<p>No hay participantes en el caso actual</p>';
             }
         }
 
     } catch (error) {
         console.error('Failed to load current case leaderboard:', error);
-        container.textContent = 'Error al cargar el ranking del caso actual.';
+        container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Error al cargar el ranking del caso actual.</p>';
         if (infoContainer) {
-            infoContainer.textContent = 'Error al cargar información del caso';
+            infoContainer.innerHTML = '<p style="color: #e74c3c;">Error al cargar información del caso</p>';
         }
     }
 }
@@ -732,12 +732,12 @@ async function loadGlobalLeaderboard() {
         });
 
         if (leaderboard.length === 0) {
-            container.textContent = 'No hay detectives en el ranking global aún. ¡Sé el primero!';
+            container.innerHTML = '<p style="text-align: center; padding: 2rem;">No hay detectives en el ranking global aún. ¡Sé el primero!</p>';
         }
 
     } catch (error) {
         console.error('Failed to load global leaderboard:', error);
-        container.textContent = 'Error al cargar el ranking global.';
+        container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Error al cargar el ranking global.</p>';
     }
 }
 
