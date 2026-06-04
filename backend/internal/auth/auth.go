@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"brew-detective-backend/internal/store"
@@ -16,6 +17,42 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
+
+var oauthStateStore = &stateStore{
+	states: make(map[string]time.Time),
+}
+
+type stateStore struct {
+	mu     sync.Mutex
+	states map[string]time.Time
+}
+
+func (s *stateStore) Save(state string, ttl time.Duration) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.states[state] = time.Now().Add(ttl)
+	s.cleanup()
+}
+
+func (s *stateStore) Validate(state string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	expiry, ok := s.states[state]
+	if !ok {
+		return false
+	}
+	delete(s.states, state)
+	return time.Now().Before(expiry)
+}
+
+func (s *stateStore) cleanup() {
+	now := time.Now()
+	for state, expiry := range s.states {
+		if now.After(expiry) {
+			delete(s.states, state)
+		}
+	}
+}
 
 var (
 	googleOauthConfig *oauth2.Config
@@ -44,6 +81,7 @@ type Claims struct {
 // without hitting Google.
 type Authenticator interface {
 	GenerateOAuthURL() string
+	ValidateOAuthState(state string) bool
 	GetUserFromOAuthCode(code string) (*GoogleUser, error)
 	GenerateJWT(userID, email, name string) (string, error)
 }
@@ -53,7 +91,12 @@ type GoogleAuthenticator struct{}
 
 func (g *GoogleAuthenticator) GenerateOAuthURL() string {
 	state := generateOAuthState()
+	oauthStateStore.Save(state, 10*time.Minute)
 	return googleOauthConfig.AuthCodeURL(state)
+}
+
+func (g *GoogleAuthenticator) ValidateOAuthState(state string) bool {
+	return oauthStateStore.Validate(state)
 }
 
 func (g *GoogleAuthenticator) GetUserFromOAuthCode(code string) (*GoogleUser, error) {
@@ -98,11 +141,6 @@ func InitAuth() {
 	clientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
 	redirectURL := os.Getenv("GOOGLE_REDIRECT_URL")
 	
-	// Debug logging (don't log secrets in production!)
-	fmt.Printf("OAuth Config - ClientID: %s\n", clientID)
-	fmt.Printf("OAuth Config - RedirectURL: %s\n", redirectURL)
-	fmt.Printf("OAuth Config - ClientSecret present: %v\n", clientSecret != "")
-	
 	googleOauthConfig = &oauth2.Config{
 		RedirectURL:  redirectURL,
 		ClientID:     clientID,
@@ -127,12 +165,6 @@ func GetGoogleOauthConfig() *oauth2.Config {
 }
 
 func GetUserDataFromGoogle(code string) (*GoogleUser, error) {
-	// Debug: Log OAuth config (without exposing secrets)
-	fmt.Printf("OAuth Exchange - ClientID: %s\n", googleOauthConfig.ClientID)
-	fmt.Printf("OAuth Exchange - RedirectURL: %s\n", googleOauthConfig.RedirectURL)
-	fmt.Printf("OAuth Exchange - ClientSecret present: %v\n", googleOauthConfig.ClientSecret != "")
-	fmt.Printf("OAuth Exchange - Code length: %d\n", len(code))
-	
 	token, err := googleOauthConfig.Exchange(context.Background(), code)
 	if err != nil {
 		return nil, fmt.Errorf("code exchange wrong: %s", err.Error())

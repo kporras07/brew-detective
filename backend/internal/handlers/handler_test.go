@@ -22,8 +22,9 @@ func init() {
 
 func defaultMockAuth() *auth.MockAuthenticator {
 	return &auth.MockAuthenticator{
-		OAuthURL: "https://accounts.google.com/o/oauth2/auth?mock=true",
-		JWTToken: "mock-jwt-token",
+		OAuthURL:      "https://accounts.google.com/o/oauth2/auth?mock=true",
+		ValidateState: true,
+		JWTToken:      "mock-jwt-token",
 	}
 }
 
@@ -149,15 +150,22 @@ func TestGetUserProfile(t *testing.T) {
 	})
 }
 
+func fakeAuth(userID string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("userID", userID)
+		c.Next()
+	}
+}
+
 func TestUpdateUserProfile(t *testing.T) {
 	mock := store.NewMockStore()
 	h := newTestHandler(mock)
 	mock.Users["u1"] = &models.User{ID: "u1", Name: "Alice", Email: "alice@example.com"}
 
-	r := setupRouter(h)
-	r.PUT("/users/:id", h.UpdateUserProfile)
-
 	t.Run("updates name", func(t *testing.T) {
+		r := setupRouter(h)
+		r.PUT("/users/:id", fakeAuth("u1"), h.UpdateUserProfile)
+
 		body := jsonBody(map[string]string{"name": "Alice Updated"})
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("PUT", "/users/u1", body)
@@ -173,7 +181,25 @@ func TestUpdateUserProfile(t *testing.T) {
 		}
 	})
 
+	t.Run("forbidden for different user", func(t *testing.T) {
+		r := setupRouter(h)
+		r.PUT("/users/:id", fakeAuth("u2"), h.UpdateUserProfile)
+
+		body := jsonBody(map[string]string{"name": "Hacked"})
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("PUT", "/users/u1", body)
+		req.Header.Set("Content-Type", "application/json")
+		r.ServeHTTP(w, req)
+
+		if w.Code != http.StatusForbidden {
+			t.Fatalf("expected 403, got %d", w.Code)
+		}
+	})
+
 	t.Run("user not found", func(t *testing.T) {
+		r := setupRouter(h)
+		r.PUT("/users/:id", fakeAuth("unknown"), h.UpdateUserProfile)
+
 		body := jsonBody(map[string]string{"name": "Test"})
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("PUT", "/users/unknown", body)
@@ -872,15 +898,17 @@ func TestGoogleCallbackMissingState(t *testing.T) {
 	}
 }
 
-func TestGoogleCallbackShortState(t *testing.T) {
+func TestGoogleCallbackInvalidState(t *testing.T) {
 	mock := store.NewMockStore()
-	h := newTestHandler(mock)
+	mockAuth := defaultMockAuth()
+	mockAuth.ValidateState = false
+	h := NewHandler(mock, mockAuth)
 
 	r := setupRouter(h)
 	r.GET("/auth/google/callback", h.GoogleCallback)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/auth/google/callback?state=short", nil)
+	req, _ := http.NewRequest("GET", "/auth/google/callback?state=invalid-state-token", nil)
 	r.ServeHTTP(w, req)
 
 	if w.Code != http.StatusBadRequest {
@@ -888,7 +916,7 @@ func TestGoogleCallbackShortState(t *testing.T) {
 	}
 
 	result := parseJSON(t, w)
-	if result["error"] != "Invalid OAuth state format" {
+	if result["error"] != "Invalid or expired OAuth state" {
 		t.Errorf("unexpected error: %v", result["error"])
 	}
 }
@@ -1936,7 +1964,7 @@ func TestUpdateUserProfileInvalidJSON(t *testing.T) {
 	h := newTestHandler(mock)
 
 	r := setupRouter(h)
-	r.PUT("/users/:id", h.UpdateUserProfile)
+	r.PUT("/users/:id", fakeAuth("u1"), h.UpdateUserProfile)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("PUT", "/users/u1", bytes.NewBufferString("bad"))
@@ -1954,7 +1982,7 @@ func TestUpdateUserProfileEmailOnly(t *testing.T) {
 	mock.Users["u1"] = &models.User{ID: "u1", Name: "Alice", Email: "old@test.com"}
 
 	r := setupRouter(h)
-	r.PUT("/users/:id", h.UpdateUserProfile)
+	r.PUT("/users/:id", fakeAuth("u1"), h.UpdateUserProfile)
 
 	body := jsonBody(map[string]string{"email": "new@test.com"})
 	w := httptest.NewRecorder()
@@ -2256,7 +2284,7 @@ func TestUpdateUserProfileStoreError(t *testing.T) {
 	mock.SetUserErr = fmt.Errorf("write failed")
 
 	r := setupRouter(h)
-	r.PUT("/users/:id", h.UpdateUserProfile)
+	r.PUT("/users/:id", fakeAuth("u1"), h.UpdateUserProfile)
 
 	body := jsonBody(map[string]string{"name": "Updated"})
 	w := httptest.NewRecorder()

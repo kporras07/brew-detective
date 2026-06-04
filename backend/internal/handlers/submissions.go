@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -79,21 +78,10 @@ func (h *Handler) SubmitCase(c *gin.Context) {
 
 // calculateScoreWithCase calculates the score and accuracy for a submission against a given case
 func calculateScoreWithCase(submission *models.Submission, activeCase *models.CoffeeCase) (int, float64) {
-	fmt.Printf("🔍 [SCORING DEBUG] Starting score calculation for submission ID: %s\n", submission.ID)
-
 	if activeCase == nil {
-		fmt.Printf("❌ [SCORING DEBUG] No case provided, using default scoring\n")
 		return calculateScoreDefault(submission)
 	}
 
-	fmt.Printf("✅ [SCORING DEBUG] Active case found: %s (ID: %s)\n", activeCase.Name, activeCase.ID)
-	fmt.Printf("📋 [SCORING DEBUG] Enabled questions: Region=%t, Variety=%t, Process=%t, TasteNote1=%t, TasteNote2=%t, FavoriteCoffee=%t, BrewingMethod=%t\n",
-		activeCase.EnabledQuestions.Region, activeCase.EnabledQuestions.Variety, activeCase.EnabledQuestions.Process,
-		activeCase.EnabledQuestions.TasteNote1, activeCase.EnabledQuestions.TasteNote2,
-		activeCase.EnabledQuestions.FavoriteCoffee, activeCase.EnabledQuestions.BrewingMethod)
-	fmt.Printf("☕ [SCORING DEBUG] Case has %d coffees\n", len(activeCase.Coffees))
-
-	// Count enabled questions per coffee
 	enabledQuestionsPerCoffee := 0
 	if activeCase.EnabledQuestions.Region {
 		enabledQuestionsPerCoffee++
@@ -112,23 +100,15 @@ func calculateScoreWithCase(submission *models.Submission, activeCase *models.Co
 	}
 
 	totalQuestions := len(submission.CoffeeAnswers) * enabledQuestionsPerCoffee
-	fmt.Printf("📊 [SCORING DEBUG] Enabled questions per coffee: %d\n", enabledQuestionsPerCoffee)
-	fmt.Printf("📊 [SCORING DEBUG] Total questions: %d coffees × %d questions = %d\n", len(submission.CoffeeAnswers), enabledQuestionsPerCoffee, totalQuestions)
 
 	if totalQuestions == 0 {
-		fmt.Printf("⚠️ [SCORING DEBUG] No questions enabled, returning 0 score\n")
 		return 0, 0.0
 	}
 
 	correctAnswers := 0
 	basePoints := 100
 
-	fmt.Printf("👤 [SCORING DEBUG] User submitted %d coffee answers\n", len(submission.CoffeeAnswers))
-
-	for i, answer := range submission.CoffeeAnswers {
-		fmt.Printf("\n☕ [SCORING DEBUG] === Processing Coffee #%d (ID: %s) ===\n", i+1, answer.CoffeeID)
-
-		// Find the correct coffee data for this answer
+	for _, answer := range submission.CoffeeAnswers {
 		var correctCoffee *models.CoffeeItem
 		for _, coffee := range activeCase.Coffees {
 			if coffee.ID == answer.CoffeeID {
@@ -138,76 +118,37 @@ func calculateScoreWithCase(submission *models.Submission, activeCase *models.Co
 		}
 
 		if correctCoffee == nil {
-			fmt.Printf("❌ [SCORING DEBUG] Coffee ID %s not found in case, skipping\n", answer.CoffeeID)
 			continue
 		}
 
-		fmt.Printf("✅ [SCORING DEBUG] Found correct coffee: %s\n", correctCoffee.Name)
-		fmt.Printf("📋 [SCORING DEBUG] Correct data - Region: '%s', Variety: '%s', Process: '%s', TastingNotes: '%s'\n",
-			correctCoffee.Region, correctCoffee.Variety, correctCoffee.Process, correctCoffee.TastingNotes)
-		fmt.Printf("👤 [SCORING DEBUG] User answers - Region: '%s', Variety: '%s', Process: '%s', Note1: '%s', Note2: '%s'\n",
-			answer.Region, answer.Variety, answer.Process, answer.TasteNote1, answer.TasteNote2)
-
-		coffeeCorrectAnswers := 0
-
 		if activeCase.EnabledQuestions.Region && answer.Region != "" {
-			userRegion := strings.TrimSpace(answer.Region)
-			correctRegion := strings.TrimSpace(correctCoffee.Region)
-			isCorrect := strings.EqualFold(userRegion, correctRegion)
-			fmt.Printf("🌍 [SCORING DEBUG] Region check: '%s' vs '%s' = %t\n", userRegion, correctRegion, isCorrect)
-			if isCorrect {
+			if strings.EqualFold(strings.TrimSpace(answer.Region), strings.TrimSpace(correctCoffee.Region)) {
 				correctAnswers++
-				coffeeCorrectAnswers++
 			}
-		} else if activeCase.EnabledQuestions.Region {
-			fmt.Printf("🌍 [SCORING DEBUG] Region question enabled but user answer is empty\n")
 		}
 
 		if activeCase.EnabledQuestions.Variety && answer.Variety != "" {
-			userVariety := strings.TrimSpace(answer.Variety)
-			correctVariety := strings.TrimSpace(correctCoffee.Variety)
-			isCorrect := strings.EqualFold(userVariety, correctVariety)
-			fmt.Printf("🌱 [SCORING DEBUG] Variety check: '%s' vs '%s' = %t\n", userVariety, correctVariety, isCorrect)
-			if isCorrect {
+			if strings.EqualFold(strings.TrimSpace(answer.Variety), strings.TrimSpace(correctCoffee.Variety)) {
 				correctAnswers++
-				coffeeCorrectAnswers++
 			}
-		} else if activeCase.EnabledQuestions.Variety {
-			fmt.Printf("🌱 [SCORING DEBUG] Variety question enabled but user answer is empty\n")
 		}
 
 		if activeCase.EnabledQuestions.Process && answer.Process != "" {
-			userProcess := strings.TrimSpace(answer.Process)
-			correctProcess := strings.TrimSpace(correctCoffee.Process)
-			isCorrect := strings.EqualFold(userProcess, correctProcess)
-			fmt.Printf("⚙️ [SCORING DEBUG] Process check: '%s' vs '%s' = %t\n", userProcess, correctProcess, isCorrect)
-			if isCorrect {
+			if strings.EqualFold(strings.TrimSpace(answer.Process), strings.TrimSpace(correctCoffee.Process)) {
 				correctAnswers++
-				coffeeCorrectAnswers++
 			}
-		} else if activeCase.EnabledQuestions.Process {
-			fmt.Printf("⚙️ [SCORING DEBUG] Process question enabled but user answer is empty\n")
 		}
 
 		var awardedTastingNotes []string
-		fmt.Printf("🍫 [SCORING DEBUG] Starting tasting notes evaluation...\n")
 
 		if activeCase.EnabledQuestions.TasteNote1 && answer.TasteNote1 != "" {
-			fmt.Printf("🍫 [SCORING DEBUG] TasteNote1 check: user='%s' vs correct='%s'\n", answer.TasteNote1, correctCoffee.TastingNotes)
 			if matchedNote := getMatchedTastingNote(answer.TasteNote1, correctCoffee.TastingNotes); matchedNote != "" {
-				fmt.Printf("✅ [SCORING DEBUG] TasteNote1 MATCHED: '%s'\n", matchedNote)
 				awardedTastingNotes = append(awardedTastingNotes, matchedNote)
 				correctAnswers++
-				coffeeCorrectAnswers++
-			} else {
-				fmt.Printf("❌ [SCORING DEBUG] TasteNote1 NO MATCH\n")
 			}
-		} else if activeCase.EnabledQuestions.TasteNote1 {
-			fmt.Printf("🍫 [SCORING DEBUG] TasteNote1 question enabled but user answer is empty\n")
 		}
 
 		if activeCase.EnabledQuestions.TasteNote2 && answer.TasteNote2 != "" {
-			fmt.Printf("🍫 [SCORING DEBUG] TasteNote2 check: user='%s' vs correct='%s'\n", answer.TasteNote2, correctCoffee.TastingNotes)
 			if matchedNote := getMatchedTastingNote(answer.TasteNote2, correctCoffee.TastingNotes); matchedNote != "" {
 				alreadyAwarded := false
 				for _, awarded := range awardedTastingNotes {
@@ -217,53 +158,24 @@ func calculateScoreWithCase(submission *models.Submission, activeCase *models.Co
 					}
 				}
 				if !alreadyAwarded {
-					fmt.Printf("✅ [SCORING DEBUG] TasteNote2 MATCHED (new): '%s'\n", matchedNote)
 					correctAnswers++
-					coffeeCorrectAnswers++
-				} else {
-					fmt.Printf("⚠️ [SCORING DEBUG] TasteNote2 matched '%s' but already awarded for this note\n", matchedNote)
 				}
-			} else {
-				fmt.Printf("❌ [SCORING DEBUG] TasteNote2 NO MATCH\n")
 			}
-		} else if activeCase.EnabledQuestions.TasteNote2 {
-			fmt.Printf("🍫 [SCORING DEBUG] TasteNote2 question enabled but user answer is empty\n")
 		}
-
-		fmt.Printf("📊 [SCORING DEBUG] Coffee #%d results: %d/%d correct answers\n", i+1, coffeeCorrectAnswers, enabledQuestionsPerCoffee)
 	}
 
 	bonusPoints := 0
-	fmt.Printf("\n🎁 [SCORING DEBUG] === Bonus Questions Evaluation ===\n")
 
 	if activeCase.EnabledQuestions.FavoriteCoffee && submission.FavoriteCoffee != "" {
 		bonusPoints += 50
-		fmt.Printf("✅ [SCORING DEBUG] FavoriteCoffee bonus: +50 points (answer: '%s')\n", submission.FavoriteCoffee)
-	} else if activeCase.EnabledQuestions.FavoriteCoffee {
-		fmt.Printf("❌ [SCORING DEBUG] FavoriteCoffee enabled but no answer provided\n")
-	} else {
-		fmt.Printf("⚪ [SCORING DEBUG] FavoriteCoffee question disabled\n")
 	}
 
 	if activeCase.EnabledQuestions.BrewingMethod && submission.BrewingMethod != "" {
 		bonusPoints += 50
-		fmt.Printf("✅ [SCORING DEBUG] BrewingMethod bonus: +50 points (answer: '%s')\n", submission.BrewingMethod)
-	} else if activeCase.EnabledQuestions.BrewingMethod {
-		fmt.Printf("❌ [SCORING DEBUG] BrewingMethod enabled but no answer provided\n")
-	} else {
-		fmt.Printf("⚪ [SCORING DEBUG] BrewingMethod question disabled\n")
 	}
 
 	accuracy := float64(correctAnswers) / float64(totalQuestions)
 	score := int(float64(basePoints)*accuracy*float64(len(submission.CoffeeAnswers))) + bonusPoints
-
-	fmt.Printf("\n🏆 [SCORING DEBUG] === FINAL CALCULATION ===\n")
-	fmt.Printf("📊 [SCORING DEBUG] Correct answers: %d/%d\n", correctAnswers, totalQuestions)
-	fmt.Printf("📊 [SCORING DEBUG] Accuracy: %.4f (%.1f%%)\n", accuracy, accuracy*100)
-	fmt.Printf("📊 [SCORING DEBUG] Base calculation: %d points × %.4f accuracy × %d coffees = %.2f\n",
-		basePoints, accuracy, len(submission.CoffeeAnswers), float64(basePoints)*accuracy*float64(len(submission.CoffeeAnswers)))
-	fmt.Printf("📊 [SCORING DEBUG] Bonus points: %d\n", bonusPoints)
-	fmt.Printf("🏆 [SCORING DEBUG] FINAL SCORE: %d points\n", score)
 
 	return score, accuracy
 }
@@ -460,49 +372,26 @@ func (h *Handler) GetUserSubmissions(c *gin.Context) {
 	})
 }
 
-// getMatchedTastingNote returns the matched note from correct notes, or empty string if no match
 func getMatchedTastingNote(userNote, correctNotes string) string {
-	fmt.Printf("🔍 [TASTING DEBUG] Checking note: user='%s' vs correct='%s'\n", userNote, correctNotes)
-
 	if userNote == "" || correctNotes == "" {
-		fmt.Printf("⚠️ [TASTING DEBUG] Empty input - userNote='%s', correctNotes='%s'\n", userNote, correctNotes)
 		return ""
 	}
 
 	userNote = strings.TrimSpace(strings.ToLower(userNote))
-	fmt.Printf("🧹 [TASTING DEBUG] Normalized user note: '%s'\n", userNote)
-
 	correctNotesSlice := strings.Split(correctNotes, ",")
-	fmt.Printf("📝 [TASTING DEBUG] Split correct notes into %d parts: %v\n", len(correctNotesSlice), correctNotesSlice)
 
-	for i, note := range correctNotesSlice {
-		originalNote := note
+	for _, note := range correctNotesSlice {
 		note = strings.TrimSpace(strings.ToLower(note))
-		fmt.Printf("🔍 [TASTING DEBUG] Checking note #%d: original='%s', normalized='%s'\n", i+1, originalNote, note)
 
 		if note == "" {
-			fmt.Printf("⚠️ [TASTING DEBUG] Note #%d is empty after normalization, skipping\n", i+1)
 			continue
 		}
 
-		if userNote == note {
-			fmt.Printf("✅ [TASTING DEBUG] EXACT MATCH found: '%s' == '%s'\n", userNote, note)
+		if userNote == note || strings.Contains(userNote, note) || strings.Contains(note, userNote) {
 			return note
 		}
-
-		if strings.Contains(userNote, note) {
-			fmt.Printf("✅ [TASTING DEBUG] PARTIAL MATCH found: user '%s' contains correct '%s'\n", userNote, note)
-			return note
-		}
-		if strings.Contains(note, userNote) {
-			fmt.Printf("✅ [TASTING DEBUG] PARTIAL MATCH found: correct '%s' contains user '%s'\n", note, userNote)
-			return note
-		}
-
-		fmt.Printf("❌ [TASTING DEBUG] No match for note #%d\n", i+1)
 	}
 
-	fmt.Printf("❌ [TASTING DEBUG] No matches found for user note '%s'\n", userNote)
 	return ""
 }
 

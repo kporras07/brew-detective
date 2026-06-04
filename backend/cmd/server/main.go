@@ -3,10 +3,12 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"brew-detective-backend/internal/auth"
 	"brew-detective-backend/internal/database"
 	"brew-detective-backend/internal/handlers"
+	"brew-detective-backend/internal/middleware"
 	"brew-detective-backend/internal/store"
 
 	"github.com/gin-contrib/cors"
@@ -51,7 +53,9 @@ func main() {
 	})
 
 	// Auth routes
+	authLimiter := middleware.NewRateLimiter(10, time.Minute)
 	authRoutes := router.Group("/auth")
+	authRoutes.Use(authLimiter.Middleware())
 	{
 		authRoutes.GET("/google", h.GoogleLogin)
 		authRoutes.GET("/google/callback", h.GoogleCallback)
