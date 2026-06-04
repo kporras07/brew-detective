@@ -1,3 +1,9 @@
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
 // Router for handling navigation and URLs
 const Router = {
     routes: {
@@ -647,7 +653,7 @@ async function loadCurrentCaseLeaderboard() {
         
         // Update case info
         if (infoContainer && response.case_name) {
-            infoContainer.innerHTML = `<p><strong>${response.case_name}</strong> - ${leaderboard.length} detectives participando</p>`;
+            infoContainer.innerHTML = `<p><strong>${escapeHTML(response.case_name)}</strong> - ${leaderboard.length} detectives participando</p>`;
         }
         
         // Clear loading spinner
@@ -663,23 +669,21 @@ async function loadCurrentCaseLeaderboard() {
             entryElement.innerHTML = `
                 <div class="rank">${medal} ${rank}</div>
                 <div class="detective-name">
-                    ${entry.detective_name || 'Detective Anónimo'}
-                    <!-- Badges temporarily disabled -->
+                    ${escapeHTML(entry.detective_name || 'Detective Anónimo')}
                 </div>
                 <div class="score">${entry.points || 0} pts (${Math.round(entry.accuracy * 100)}%)</div>
             `;
-            
+
             container.appendChild(entryElement);
         });
-        
-        // Show empty state if no data
+
         if (leaderboard.length === 0) {
             container.innerHTML = '<p style="text-align: center; padding: 2rem;">No hay detectives en este caso aún. ¡Sé el primero en resolverlo!</p>';
             if (infoContainer) {
                 infoContainer.innerHTML = '<p>No hay participantes en el caso actual</p>';
             }
         }
-        
+
     } catch (error) {
         console.error('Failed to load current case leaderboard:', error);
         container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Error al cargar el ranking del caso actual.</p>';
@@ -719,20 +723,18 @@ async function loadGlobalLeaderboard() {
             entryElement.innerHTML = `
                 <div class="rank">${medal} ${rank}</div>
                 <div class="detective-name">
-                    ${entry.detective_name || 'Detective Anónimo'}
-                    <!-- Badges temporarily disabled -->
+                    ${escapeHTML(entry.detective_name || 'Detective Anónimo')}
                 </div>
                 <div class="score">${entry.points || 0} pts (${entry.cases_count || 0} casos)</div>
             `;
-            
+
             container.appendChild(entryElement);
         });
-        
-        // Show empty state if no data
+
         if (leaderboard.length === 0) {
             container.innerHTML = '<p style="text-align: center; padding: 2rem;">No hay detectives en el ranking global aún. ¡Sé el primero!</p>';
         }
-        
+
     } catch (error) {
         console.error('Failed to load global leaderboard:', error);
         container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #e74c3c;">Error al cargar el ranking global.</p>';

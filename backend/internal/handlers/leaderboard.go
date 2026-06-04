@@ -65,6 +65,12 @@ func (h *Handler) GetUserProfile(c *gin.Context) {
 func (h *Handler) UpdateUserProfile(c *gin.Context) {
 	userID := c.Param("id")
 
+	authenticatedUserID, exists := c.Get("userID")
+	if !exists || authenticatedUserID.(string) != userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You can only update your own profile"})
+		return
+	}
+
 	var updates struct {
 		Name  string `json:"name"`
 		Email string `json:"email"`

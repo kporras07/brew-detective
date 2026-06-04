@@ -19,10 +19,13 @@ FROM alpine:3.19
 # Install ca-certificates for HTTPS requests
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+RUN adduser -D -u 1000 appuser
+WORKDIR /home/appuser
 
 # Copy the binary from builder stage
 COPY --from=builder /app/main .
+
+USER appuser
 
 # Expose port
 EXPOSE 8080

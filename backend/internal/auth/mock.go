@@ -4,15 +4,20 @@ import "fmt"
 
 // MockAuthenticator is a test implementation of Authenticator.
 type MockAuthenticator struct {
-	OAuthURL     string
-	GoogleUser   *GoogleUser
-	GoogleErr    error
-	JWTToken     string
-	JWTErr       error
+	OAuthURL          string
+	ValidateState     bool
+	GoogleUser        *GoogleUser
+	GoogleErr         error
+	JWTToken          string
+	JWTErr            error
 }
 
 func (m *MockAuthenticator) GenerateOAuthURL() string {
 	return m.OAuthURL
+}
+
+func (m *MockAuthenticator) ValidateOAuthState(state string) bool {
+	return m.ValidateState
 }
 
 func (m *MockAuthenticator) GetUserFromOAuthCode(code string) (*GoogleUser, error) {

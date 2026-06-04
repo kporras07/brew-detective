@@ -19,15 +19,13 @@ func (h *Handler) GoogleLogin(c *gin.Context) {
 func (h *Handler) GoogleCallback(c *gin.Context) {
 	queryState := c.Query("state")
 
-	// In a production app with sessions, you'd validate against stored state
 	if queryState == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "OAuth state parameter missing"})
 		return
 	}
 
-	// Basic state validation - ensure it's a reasonable hex string
-	if len(queryState) < 16 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid OAuth state format"})
+	if !h.Auth.ValidateOAuthState(queryState) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or expired OAuth state"})
 		return
 	}
 
@@ -39,8 +37,7 @@ func (h *Handler) GoogleCallback(c *gin.Context) {
 
 	googleUser, err := h.Auth.GetUserFromOAuthCode(code)
 	if err != nil {
-		fmt.Printf("Error getting user data from Google: %v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user data", "details": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user data"})
 		return
 	}
 
