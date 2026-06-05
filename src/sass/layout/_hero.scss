@@ -6,35 +6,112 @@
     display: flex;
     align-items: center;
     position: relative;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><pattern id="coffee-beans" patternUnits="userSpaceOnUse" width="100" height="100"><circle cx="20" cy="20" r="3" fill="%23d4af37" opacity="0.1"/><circle cx="60" cy="40" r="2" fill="%23d4af37" opacity="0.1"/><circle cx="80" cy="70" r="3" fill="%23d4af37" opacity="0.1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23coffee-beans)"/></svg>') center/cover;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 30% 50%, rgba(80, 50, 20, 0.6) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                $background-darker;
+}
+
+.hero-atmosphere {
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(212, 175, 55, 0.015) 2px,
+            rgba(212, 175, 55, 0.015) 4px
+        );
+    pointer-events: none;
+    z-index: 1;
+}
+
+.hero-steam {
+    position: absolute;
+    bottom: 20%;
+    right: 15%;
+    z-index: 1;
+    pointer-events: none;
+
+    span {
+        display: block;
+        position: absolute;
+        width: 2px;
+        background: linear-gradient(to top, rgba(212, 175, 55, 0.15), transparent);
+        border-radius: 50%;
+        animation: steam 3s ease-out infinite;
+        opacity: 0;
+
+        &:nth-child(1) {
+            height: 60px;
+            left: 0;
+            animation-delay: 0s;
+        }
+
+        &:nth-child(2) {
+            height: 80px;
+            left: 15px;
+            animation-delay: 1s;
+        }
+
+        &:nth-child(3) {
+            height: 50px;
+            left: 8px;
+            animation-delay: 2s;
+        }
+    }
 }
 
 .hero-content {
     text-align: center;
     z-index: $z-hero;
     position: relative;
-    
-    h1 {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
-        @include gold-gradient-text;
-        
+
+    .hero-eyebrow {
+        font-family: $font-body;
+        text-transform: uppercase;
+        letter-spacing: 0.35em;
+        font-size: 0.85rem;
+        color: $primary-gold;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+        opacity: 0.9;
+
         @include mobile {
-            font-size: 2.5rem;
+            font-size: 0.7rem;
+            letter-spacing: 0.25em;
         }
     }
-    
-    p {
-        font-size: 1.3rem;
-        margin-bottom: 2rem;
-        max-width: 600px;
+
+    h1 {
+        font-size: 7rem;
+        font-weight: 900;
+        line-height: 0.9;
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.03em;
+        @include gold-gradient-text;
+        text-shadow: none;
+
+        @include mobile {
+            font-size: 4rem;
+        }
+    }
+
+    .hero-tagline {
+        font-family: $font-display;
+        font-style: italic;
+        font-size: 1.25rem;
+        margin-bottom: 2.5rem;
+        max-width: 500px;
         margin-left: auto;
         margin-right: auto;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        
+        color: rgba($text-light, 0.75);
+        line-height: 1.6;
+        font-weight: 400;
+
         @include mobile {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
         }
     }
 }
@@ -42,11 +119,12 @@
 .cta-button {
     @include button-style;
     z-index: 10;
-    
+    font-family: $font-body;
+
     &--secondary {
         background: #666;
         color: $text-light;
-        
+
         &:hover {
             background: #777;
         }
@@ -60,23 +138,24 @@
     transform: translateX(-50%);
     text-align: center;
     z-index: $z-hero;
-    
+
     p {
-        color: rgba($text-light, 0.8);
-        font-size: 0.9rem;
+        font-family: $font-body;
+        color: rgba($text-light, 0.5);
+        font-size: 0.75rem;
         margin-top: 0.5rem;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
     }
-    
+
     @include mobile {
         bottom: 4rem;
-        
+
         p {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
         }
     }
-    
-    // Extra small screens (very short viewports)
+
     @media (max-height: 600px) {
         bottom: 2rem;
     }
@@ -87,7 +166,7 @@
     height: 24px;
     position: relative;
     margin: 0 auto;
-    
+
     span {
         display: block;
         width: 12px;
@@ -98,15 +177,15 @@
         margin: -4px auto;
         animation: scroll-arrow 2s infinite;
         opacity: 0.4;
-        
+
         &:nth-child(1) {
             animation-delay: -0.4s;
         }
-        
+
         &:nth-child(2) {
             animation-delay: -0.2s;
         }
-        
+
         &:nth-child(3) {
             animation-delay: 0s;
         }
