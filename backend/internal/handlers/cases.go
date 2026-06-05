@@ -214,8 +214,22 @@ func (h *Handler) GetCaseByIDPublic(c *gin.Context) {
 
 func toPublicCase(coffeeCase *models.CoffeeCase) models.PublicCoffeeCase {
 	coffeeIDs := make([]string, len(coffeeCase.Coffees))
+	publicCoffees := make([]models.PublicCoffeeItem, len(coffeeCase.Coffees))
 	for i, coffee := range coffeeCase.Coffees {
 		coffeeIDs[i] = coffee.ID
+		pc := models.PublicCoffeeItem{
+			ID:               coffee.ID,
+			EnabledQuestions: coffee.EnabledQuestions,
+		}
+		for _, aq := range coffee.AdditionalQuestions {
+			pc.AdditionalQuestions = append(pc.AdditionalQuestions, models.PublicAdditionalQuestion{
+				ID:       aq.ID,
+				Question: aq.Question,
+				Options:  aq.Options,
+				Points:   aq.Points,
+			})
+		}
+		publicCoffees[i] = pc
 	}
 	return models.PublicCoffeeCase{
 		ID:               coffeeCase.ID,
@@ -223,6 +237,7 @@ func toPublicCase(coffeeCase *models.CoffeeCase) models.PublicCoffeeCase {
 		Description:      coffeeCase.Description,
 		EnabledQuestions: coffeeCase.EnabledQuestions,
 		CoffeeIDs:        coffeeIDs,
+		Coffees:          publicCoffees,
 		CoffeeCount:      len(coffeeCase.Coffees),
 		IsActive:         coffeeCase.IsActive,
 	}

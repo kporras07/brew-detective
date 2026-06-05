@@ -267,16 +267,24 @@ func TestGetActiveCasePublic(t *testing.T) {
 	result := parseJSON(t, w)
 	publicCase := result["case"].(map[string]interface{})
 
-	// Should have coffee_ids but not full coffee objects with answers
-	if _, hasCoffees := publicCase["coffees"]; hasCoffees {
-		t.Error("public case should not expose coffees with answers")
-	}
 	if publicCase["coffee_count"].(float64) != 1 {
 		t.Error("expected coffee_count=1")
 	}
 	coffeeIDs := publicCase["coffee_ids"].([]interface{})
 	if len(coffeeIDs) != 1 || coffeeIDs[0] != "coffee1" {
 		t.Errorf("expected coffee_ids=[coffee1], got %v", coffeeIDs)
+	}
+	// coffees should contain PublicCoffeeItem (ID only, no answers)
+	coffees := publicCase["coffees"].([]interface{})
+	if len(coffees) != 1 {
+		t.Fatalf("expected 1 public coffee item, got %d", len(coffees))
+	}
+	pc := coffees[0].(map[string]interface{})
+	if pc["id"] != "coffee1" {
+		t.Errorf("expected public coffee id=coffee1, got %v", pc["id"])
+	}
+	if _, hasRegion := pc["region"]; hasRegion {
+		t.Error("public coffee should not expose region")
 	}
 }
 
@@ -1245,14 +1253,22 @@ func TestGetCasesPublic(t *testing.T) {
 		t.Errorf("expected 2 active cases, got %d", len(cases))
 	}
 
-	// Verify no answer data leaked
+	// Verify no answer data leaked, but coffees (PublicCoffeeItem) should exist
 	for _, c := range cases {
 		caseMap := c.(map[string]interface{})
-		if _, has := caseMap["coffees"]; has {
-			t.Error("public case should not contain coffees field")
-		}
 		if _, has := caseMap["coffee_ids"]; !has {
 			t.Error("public case should contain coffee_ids")
+		}
+		coffees, hasCoffees := caseMap["coffees"]
+		if !hasCoffees {
+			t.Error("public case should contain coffees (PublicCoffeeItem)")
+			continue
+		}
+		for _, pc := range coffees.([]interface{}) {
+			pcMap := pc.(map[string]interface{})
+			if _, hasRegion := pcMap["region"]; hasRegion {
+				t.Error("public coffee item should not expose region")
+			}
 		}
 	}
 }
@@ -1280,11 +1296,17 @@ func TestGetCaseByIDPublic(t *testing.T) {
 
 		result := parseJSON(t, w)
 		publicCase := result["case"].(map[string]interface{})
-		if _, has := publicCase["coffees"]; has {
-			t.Error("public case should not expose coffees")
-		}
 		if publicCase["name"] != "Case 1" {
 			t.Errorf("expected name 'Case 1', got %v", publicCase["name"])
+		}
+		// coffees should contain PublicCoffeeItem without answer data
+		coffees := publicCase["coffees"].([]interface{})
+		if len(coffees) != 1 {
+			t.Fatalf("expected 1 public coffee, got %d", len(coffees))
+		}
+		pc := coffees[0].(map[string]interface{})
+		if _, hasRegion := pc["region"]; hasRegion {
+			t.Error("public coffee item should not expose region")
 		}
 	})
 
