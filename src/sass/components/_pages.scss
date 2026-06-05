@@ -18,67 +18,116 @@
 }
 
 // Order page styles
-.order-pricing {
-    color: $primary-gold;
+.order-page {
     text-align: center;
-    margin-bottom: 1rem;
-}
 
-.order-description {
-    text-align: center;
-    margin-bottom: 2rem;
-    opacity: 0.9;
+    &__eyebrow {
+        font-family: $font-body;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        font-size: 0.75rem;
+        color: rgba($primary-gold, 0.7);
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    &__box {
+        max-width: 520px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba($primary-gold, 0.15);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    &__box-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.2rem 1.8rem;
+        border-bottom: 1px solid rgba($primary-gold, 0.1);
+        background: rgba($primary-gold, 0.04);
+    }
+
+    &__box-label {
+        font-family: $font-body;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-size: 0.7rem;
+        color: rgba($primary-gold, 0.6);
+        font-weight: 500;
+    }
+
+    &__box-price {
+        font-family: $font-display;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: $primary-gold;
+    }
+
+    &__includes {
+        padding: 1.5rem 1.8rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        border-bottom: 1px solid rgba($primary-gold, 0.1);
+    }
+
+    &__includes-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        text-align: left;
+
+        strong {
+            display: block;
+            color: $text-light;
+            font-family: $font-display;
+            font-size: 0.95rem;
+            margin-bottom: 0.15rem;
+        }
+
+        span {
+            color: rgba($text-light, 0.5);
+            font-size: 0.85rem;
+        }
+    }
+
+    &__includes-icon {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+    }
+
+    &__note {
+        margin-top: 1rem;
+        color: rgba($text-light, 0.4);
+        font-size: 0.8rem;
+        letter-spacing: 0.05em;
+    }
+
+    &__login {
+        padding: 0.5rem 0;
+    }
+
+    &__login-text {
+        font-family: $font-display;
+        font-style: italic;
+        color: rgba($text-light, 0.6);
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
 }
 
 .order-content {
     &--authenticated {
         display: none;
-        text-align: center;
-        
-        .order-note {
-            margin-top: 1rem;
-            opacity: 0.7;
-            font-size: 0.9rem;
-        }
+        padding: 1.8rem;
     }
-    
+
     &--unauthenticated {
         display: block;
-        text-align: center;
-    }
-}
-
-.login-prompt {
-    background: linear-gradient(135deg, rgba($primary-gold, 0.2), rgba($primary-gold, 0.1));
-    border: 2px solid rgba($primary-gold, 0.3);
-    border-radius: 12px;
-    padding: 2rem;
-    margin: 2rem 0;
-    
-    &__title {
-        color: $primary-gold;
-        margin-bottom: 1rem;
-    }
-    
-    &__description {
-        color: rgba($text-light, 0.9);
-        margin-bottom: 1.5rem;
-    }
-    
-    &__benefits {
-        text-align: left;
-        margin: 1.5rem 0;
-        
-        &-item {
-            margin-bottom: 0.8rem;
-            color: rgba($text-light, 0.9);
-        }
-    }
-    
-    &__note {
-        margin-top: 1rem;
-        opacity: 0.7;
-        font-size: 0.9rem;
+        padding: 1.8rem;
     }
 }
 

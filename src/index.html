@@ -181,52 +181,59 @@
 
     <!-- Order Page -->
     <div id="order" class="page">
-        <section class="section">
+        <section class="section order-page">
             <div class="container">
+                <p class="order-page__eyebrow">Tu Próximo Caso</p>
                 <h2 class="section-title">Ordenar Caja Detective</h2>
-                <div class="form-container">
-                    <h3 class="order-pricing">💰 Precio: ₡18,000</h3>
-                    <p class="order-description">
-                        Incluye 4 cafés costarricenses misteriosos de 80g cada uno + guía de cata + acceso al juego online
-                    </p>
-                    
+
+                <div class="order-page__box">
+                    <div class="order-page__box-header">
+                        <div class="order-page__box-label">Caja Misteriosa</div>
+                        <div class="order-page__box-price">₡18,000</div>
+                    </div>
+
+                    <div class="order-page__includes">
+                        <div class="order-page__includes-item">
+                            <span class="order-page__includes-icon">☕</span>
+                            <div>
+                                <strong>4 cafés misteriosos</strong>
+                                <span>80g cada uno, sin etiquetas</span>
+                            </div>
+                        </div>
+                        <div class="order-page__includes-item">
+                            <span class="order-page__includes-icon">📋</span>
+                            <div>
+                                <strong>Guía de cata</strong>
+                                <span>Instrucciones para tu investigación</span>
+                            </div>
+                        </div>
+                        <div class="order-page__includes-item">
+                            <span class="order-page__includes-icon">🔍</span>
+                            <div>
+                                <strong>Acceso al juego online</strong>
+                                <span>Envía respuestas y compite en el ranking</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Authenticated User Content -->
                     <div id="orderAuthenticatedContent" class="order-content--authenticated">
                         <button onclick="openWhatsAppOrder()" class="cta-button">
-                            📱 Ordenar por WhatsApp
+                            Ordenar por WhatsApp
                         </button>
-                        <p class="order-note">
+                        <p class="order-page__note">
                             Te contactaremos para coordinar la entrega y el pago
                         </p>
                     </div>
-                    
+
                     <!-- Unauthenticated User Content -->
                     <div id="orderUnauthenticatedContent" class="order-content--unauthenticated">
-                        <div class="login-prompt">
-                            <h4 class="login-prompt__title">🔐 Inicia Sesión para Ordenar</h4>
-                            <p class="login-prompt__description">
-                                Para poder ordenar tu caja detective, necesitas tener una cuenta. Esto nos permite:
-                            </p>
-                            <div class="login-prompt__benefits">
-                                <div class="login-prompt__benefits-item">
-                                    ✓ Gestionar tus pedidos y entregas
-                                </div>
-                                <div class="login-prompt__benefits-item">
-                                    ✓ Guardar tu progreso como detective
-                                </div>
-                                <div class="login-prompt__benefits-item">
-                                    ✓ Acceder a tu historial de casos
-                                </div>
-                                <div class="login-prompt__benefits-item">
-                                    ✓ Participar en el ranking de detectives
-                                </div>
-                            </div>
+                        <div class="order-page__login">
+                            <p class="order-page__login-text">Inicia sesión para ordenar tu caja y participar en el juego</p>
                             <button onclick="Auth.login()" class="cta-button">
-                                🚀 Iniciar Sesión con Google
+                                Iniciar Sesión con Google
                             </button>
-                            <p class="login-prompt__note">
-                                Es rápido, seguro y gratuito
-                            </p>
+                            <p class="order-page__note">Es rápido, seguro y gratuito</p>
                         </div>
                     </div>
                 </div>
