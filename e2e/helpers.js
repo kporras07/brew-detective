@@ -53,6 +53,12 @@ async function mockAPI(page) {
           description: 'Descubre los origenes de estos 4 cafes',
           is_active: true,
           coffee_ids: ['c1', 'c2', 'c3', 'c4'],
+          coffees: [
+            { id: 'c1' },
+            { id: 'c2' },
+            { id: 'c3' },
+            { id: 'c4' },
+          ],
           enabled_questions: {
             region: true, variety: true, process: true,
             taste_note_1: true, taste_note_2: true,
@@ -137,4 +143,49 @@ async function loginAs(page, user = {}) {
   }, { token, user: finalUser });
 }
 
-module.exports = { API_BASE, mockAPI, createFakeJWT, loginAs };
+/**
+ * Mock API with per-coffee question overrides and additional questions.
+ * Coffee 1: override (region only) + 1 additional question
+ * Coffees 2-4: case-level defaults, no additional questions
+ */
+async function mockAPIWithPerCoffeeQuestions(page) {
+  await mockAPI(page);
+
+  // Override active case with per-coffee data
+  await page.route(`${API_BASE}/api/v1/cases/active/public`, route =>
+    route.fulfill({
+      json: {
+        case: {
+          id: 'case1',
+          name: 'Caso Misterio #1',
+          description: 'Descubre los origenes de estos 4 cafes',
+          is_active: true,
+          coffee_ids: ['c1', 'c2', 'c3', 'c4'],
+          coffees: [
+            {
+              id: 'c1',
+              enabled_questions: {
+                region: true, variety: false, process: false,
+                taste_note_1: false, taste_note_2: false,
+              },
+              additional_questions: [
+                { id: 'aq1', question: 'Altitud del cultivo?', options: ['Alta', 'Media', 'Baja'], points: 15 },
+              ],
+            },
+            { id: 'c2' },
+            { id: 'c3' },
+            { id: 'c4' },
+          ],
+          enabled_questions: {
+            region: true, variety: true, process: true,
+            taste_note_1: true, taste_note_2: true,
+            favorite_coffee: true, brewing_method: true,
+          },
+        },
+      },
+    }),
+    { times: 1 } // override the earlier route once
+  );
+}
+
+module.exports = { API_BASE, mockAPI, mockAPIWithPerCoffeeQuestions, createFakeJWT, loginAs };

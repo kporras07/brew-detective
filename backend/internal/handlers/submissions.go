@@ -76,79 +76,92 @@ func (h *Handler) SubmitCase(c *gin.Context) {
 	})
 }
 
+func getEffectiveEnabledQuestions(coffee *models.CoffeeItem, caseLevel models.EnabledQuestions) models.EnabledQuestions {
+	if coffee.EnabledQuestions != nil {
+		return *coffee.EnabledQuestions
+	}
+	return caseLevel
+}
+
+func countEnabledQuestions(eq models.EnabledQuestions) int {
+	count := 0
+	if eq.Region {
+		count++
+	}
+	if eq.Variety {
+		count++
+	}
+	if eq.Process {
+		count++
+	}
+	if eq.TasteNote1 {
+		count++
+	}
+	if eq.TasteNote2 {
+		count++
+	}
+	return count
+}
+
 // calculateScoreWithCase calculates the score and accuracy for a submission against a given case
 func calculateScoreWithCase(submission *models.Submission, activeCase *models.CoffeeCase) (int, float64) {
 	if activeCase == nil {
 		return calculateScoreDefault(submission)
 	}
 
-	enabledQuestionsPerCoffee := 0
-	if activeCase.EnabledQuestions.Region {
-		enabledQuestionsPerCoffee++
-	}
-	if activeCase.EnabledQuestions.Variety {
-		enabledQuestionsPerCoffee++
-	}
-	if activeCase.EnabledQuestions.Process {
-		enabledQuestionsPerCoffee++
-	}
-	if activeCase.EnabledQuestions.TasteNote1 {
-		enabledQuestionsPerCoffee++
-	}
-	if activeCase.EnabledQuestions.TasteNote2 {
-		enabledQuestionsPerCoffee++
-	}
-
-	totalQuestions := len(submission.CoffeeAnswers) * enabledQuestionsPerCoffee
-
-	if totalQuestions == 0 {
-		return 0, 0.0
-	}
-
-	correctAnswers := 0
+	correctStandard := 0
+	totalStandard := 0
+	correctAdditional := 0
+	totalAdditional := 0
+	additionalScore := 0
 	basePoints := 100
 
 	for _, answer := range submission.CoffeeAnswers {
 		var correctCoffee *models.CoffeeItem
-		for _, coffee := range activeCase.Coffees {
-			if coffee.ID == answer.CoffeeID {
-				correctCoffee = &coffee
+		for i := range activeCase.Coffees {
+			if activeCase.Coffees[i].ID == answer.CoffeeID {
+				correctCoffee = &activeCase.Coffees[i]
 				break
 			}
 		}
 
 		if correctCoffee == nil {
+			eq := activeCase.EnabledQuestions
+			totalStandard += countEnabledQuestions(eq)
 			continue
 		}
 
-		if activeCase.EnabledQuestions.Region && answer.Region != "" {
+		eq := getEffectiveEnabledQuestions(correctCoffee, activeCase.EnabledQuestions)
+		totalStandard += countEnabledQuestions(eq)
+
+		if eq.Region && answer.Region != "" {
 			if strings.EqualFold(strings.TrimSpace(answer.Region), strings.TrimSpace(correctCoffee.Region)) {
-				correctAnswers++
+				correctStandard++
 			}
 		}
 
-		if activeCase.EnabledQuestions.Variety && answer.Variety != "" {
+		if eq.Variety && answer.Variety != "" {
 			if strings.EqualFold(strings.TrimSpace(answer.Variety), strings.TrimSpace(correctCoffee.Variety)) {
-				correctAnswers++
+				correctStandard++
 			}
 		}
 
-		if activeCase.EnabledQuestions.Process && answer.Process != "" {
+		if eq.Process && answer.Process != "" {
 			if strings.EqualFold(strings.TrimSpace(answer.Process), strings.TrimSpace(correctCoffee.Process)) {
-				correctAnswers++
+				correctStandard++
 			}
 		}
 
 		var awardedTastingNotes []string
 
-		if activeCase.EnabledQuestions.TasteNote1 && answer.TasteNote1 != "" {
+		if eq.TasteNote1 && answer.TasteNote1 != "" {
 			if matchedNote := getMatchedTastingNote(answer.TasteNote1, correctCoffee.TastingNotes); matchedNote != "" {
 				awardedTastingNotes = append(awardedTastingNotes, matchedNote)
-				correctAnswers++
+				correctStandard++
 			}
 		}
 
-		if activeCase.EnabledQuestions.TasteNote2 && answer.TasteNote2 != "" {
+		if eq.TasteNote2 && answer.TasteNote2 != "" {
 			if matchedNote := getMatchedTastingNote(answer.TasteNote2, correctCoffee.TastingNotes); matchedNote != "" {
 				alreadyAwarded := false
 				for _, awarded := range awardedTastingNotes {
@@ -158,7 +171,21 @@ func calculateScoreWithCase(submission *models.Submission, activeCase *models.Co
 					}
 				}
 				if !alreadyAwarded {
-					correctAnswers++
+					correctStandard++
+				}
+			}
+		}
+
+		// Score additional questions
+		for _, aq := range correctCoffee.AdditionalQuestions {
+			totalAdditional++
+			for _, aa := range answer.AdditionalAnswers {
+				if aa.QuestionID == aq.ID {
+					if strings.EqualFold(strings.TrimSpace(aa.Answer), strings.TrimSpace(aq.CorrectOption)) {
+						correctAdditional++
+						additionalScore += aq.Points
+					}
+					break
 				}
 			}
 		}
@@ -174,8 +201,20 @@ func calculateScoreWithCase(submission *models.Submission, activeCase *models.Co
 		bonusPoints += 50
 	}
 
-	accuracy := float64(correctAnswers) / float64(totalQuestions)
-	score := int(float64(basePoints)*accuracy*float64(len(submission.CoffeeAnswers))) + bonusPoints
+	totalQuestions := totalStandard + totalAdditional
+	if totalQuestions == 0 {
+		return bonusPoints, 0.0
+	}
+
+	standardAccuracy := 0.0
+	if totalStandard > 0 {
+		standardAccuracy = float64(correctStandard) / float64(totalStandard)
+	}
+	standardScore := int(float64(basePoints) * standardAccuracy * float64(len(submission.CoffeeAnswers)))
+
+	totalCorrect := correctStandard + correctAdditional
+	accuracy := float64(totalCorrect) / float64(totalQuestions)
+	score := standardScore + additionalScore + bonusPoints
 
 	return score, accuracy
 }

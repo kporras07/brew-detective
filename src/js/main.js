@@ -333,6 +333,7 @@ async function loadActiveCase() {
                 description: activeCase.description,
                 // Handle both camelCase and snake_case from different endpoints
                 coffeeIds: activeCase.coffeeIds || activeCase.coffee_ids || [],
+                coffees: activeCase.coffees || [],
                 questions: activeCase.enabled_questions || {
                     region: true,
                     variety: true,
@@ -369,112 +370,163 @@ async function loadActiveCase() {
     }
 }
 
+// Get the effective enabled questions for a specific coffee index (0-based)
+function getEffectiveQuestions(coffeeIndex) {
+    const caseData = window.activeCaseData;
+    if (!caseData) return {};
+    const caseLevel = caseData.questions || {};
+    const coffees = caseData.coffees || [];
+    const coffee = coffees[coffeeIndex];
+    if (coffee && coffee.enabled_questions) {
+        return coffee.enabled_questions;
+    }
+    return caseLevel;
+}
+
 // Customize submission form based on active case enabled questions
 function customizeSubmissionForm() {
-    const questions = window.activeCaseQuestions;
-    if (!questions) return;
-    
-    // Helper function to show/hide form groups for coffee questions
-    function toggleCoffeeQuestion(questionType, enabled) {
-        for (let i = 1; i <= 4; i++) {
-            const formGroup = document.querySelector(`#coffee${i}_${questionType}`);
-            if (formGroup && formGroup.closest('.form-group')) {
-                formGroup.closest('.form-group').style.display = enabled ? 'block' : 'none';
-                
-                // Make required/optional based on enabled state
-                formGroup.required = enabled;
+    const caseData = window.activeCaseData;
+    if (!caseData || !caseData.questions) return;
+    const caseQuestions = caseData.questions;
+
+    // Remove any previously injected additional question fields
+    document.querySelectorAll('.additional-question-group').forEach(el => el.remove());
+
+    for (let i = 1; i <= 4; i++) {
+        const eq = getEffectiveQuestions(i - 1);
+
+        // Show/hide standard question fields per coffee
+        const fields = [
+            { id: `coffee${i}_region`, key: 'region' },
+            { id: `coffee${i}_variety`, key: 'variety' },
+            { id: `coffee${i}_process`, key: 'process' },
+        ];
+        fields.forEach(({ id, key }) => {
+            const el = document.getElementById(id);
+            if (el && el.closest('.form-group')) {
+                el.closest('.form-group').style.display = eq[key] ? 'block' : 'none';
+                el.required = !!eq[key];
+            }
+        });
+
+        const note1 = document.getElementById(`coffee${i}_note1`);
+        const note2 = document.getElementById(`coffee${i}_note2`);
+        if (note1 && note1.closest('.form-group')) {
+            note1.closest('.form-group').style.display = eq.taste_note_1 ? 'block' : 'none';
+        }
+        if (note2 && note2.closest('.form-group')) {
+            note2.closest('.form-group').style.display = eq.taste_note_2 ? 'block' : 'none';
+        }
+
+        // Render additional questions for this coffee
+        const coffees = caseData.coffees || [];
+        const coffee = coffees[i - 1];
+        if (coffee && coffee.additional_questions && coffee.additional_questions.length > 0) {
+            const lastStandardField = note2 ? note2.closest('.form-group') : document.getElementById(`coffee${i}_process`)?.closest('.form-group');
+            if (lastStandardField) {
+                coffee.additional_questions.forEach(aq => {
+                    const div = document.createElement('div');
+                    div.className = 'form-group additional-question-group';
+                    const label = document.createElement('label');
+                    label.setAttribute('for', `coffee${i}_additional_${aq.id}`);
+                    label.textContent = `${aq.question} (${aq.points} pts)`;
+                    const select = document.createElement('select');
+                    select.id = `coffee${i}_additional_${aq.id}`;
+                    const defaultOpt = document.createElement('option');
+                    defaultOpt.value = '';
+                    defaultOpt.textContent = 'Selecciona una opción';
+                    select.appendChild(defaultOpt);
+                    aq.options.forEach(opt => {
+                        const option = document.createElement('option');
+                        option.value = opt;
+                        option.textContent = opt;
+                        select.appendChild(option);
+                    });
+                    div.appendChild(label);
+                    div.appendChild(select);
+                    lastStandardField.parentNode.insertBefore(div, lastStandardField.nextSibling);
+                });
             }
         }
     }
-    
-    // Show/hide coffee-specific questions
-    toggleCoffeeQuestion('region', questions.region);
-    toggleCoffeeQuestion('variety', questions.variety);
-    toggleCoffeeQuestion('process', questions.process);
-    
-    // Handle taste notes
-    for (let i = 1; i <= 4; i++) {
-        const note1Input = document.getElementById(`coffee${i}_note1`);
-        const note2Input = document.getElementById(`coffee${i}_note2`);
-        
-        if (note1Input && note1Input.closest('.form-group')) {
-            note1Input.closest('.form-group').style.display = questions.taste_note_1 ? 'block' : 'none';
-        }
-        if (note2Input && note2Input.closest('.form-group')) {
-            note2Input.closest('.form-group').style.display = questions.taste_note_2 ? 'block' : 'none';
-        }
-    }
-    
+
     // Show/hide bonus questions
     const favoriteCoffeeGroup = document.getElementById('favorite_coffee');
     if (favoriteCoffeeGroup && favoriteCoffeeGroup.closest('.form-group')) {
-        favoriteCoffeeGroup.closest('.form-group').style.display = questions.favorite_coffee ? 'block' : 'none';
+        favoriteCoffeeGroup.closest('.form-group').style.display = caseQuestions.favorite_coffee ? 'block' : 'none';
     }
-    
+
     const brewingMethodGroup = document.getElementById('brewing_method');
     if (brewingMethodGroup && brewingMethodGroup.closest('.form-group')) {
-        brewingMethodGroup.closest('.form-group').style.display = questions.brewing_method ? 'block' : 'none';
-    }
-    
-    // Hide entire bonus questions section if no bonus questions are enabled
-    const bonusSection = document.querySelector('h3[style*="🔍 Preguntas Bonus"]');
-    if (bonusSection) {
-        const showBonusSection = questions.favorite_coffee || questions.brewing_method;
-        bonusSection.style.display = showBonusSection ? 'block' : 'none';
+        brewingMethodGroup.closest('.form-group').style.display = caseQuestions.brewing_method ? 'block' : 'none';
     }
 }
 
 // Update scoring information box based on enabled questions
 function updateScoringInfo() {
-    const questions = window.activeCaseData?.questions || {};
+    const caseData = window.activeCaseData;
+    const questions = caseData?.questions || {};
     if (!questions || Object.keys(questions).length === 0) return;
-    
+
     const coffeeQuestionsList = document.getElementById('coffeeQuestionsList');
     const bonusQuestionsList = document.getElementById('bonusQuestionsList');
     const maxScoreDisplay = document.getElementById('maxScoreDisplay');
-    
+
     if (!coffeeQuestionsList || !bonusQuestionsList || !maxScoreDisplay) return;
-    
-    // Count enabled coffee questions
+
+    const questionLabels = [
+        { key: 'region', label: 'Región' },
+        { key: 'variety', label: 'Variedad' },
+        { key: 'process', label: 'Proceso' },
+        { key: 'taste_note_1', label: 'Nota de cata 1' },
+        { key: 'taste_note_2', label: 'Nota de cata 2' },
+    ];
+
+    // Check if any coffee has per-coffee overrides
+    const coffees = caseData.coffees || [];
+    const hasOverrides = coffees.some(c => c && c.enabled_questions);
+
+    let coffeeQuestionsHtml = [];
+    let totalAdditionalPoints = 0;
+
+    if (hasOverrides) {
+        coffeeQuestionsHtml.push('<div style="opacity: 0.7; font-size: 0.9rem; margin-bottom: 0.5rem;">Las preguntas varían por café</div>');
+    }
+
+    // Show case-level questions as the baseline
     let enabledCoffeeQuestions = 0;
-    const coffeeQuestionsHtml = [];
-    
-    if (questions.region) {
-        coffeeQuestionsHtml.push('<div>• Región: <strong>20 puntos</strong></div>');
-        enabledCoffeeQuestions++;
-    }
-    if (questions.variety) {
-        coffeeQuestionsHtml.push('<div>• Variedad: <strong>20 puntos</strong></div>');
-        enabledCoffeeQuestions++;
-    }
-    if (questions.process) {
-        coffeeQuestionsHtml.push('<div>• Proceso: <strong>20 puntos</strong></div>');
-        enabledCoffeeQuestions++;
-    }
-    if (questions.taste_note_1) {
-        coffeeQuestionsHtml.push('<div>• Nota de cata 1: <strong>20 puntos</strong></div>');
-        enabledCoffeeQuestions++;
-    }
-    if (questions.taste_note_2) {
-        coffeeQuestionsHtml.push('<div>• Nota de cata 2: <strong>20 puntos</strong></div>');
-        enabledCoffeeQuestions++;
-    }
-    
-    // Update coffee questions display
+    questionLabels.forEach(({ key, label }) => {
+        if (questions[key]) {
+            coffeeQuestionsHtml.push(`<div>• ${label}</div>`);
+            enabledCoffeeQuestions++;
+        }
+    });
+
+    // Collect additional question info
+    let additionalHtml = [];
+    coffees.forEach((coffee, idx) => {
+        if (coffee && coffee.additional_questions) {
+            coffee.additional_questions.forEach(aq => {
+                totalAdditionalPoints += aq.points;
+                additionalHtml.push(`<div>• Café #${idx + 1} - ${escapeHTML(aq.question)}: <strong>+${aq.points} pts</strong></div>`);
+            });
+        }
+    });
+
     if (enabledCoffeeQuestions > 0) {
-        const pointsPerQuestion = Math.round(100 / enabledCoffeeQuestions);
-        const adjustedHtml = coffeeQuestionsHtml.map(html => 
-            html.replace('20 puntos', `${pointsPerQuestion} puntos`)
-        );
-        coffeeQuestionsList.innerHTML = adjustedHtml.join('');
+        coffeeQuestionsList.innerHTML = coffeeQuestionsHtml.join('');
     } else {
         coffeeQuestionsList.innerHTML = '<div style="opacity: 0.7; font-style: italic;">No hay preguntas de café habilitadas</div>';
     }
-    
+
+    if (additionalHtml.length > 0) {
+        coffeeQuestionsList.innerHTML += '<div style="margin-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.5rem;"><strong>Preguntas adicionales:</strong></div>' + additionalHtml.join('');
+    }
+
     // Count enabled bonus questions and update display
     const bonusQuestionsHtml = [];
     let bonusPoints = 0;
-    
+
     if (questions.favorite_coffee) {
         bonusQuestionsHtml.push('<div>• Café favorito: <strong>+50 puntos</strong></div>');
         bonusPoints += 50;
@@ -483,19 +535,19 @@ function updateScoringInfo() {
         bonusQuestionsHtml.push('<div>• Método de preparación: <strong>+50 puntos</strong></div>');
         bonusPoints += 50;
     }
-    
+
     if (bonusQuestionsHtml.length > 0) {
         bonusQuestionsList.innerHTML = bonusQuestionsHtml.join('');
     } else {
         bonusQuestionsList.innerHTML = '<div style="opacity: 0.7; font-style: italic;">No hay preguntas bonus habilitadas</div>';
     }
-    
-    // Calculate and display maximum score
-    // Formula: (base points × 4 coffees) + bonus points
+
+    // Calculate max score: base points per coffee (100) × coffees + additional + bonus
+    const coffeeCount = caseData.coffeeIds?.length || 4;
     const basePointsPerCoffee = enabledCoffeeQuestions > 0 ? 100 : 0;
-    const maxBaseScore = basePointsPerCoffee * 4; // 4 coffees
-    const maxTotalScore = maxBaseScore + bonusPoints;
-    
+    const maxBaseScore = basePointsPerCoffee * coffeeCount;
+    const maxTotalScore = maxBaseScore + totalAdditionalPoints + bonusPoints;
+
     maxScoreDisplay.innerHTML = `<strong style="color: #d4af37; font-size: 1rem;">🏆 Máximo: ${maxTotalScore} puntos</strong>`;
 }
 
@@ -533,42 +585,37 @@ document.getElementById('submitForm').addEventListener('submit', async function(
     }
     
     // Collect form data with actual coffee UUIDs
+    const coffeeAnswers = [];
+    for (let i = 0; i < 4; i++) {
+        const n = i + 1;
+        const answer = {
+            coffee_id: activeCaseData.coffeeIds[i],
+            region: document.getElementById(`coffee${n}_region`).value,
+            variety: document.getElementById(`coffee${n}_variety`).value,
+            process: document.getElementById(`coffee${n}_process`).value,
+            taste_note_1: document.getElementById(`coffee${n}_note1`).value,
+            taste_note_2: document.getElementById(`coffee${n}_note2`).value
+        };
+
+        // Collect additional answers for this coffee
+        const coffees = activeCaseData.coffees || [];
+        const coffee = coffees[i];
+        if (coffee && coffee.additional_questions && coffee.additional_questions.length > 0) {
+            answer.additional_answers = coffee.additional_questions.map(aq => {
+                const el = document.getElementById(`coffee${n}_additional_${aq.id}`);
+                return {
+                    question_id: aq.id,
+                    answer: el ? el.value : ''
+                };
+            });
+        }
+
+        coffeeAnswers.push(answer);
+    }
+
     const submission = {
         order_id: document.getElementById('orderId').value.toUpperCase(),
-        coffee_answers: [
-            {
-                coffee_id: activeCaseData.coffeeIds[0],
-                region: document.getElementById('coffee1_region').value,
-                variety: document.getElementById('coffee1_variety').value,
-                process: document.getElementById('coffee1_process').value,
-                taste_note_1: document.getElementById('coffee1_note1').value,
-                taste_note_2: document.getElementById('coffee1_note2').value
-            },
-            {
-                coffee_id: activeCaseData.coffeeIds[1],
-                region: document.getElementById('coffee2_region').value,
-                variety: document.getElementById('coffee2_variety').value,
-                process: document.getElementById('coffee2_process').value,
-                taste_note_1: document.getElementById('coffee2_note1').value,
-                taste_note_2: document.getElementById('coffee2_note2').value
-            },
-            {
-                coffee_id: activeCaseData.coffeeIds[2],
-                region: document.getElementById('coffee3_region').value,
-                variety: document.getElementById('coffee3_variety').value,
-                process: document.getElementById('coffee3_process').value,
-                taste_note_1: document.getElementById('coffee3_note1').value,
-                taste_note_2: document.getElementById('coffee3_note2').value
-            },
-            {
-                coffee_id: activeCaseData.coffeeIds[3],
-                region: document.getElementById('coffee4_region').value,
-                variety: document.getElementById('coffee4_variety').value,
-                process: document.getElementById('coffee4_process').value,
-                taste_note_1: document.getElementById('coffee4_note1').value,
-                taste_note_2: document.getElementById('coffee4_note2').value
-            }
-        ],
+        coffee_answers: coffeeAnswers,
         favorite_coffee: document.getElementById('favorite_coffee').value,
         brewing_method: document.getElementById('brewing_method').value
     };
@@ -1029,6 +1076,156 @@ function showAdminNotification(message, type) {
     }
 }
 
+// Per-coffee question override and additional questions management
+
+function toggleCoffeeQuestionOverride(coffeeIndex, formPrefix) {
+    const prefix = formPrefix === 'edit' ? `editCoffee${coffeeIndex}` : `coffee${coffeeIndex}`;
+    const checkbox = document.getElementById(`${prefix}OverrideQuestions`);
+    const panel = document.getElementById(`${prefix}OverridePanel`);
+    if (panel) {
+        panel.style.display = checkbox && checkbox.checked ? 'grid' : 'none';
+    }
+}
+
+let additionalQuestionCounters = { create: [0, 0, 0, 0], edit: [0, 0, 0, 0] };
+
+function addAdditionalQuestion(coffeeIndex, formPrefix) {
+    const mode = formPrefix === 'edit' ? 'edit' : 'create';
+    const prefix = mode === 'edit' ? `editCoffee${coffeeIndex}` : `coffee${coffeeIndex}`;
+    const container = document.getElementById(`${prefix}AdditionalQuestions`);
+    if (!container) return;
+
+    const idx = additionalQuestionCounters[mode][coffeeIndex - 1]++;
+    const block = document.createElement('div');
+    block.className = 'admin-section__additional-question';
+    block.id = `${prefix}_aq_${idx}`;
+    block.style.cssText = 'background:rgba(0,0,0,0.2);padding:0.8rem;border-radius:6px;margin-bottom:0.5rem;';
+
+    block.innerHTML =
+        `<div class="form-group"><label>Pregunta:</label><input type="text" id="${prefix}_aq_${idx}_question" placeholder="Ej: ¿A qué altitud se cultivó?" class="admin-section__input"></div>` +
+        `<div class="form-group"><label>Opciones:</label><div id="${prefix}_aq_${idx}_options"></div>` +
+        `<button type="button" onclick="addAdditionalOption(${coffeeIndex},'${mode}',${idx})" class="cta-button cta-button--secondary" style="padding:0.3rem 0.6rem;font-size:0.8rem;">+ Opción</button></div>` +
+        `<div class="form-group"><label>Respuesta Correcta:</label><select id="${prefix}_aq_${idx}_correct" class="admin-section__input"><option value="">Agrega opciones primero</option></select></div>` +
+        `<div class="form-group"><label>Puntos:</label><input type="number" id="${prefix}_aq_${idx}_points" value="10" min="1" class="admin-section__input" style="width:80px;"></div>` +
+        `<button type="button" onclick="removeAdditionalQuestion(${coffeeIndex},'${mode}',${idx})" class="cta-button" style="background:#e74c3c;padding:0.3rem 0.6rem;font-size:0.8rem;">Eliminar Pregunta</button>`;
+
+    container.appendChild(block);
+}
+
+function removeAdditionalQuestion(coffeeIndex, mode, idx) {
+    const prefix = mode === 'edit' ? `editCoffee${coffeeIndex}` : `coffee${coffeeIndex}`;
+    const block = document.getElementById(`${prefix}_aq_${idx}`);
+    if (block) block.remove();
+}
+
+let additionalOptionCounters = {};
+
+function addAdditionalOption(coffeeIndex, mode, aqIdx) {
+    const prefix = mode === 'edit' ? `editCoffee${coffeeIndex}` : `coffee${coffeeIndex}`;
+    const container = document.getElementById(`${prefix}_aq_${aqIdx}_options`);
+    if (!container) return;
+
+    const key = `${prefix}_aq_${aqIdx}`;
+    if (!additionalOptionCounters[key]) additionalOptionCounters[key] = 0;
+    const optIdx = additionalOptionCounters[key]++;
+
+    const row = document.createElement('div');
+    row.id = `${prefix}_aq_${aqIdx}_opt_${optIdx}`;
+    row.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:0.3rem;align-items:center;';
+    row.innerHTML =
+        `<input type="text" id="${prefix}_aq_${aqIdx}_option_${optIdx}" placeholder="Opción" class="admin-section__input" style="flex:1;" oninput="updateCorrectOptionDropdown(${coffeeIndex},'${mode}',${aqIdx})">` +
+        `<button type="button" onclick="removeAdditionalOption(${coffeeIndex},'${mode}',${aqIdx},${optIdx})" style="background:#e74c3c;color:white;border:none;border-radius:4px;padding:0.3rem 0.5rem;cursor:pointer;">×</button>`;
+
+    container.appendChild(row);
+    updateCorrectOptionDropdown(coffeeIndex, mode, aqIdx);
+}
+
+function removeAdditionalOption(coffeeIndex, mode, aqIdx, optIdx) {
+    const prefix = mode === 'edit' ? `editCoffee${coffeeIndex}` : `coffee${coffeeIndex}`;
+    const row = document.getElementById(`${prefix}_aq_${aqIdx}_opt_${optIdx}`);
+    if (row) row.remove();
+    updateCorrectOptionDropdown(coffeeIndex, mode, aqIdx);
+}
+
+function updateCorrectOptionDropdown(coffeeIndex, mode, aqIdx) {
+    const prefix = mode === 'edit' ? `editCoffee${coffeeIndex}` : `coffee${coffeeIndex}`;
+    const container = document.getElementById(`${prefix}_aq_${aqIdx}_options`);
+    const select = document.getElementById(`${prefix}_aq_${aqIdx}_correct`);
+    if (!container || !select) return;
+
+    const currentVal = select.value;
+    const inputs = container.querySelectorAll('input[type="text"]');
+    select.innerHTML = '<option value="">Selecciona respuesta correcta</option>';
+    inputs.forEach(input => {
+        const val = input.value.trim();
+        if (val) {
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.textContent = val;
+            select.appendChild(opt);
+        }
+    });
+    if (currentVal) select.value = currentVal;
+}
+
+function collectCoffeeOverrideAndAdditional(coffeeIndex, mode) {
+    const prefix = mode === 'edit' ? `editCoffee${coffeeIndex}` : `coffee${coffeeIndex}`;
+    const result = {};
+
+    // Per-coffee enabled questions override
+    const overrideCheckbox = document.getElementById(`${prefix}OverrideQuestions`);
+    if (overrideCheckbox && overrideCheckbox.checked) {
+        result.enabled_questions = {
+            region: document.getElementById(`${prefix}QuestionRegion`)?.checked || false,
+            variety: document.getElementById(`${prefix}QuestionVariety`)?.checked || false,
+            process: document.getElementById(`${prefix}QuestionProcess`)?.checked || false,
+            taste_note_1: document.getElementById(`${prefix}QuestionTasteNote1`)?.checked || false,
+            taste_note_2: document.getElementById(`${prefix}QuestionTasteNote2`)?.checked || false,
+        };
+    }
+
+    // Additional questions
+    const container = document.getElementById(`${prefix}AdditionalQuestions`);
+    if (container) {
+        const blocks = container.querySelectorAll('.admin-section__additional-question');
+        const additionalQuestions = [];
+        blocks.forEach(block => {
+            const blockId = block.id;
+            const questionInput = block.querySelector(`[id$="_question"]`);
+            const correctSelect = block.querySelector(`[id$="_correct"]`);
+            const pointsInput = block.querySelector(`[id$="_points"]`);
+            const optionsContainer = block.querySelector(`[id$="_options"]`);
+
+            const question = questionInput?.value?.trim();
+            const correctOption = correctSelect?.value?.trim();
+            const points = parseInt(pointsInput?.value) || 10;
+
+            const options = [];
+            if (optionsContainer) {
+                optionsContainer.querySelectorAll('input[type="text"]').forEach(input => {
+                    const val = input.value.trim();
+                    if (val) options.push(val);
+                });
+            }
+
+            if (question && options.length > 0 && correctOption) {
+                additionalQuestions.push({
+                    id: `aq_${coffeeIndex}_${additionalQuestions.length}`,
+                    question: question,
+                    options: options,
+                    correct_option: correctOption,
+                    points: points,
+                });
+            }
+        });
+        if (additionalQuestions.length > 0) {
+            result.additional_questions = additionalQuestions;
+        }
+    }
+
+    return result;
+}
+
 // Case Management Functions
 
 function showCreateCaseForm() {
@@ -1063,6 +1260,17 @@ function clearCaseForm() {
     document.getElementById('questionTasteNote2').checked = true;
     document.getElementById('questionFavoriteCoffee').checked = true;
     document.getElementById('questionBrewingMethod').checked = true;
+
+    // Reset per-coffee overrides and additional questions
+    for (let i = 1; i <= 4; i++) {
+        const overrideCheckbox = document.getElementById(`coffee${i}OverrideQuestions`);
+        if (overrideCheckbox) overrideCheckbox.checked = false;
+        const panel = document.getElementById(`coffee${i}OverridePanel`);
+        if (panel) panel.style.display = 'none';
+        const aqContainer = document.getElementById(`coffee${i}AdditionalQuestions`);
+        if (aqContainer) aqContainer.innerHTML = '';
+    }
+    additionalQuestionCounters.create = [0, 0, 0, 0];
 }
 
 async function loadCaseFormDropdowns() {
@@ -1134,16 +1342,22 @@ async function createCase() {
             return;
         }
         
-        coffees.push({
+        const coffeeObj = {
             id: `coffee_${i}`,
             name: coffeeName,
             region: region,
             variety: variety,
             process: process,
             tasting_notes: notes
-        });
+        };
+
+        const extras = collectCoffeeOverrideAndAdditional(i, 'create');
+        if (extras.enabled_questions) coffeeObj.enabled_questions = extras.enabled_questions;
+        if (extras.additional_questions) coffeeObj.additional_questions = extras.additional_questions;
+
+        coffees.push(coffeeObj);
     }
-    
+
     // Collect enabled questions
     const enabledQuestions = {
         region: document.getElementById('questionRegion').checked,
@@ -1416,10 +1630,67 @@ function populateEditForm(caseData) {
             console.error(`${id} element not found`);
         }
     });
-        
+
+    // Populate per-coffee overrides and additional questions
+    additionalQuestionCounters.edit = [0, 0, 0, 0];
+    for (let i = 1; i <= 4; i++) {
+        const coffee = caseData.coffees && caseData.coffees[i - 1];
+        const prefix = `editCoffee${i}`;
+
+        // Reset containers
+        const aqContainer = document.getElementById(`${prefix}AdditionalQuestions`);
+        if (aqContainer) aqContainer.innerHTML = '';
+
+        const overrideCheckbox = document.getElementById(`${prefix}OverrideQuestions`);
+        const panel = document.getElementById(`${prefix}OverridePanel`);
+
+        if (coffee && coffee.enabled_questions) {
+            if (overrideCheckbox) overrideCheckbox.checked = true;
+            if (panel) panel.style.display = 'grid';
+            const eq = coffee.enabled_questions;
+            const fields = ['Region', 'Variety', 'Process', 'TasteNote1', 'TasteNote2'];
+            const keys = ['region', 'variety', 'process', 'taste_note_1', 'taste_note_2'];
+            fields.forEach((field, idx) => {
+                const el = document.getElementById(`${prefix}Question${field}`);
+                if (el) el.checked = !!eq[keys[idx]];
+            });
+        } else {
+            if (overrideCheckbox) overrideCheckbox.checked = false;
+            if (panel) panel.style.display = 'none';
+        }
+
+        // Populate additional questions
+        if (coffee && coffee.additional_questions) {
+            coffee.additional_questions.forEach(aq => {
+                addAdditionalQuestion(i, 'edit');
+                const idx = additionalQuestionCounters.edit[i - 1] - 1;
+                const qInput = document.getElementById(`${prefix}_aq_${idx}_question`);
+                if (qInput) qInput.value = aq.question || '';
+                const ptsInput = document.getElementById(`${prefix}_aq_${idx}_points`);
+                if (ptsInput) ptsInput.value = aq.points || 10;
+
+                // Add options
+                if (aq.options) {
+                    aq.options.forEach(opt => {
+                        addAdditionalOption(i, 'edit', idx);
+                        const key = `${prefix}_aq_${idx}`;
+                        const optIdx = (additionalOptionCounters[key] || 1) - 1;
+                        const optInput = document.getElementById(`${prefix}_aq_${idx}_option_${optIdx}`);
+                        if (optInput) optInput.value = opt;
+                    });
+                    updateCorrectOptionDropdown(i, 'edit', idx);
+                }
+
+                // Set correct option
+                const correctSelect = document.getElementById(`${prefix}_aq_${idx}_correct`);
+                if (correctSelect && aq.correct_option) correctSelect.value = aq.correct_option;
+            });
+        }
+    }
+
     } catch (error) {
         console.error('Error in populateEditForm:', error);
-        throw error; // Re-throw to be caught by the calling function
+        throw error;
     }
 }
 
@@ -1575,16 +1846,22 @@ async function updateCase() {
             return;
         }
         
-        coffees.push({
-            id: originalCoffeeIds[i-1] || `coffee_${i}`, // Use original ID if available, fallback to generated
+        const coffeeObj = {
+            id: originalCoffeeIds[i-1] || `coffee_${i}`,
             name: coffeeName,
             region: region,
             variety: variety,
             process: process,
             tasting_notes: notes
-        });
+        };
+
+        const extras = collectCoffeeOverrideAndAdditional(i, 'edit');
+        if (extras.enabled_questions) coffeeObj.enabled_questions = extras.enabled_questions;
+        if (extras.additional_questions) coffeeObj.additional_questions = extras.additional_questions;
+
+        coffees.push(coffeeObj);
     }
-    
+
     // Collect enabled questions
     const enabledQuestions = {
         region: document.getElementById('editQuestionRegion').checked,

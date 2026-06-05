@@ -35,6 +35,13 @@ type CoffeeCase struct {
 	IsActive         bool              `firestore:"is_active" json:"is_active"`
 }
 
+// PublicCoffeeItem represents a coffee with only public information
+type PublicCoffeeItem struct {
+	ID                  string                    `json:"id"`
+	EnabledQuestions    *EnabledQuestions          `json:"enabled_questions,omitempty"`
+	AdditionalQuestions []PublicAdditionalQuestion `json:"additional_questions,omitempty"`
+}
+
 // PublicCoffeeCase represents a coffee case with only public information (no answers)
 type PublicCoffeeCase struct {
 	ID               string           `json:"id"`
@@ -42,6 +49,7 @@ type PublicCoffeeCase struct {
 	Description      string           `json:"description"`
 	EnabledQuestions EnabledQuestions `json:"enabled_questions"`
 	CoffeeIDs        []string         `json:"coffee_ids"`
+	Coffees          []PublicCoffeeItem `json:"coffees,omitempty"`
 	CoffeeCount      int              `json:"coffee_count"`
 	IsActive         bool             `json:"is_active"`
 }
@@ -57,16 +65,41 @@ type EnabledQuestions struct {
 	BrewingMethod  bool `firestore:"brewing_method" json:"brewing_method"`
 }
 
+// AdditionalQuestion represents a custom multiple-choice question for a coffee
+type AdditionalQuestion struct {
+	ID            string   `firestore:"id" json:"id"`
+	Question      string   `firestore:"question" json:"question"`
+	Options       []string `firestore:"options" json:"options"`
+	CorrectOption string   `firestore:"correct_option" json:"correct_option"`
+	Points        int      `firestore:"points" json:"points"`
+}
+
+// PublicAdditionalQuestion is AdditionalQuestion without the correct answer
+type PublicAdditionalQuestion struct {
+	ID       string   `json:"id"`
+	Question string   `json:"question"`
+	Options  []string `json:"options"`
+	Points   int      `json:"points"`
+}
+
+// AdditionalAnswer represents a user's answer to an additional question
+type AdditionalAnswer struct {
+	QuestionID string `firestore:"question_id" json:"question_id"`
+	Answer     string `firestore:"answer" json:"answer"`
+}
+
 // CoffeeItem represents a single coffee in a case
 type CoffeeItem struct {
-	ID          string `firestore:"id" json:"id"`
-	Name        string `firestore:"name" json:"name"`
-	Region      string `firestore:"region" json:"region"`
-	Variety     string `firestore:"variety" json:"variety"`
-	Process     string `firestore:"process" json:"process"`
-	TastingNotes string `firestore:"tasting_notes" json:"tasting_notes"`
-	Farm        string `firestore:"farm" json:"farm"`
-	Altitude    int    `firestore:"altitude" json:"altitude"`
+	ID                  string              `firestore:"id" json:"id"`
+	Name                string              `firestore:"name" json:"name"`
+	Region              string              `firestore:"region" json:"region"`
+	Variety             string              `firestore:"variety" json:"variety"`
+	Process             string              `firestore:"process" json:"process"`
+	TastingNotes        string              `firestore:"tasting_notes" json:"tasting_notes"`
+	Farm                string              `firestore:"farm" json:"farm"`
+	Altitude            int                 `firestore:"altitude" json:"altitude"`
+	EnabledQuestions    *EnabledQuestions    `firestore:"enabled_questions,omitempty" json:"enabled_questions,omitempty"`
+	AdditionalQuestions []AdditionalQuestion `firestore:"additional_questions,omitempty" json:"additional_questions,omitempty"`
 }
 
 // Submission represents a user's case submission
@@ -86,13 +119,14 @@ type Submission struct {
 
 // CoffeeAnswer represents a user's answer for a single coffee
 type CoffeeAnswer struct {
-	CoffeeID     string `firestore:"coffee_id" json:"coffee_id"`
-	Region       string `firestore:"region" json:"region"`
-	Variety      string `firestore:"variety" json:"variety"`
-	Process      string `firestore:"process" json:"process"`
-	TasteNote1   string `firestore:"taste_note_1" json:"taste_note_1"`
-	TasteNote2   string `firestore:"taste_note_2" json:"taste_note_2"`
-	Points       int    `firestore:"points" json:"points"`
+	CoffeeID          string             `firestore:"coffee_id" json:"coffee_id"`
+	Region            string             `firestore:"region" json:"region"`
+	Variety           string             `firestore:"variety" json:"variety"`
+	Process           string             `firestore:"process" json:"process"`
+	TasteNote1        string             `firestore:"taste_note_1" json:"taste_note_1"`
+	TasteNote2        string             `firestore:"taste_note_2" json:"taste_note_2"`
+	Points            int                `firestore:"points" json:"points"`
+	AdditionalAnswers []AdditionalAnswer `firestore:"additional_answers,omitempty" json:"additional_answers,omitempty"`
 }
 
 // Order represents a coffee case order
