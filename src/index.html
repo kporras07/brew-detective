@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brew Detective - Resuelve el Misterio del Café</title>
+    <title>🔍 Brew Detective - Resuelve el Misterio del Café</title>
     <link rel="stylesheet" href="css/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- GitHub Pages SPA routing script -->
@@ -71,10 +74,15 @@
     <!-- Home Page -->
     <div id="home" class="page active">
         <section class="hero">
+            <div class="hero-atmosphere"></div>
+            <div class="hero-steam">
+                <span></span><span></span><span></span>
+            </div>
             <div class="container">
                 <div class="hero-content fade-in">
-                    <h1>Brew Detective</h1>
-                    <p>Conviértete en un detective del café. Resuelve misterios, descifra sabores y compite por el primer lugar en el ranking de catadores más expertos.</p>
+                    <p class="hero-eyebrow">Misterio Cafetalero de Costa Rica</p>
+                    <h1>Brew<br>Detective</h1>
+                    <p class="hero-tagline">Descifra sabores. Resuelve misterios.<br>Conviértete en el mejor catador.</p>
                     <a href="/order" class="cta-button">Iniciar Investigación</a>
                 </div>
             </div>
@@ -91,50 +99,80 @@
         <section class="section section--reduced-top">
             <div class="container">
                 <h2 class="section-title">¿Cómo Funciona?</h2>
-                <div class="cards-grid symmetric">
-                    <div class="card fade-in">
-                        <h3>📦 Ordena tu Caja Misteriosa</h3>
-                        <p>Solicita tu caja con 4 cafés costarricenses misteriosos de 80g cada uno. <strong>₡18,000</strong></p>
+                <div class="timeline">
+                    <div class="timeline-step fade-in">
+                        <div class="timeline-step__number">1</div>
+                        <div class="timeline-step__content">
+                            <h3>Ordena tu Caja Misteriosa</h3>
+                            <p>Solicita tu caja con 4 cafés costarricenses misteriosos de 80g cada uno. <strong>₡18,000</strong></p>
+                        </div>
                     </div>
-                    <div class="card fade-in">
-                        <h3>☕ Recibe y Cata</h3>
-                        <p>Sin etiquetas, sin pistas... solo tu paladar y tu intuición para descubrir los secretos.</p>
+                    <div class="timeline-step fade-in">
+                        <div class="timeline-step__number">2</div>
+                        <div class="timeline-step__content">
+                            <h3>Recibe y Cata</h3>
+                            <p>Sin etiquetas, sin pistas... solo tu paladar y tu intuición para descubrir los secretos.</p>
+                        </div>
                     </div>
-                    <div class="card fade-in">
-                        <h3>🔍 Analiza las Evidencias</h3>
-                        <p>Usa tus sentidos para descubrir la región, variedad, proceso y más. Cada detalle es importante.</p>
+                    <div class="timeline-step fade-in">
+                        <div class="timeline-step__number">3</div>
+                        <div class="timeline-step__content">
+                            <h3>Analiza las Evidencias</h3>
+                            <p>Usa tus sentidos para descubrir la región, variedad, proceso y más.</p>
+                        </div>
                     </div>
-                    <div class="card fade-in">
-                        <h3>💡 Resuelve el Misterio</h3>
-                        <p>Responde nuestras preguntas detectivescas y envía tus conclusiones. Cada respuesta correcta suma puntos.</p>
+                    <div class="timeline-step fade-in">
+                        <div class="timeline-step__number">4</div>
+                        <div class="timeline-step__content">
+                            <h3>Resuelve el Misterio</h3>
+                            <p>Envía tus conclusiones. Cada respuesta correcta suma puntos a tu perfil de detective.</p>
+                        </div>
                     </div>
-                    <div class="card fade-in">
-                        <h3>🏆 Compite en el Ranking</h3>
-                        <p>Sube en el ranking de detectives. Gana insignias, desbloquea logros y conviértete en el mejor detective del café.</p>
-                    </div>
-                    <div class="card fade-in">
-                        <h3>🎉 Disfruta el Proceso</h3>
-                        <p>Aprende sobre el café costarricense mientras te diviertes y conectas con otros amantes del café.</p>
+                    <div class="timeline-step fade-in">
+                        <div class="timeline-step__number">5</div>
+                        <div class="timeline-step__content">
+                            <h3>Compite en el Ranking</h3>
+                            <p>Sube en el ranking, gana insignias y conviértete en el mejor detective del café.</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="section">
+        <section class="section evidence-section">
             <div class="container">
-                <h2 class="section-title">Tipos de Misterios</h2>
-                <div class="cards-grid symmetric">
-                    <div class="card fade-in">
-                        <h3>🌍 Caso Origen</h3>
-                        <p>¿De qué región de Costa Rica viene este café? ¿Qué finca? Descifra las pistas en cada sorbo.</p>
+                <h2 class="section-title">El Expediente</h2>
+                <p class="section-subtitle">Cada caja contiene tres tipos de pista por resolver</p>
+                <div class="evidence-board">
+                    <div class="evidence-card fade-in" data-case="origen">
+                        <div class="evidence-card__pin"></div>
+                        <div class="evidence-card__label">PISTA N.° 01</div>
+                        <div class="evidence-card__icon">
+                            <svg viewBox="0 0 64 64" width="48" height="48"><circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" stroke-width="2"/><path d="M32 8 C32 8 20 20 20 32 C20 44 32 56 32 56 C32 56 44 44 44 32 C44 20 32 8 32 8Z" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="32" x2="56" y2="32" stroke="currentColor" stroke-width="1" opacity="0.5"/><line x1="32" y1="8" x2="32" y2="56" stroke="currentColor" stroke-width="1" opacity="0.5"/></svg>
+                        </div>
+                        <h3>Pista Geográfica</h3>
+                        <p>¿De qué región de Costa Rica viene este café? ¿Tarrazú, Valle Occidental, Brunca? Descifra las pistas geográficas en cada sorbo.</p>
+                        <div class="evidence-card__tag">Geografía &bull; Terroir &bull; Microclima</div>
                     </div>
-                    <div class="card fade-in">
-                        <h3>⚙️ Caso Proceso</h3>
-                        <p>¿Lavado, natural, honey? El proceso de beneficiado deja huellas únicas.</p>
+                    <div class="evidence-card fade-in" data-case="proceso">
+                        <div class="evidence-card__pin"></div>
+                        <div class="evidence-card__label">PISTA N.° 02</div>
+                        <div class="evidence-card__icon">
+                            <svg viewBox="0 0 64 64" width="48" height="48"><rect x="12" y="20" width="40" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 28 L52 28" stroke="currentColor" stroke-width="1.5"/><circle cx="20" cy="24" r="2" fill="currentColor"/><circle cx="28" cy="24" r="2" fill="currentColor"/><path d="M16 34 L48 34 M16 40 L36 40" stroke="currentColor" stroke-width="1" opacity="0.6"/><path d="M24 20 L24 14 L40 14 L40 20" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+                        </div>
+                        <h3>Pista de Proceso</h3>
+                        <p>¿Lavado, natural, honey? El método de beneficiado deja huellas únicas que transforman el perfil del grano.</p>
+                        <div class="evidence-card__tag">Beneficiado &bull; Fermentación &bull; Secado</div>
                     </div>
-                    <div class="card fade-in">
-                        <h3>🌱 Caso Variedad</h3>
-                        <p>¿Caturra, Bourbon, Geisha? Cada variedad tiene su personalidad única.</p>
+                    <div class="evidence-card fade-in" data-case="variedad">
+                        <div class="evidence-card__pin"></div>
+                        <div class="evidence-card__label">PISTA N.° 03</div>
+                        <div class="evidence-card__icon">
+                            <svg viewBox="0 0 64 64" width="48" height="48"><path d="M32 56 L32 24" stroke="currentColor" stroke-width="2"/><path d="M32 24 C32 24 20 20 18 10 C18 10 28 14 32 24" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M32 30 C32 30 44 26 46 16 C46 16 36 20 32 30" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M32 36 C32 36 22 32 20 22 C20 22 30 26 32 36" fill="none" stroke="currentColor" stroke-width="1.5"/><ellipse cx="32" cy="58" rx="8" ry="3" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4"/></svg>
+                        </div>
+                        <h3>Pista Varietal</h3>
+                        <p>¿Caturra, Bourbon, Geisha? Cada variedad tiene personalidad propia — notas, cuerpo y carácter inconfundibles.</p>
+                        <div class="evidence-card__tag">Genética &bull; Perfil &bull; Carácter</div>
                     </div>
                 </div>
             </div>
@@ -143,52 +181,59 @@
 
     <!-- Order Page -->
     <div id="order" class="page">
-        <section class="section">
+        <section class="section order-page">
             <div class="container">
+                <p class="order-page__eyebrow">Tu Próximo Caso</p>
                 <h2 class="section-title">Ordenar Caja Detective</h2>
-                <div class="form-container">
-                    <h3 class="order-pricing">💰 Precio: ₡18,000</h3>
-                    <p class="order-description">
-                        Incluye 4 cafés costarricenses misteriosos de 80g cada uno + guía de cata + acceso al juego online
-                    </p>
-                    
+
+                <div class="order-page__box">
+                    <div class="order-page__box-header">
+                        <div class="order-page__box-label">Caja Misteriosa</div>
+                        <div class="order-page__box-price">₡18,000</div>
+                    </div>
+
+                    <div class="order-page__includes">
+                        <div class="order-page__includes-item">
+                            <span class="order-page__includes-icon">☕</span>
+                            <div>
+                                <strong>4 cafés misteriosos</strong>
+                                <span>80g cada uno, sin etiquetas</span>
+                            </div>
+                        </div>
+                        <div class="order-page__includes-item">
+                            <span class="order-page__includes-icon">📋</span>
+                            <div>
+                                <strong>Guía de cata</strong>
+                                <span>Instrucciones para tu investigación</span>
+                            </div>
+                        </div>
+                        <div class="order-page__includes-item">
+                            <span class="order-page__includes-icon">🔍</span>
+                            <div>
+                                <strong>Acceso al juego online</strong>
+                                <span>Envía respuestas y compite en el ranking</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Authenticated User Content -->
                     <div id="orderAuthenticatedContent" class="order-content--authenticated">
                         <button onclick="openWhatsAppOrder()" class="cta-button">
-                            📱 Ordenar por WhatsApp
+                            Ordenar por WhatsApp
                         </button>
-                        <p class="order-note">
+                        <p class="order-page__note">
                             Te contactaremos para coordinar la entrega y el pago
                         </p>
                     </div>
-                    
+
                     <!-- Unauthenticated User Content -->
                     <div id="orderUnauthenticatedContent" class="order-content--unauthenticated">
-                        <div class="login-prompt">
-                            <h4 class="login-prompt__title">🔐 Inicia Sesión para Ordenar</h4>
-                            <p class="login-prompt__description">
-                                Para poder ordenar tu caja detective, necesitas tener una cuenta. Esto nos permite:
-                            </p>
-                            <div class="login-prompt__benefits">
-                                <div class="login-prompt__benefits-item">
-                                    ✓ Gestionar tus pedidos y entregas
-                                </div>
-                                <div class="login-prompt__benefits-item">
-                                    ✓ Guardar tu progreso como detective
-                                </div>
-                                <div class="login-prompt__benefits-item">
-                                    ✓ Acceder a tu historial de casos
-                                </div>
-                                <div class="login-prompt__benefits-item">
-                                    ✓ Participar en el ranking de detectives
-                                </div>
-                            </div>
+                        <div class="order-page__login">
+                            <p class="order-page__login-text">Inicia sesión para ordenar tu caja y participar en el juego</p>
                             <button onclick="Auth.login()" class="cta-button">
-                                🚀 Iniciar Sesión con Google
+                                Iniciar Sesión con Google
                             </button>
-                            <p class="login-prompt__note">
-                                Es rápido, seguro y gratuito
-                            </p>
+                            <p class="order-page__note">Es rápido, seguro y gratuito</p>
                         </div>
                     </div>
                 </div>
@@ -1241,7 +1286,7 @@
                 </div>
             </div>
             <div class="footer-text">
-                <p>© 2025 Brew Detective. Todos los derechos reservados.</p>
+                <p>© 2025 🔍 Brew Detective. Todos los derechos reservados.</p>
                 <p>Síguenos en <a href="https://instagram.com/sinfonia_cafe_cr" style="color: #d4af37; text-decoration: none;" target="_blank" rel="noopener noreferrer">@sinfonia_cafe_cr</a></p>
             </div>
         </div>

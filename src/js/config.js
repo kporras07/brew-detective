@@ -2,7 +2,7 @@
 const API_CONFIG = {
     // Production backend URL on Cloud Run
     BASE_URL: 'https://api.brewdetective.coffee',
-    
+
     // For local development
     // BASE_URL: 'http://localhost:8888',
     
