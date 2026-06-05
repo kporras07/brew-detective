@@ -2,13 +2,13 @@
 @use '../base/mixins' as *;
 
 header {
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
     position: fixed;
     top: 0;
     width: 100%;
     z-index: $z-header;
-    border-bottom: 2px solid $primary-gold;
+    border-bottom: 1px solid rgba($primary-gold, 0.15);
 }
 
 nav {
@@ -20,40 +20,45 @@ nav {
 
 .logo {
     font-family: $font-display;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: $primary-gold;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
+    text-decoration: none;
 }
 
 .nav-links {
     display: flex;
     list-style: none;
-    gap: 2rem;
+    gap: 2.2rem;
     align-items: center;
-    
+
     a {
-        color: $text-light;
+        font-family: $font-body;
+        color: rgba($text-light, 0.6);
         text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
         transition: color 0.3s;
         position: relative;
-        
+
         &:hover {
             color: $primary-gold;
         }
-        
+
         &::after {
             content: '';
             position: absolute;
             bottom: -5px;
             left: 0;
             width: 0;
-            height: 2px;
+            height: 1px;
             background: $primary-gold;
             transition: width 0.3s;
         }
-        
+
         &:hover::after {
             width: 100%;
         }
@@ -63,73 +68,82 @@ nav {
 // User dropdown styles
 .user-dropdown {
     position: relative;
-    
+
     .user-menu-toggle {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        background: rgba($primary-gold, 0.1);
-        border-radius: 25px;
-        border: 1px solid rgba($primary-gold, 0.3);
+        padding: 0.4rem 0.9rem;
+        background: rgba($primary-gold, 0.08);
+        border-radius: 20px;
+        border: 1px solid rgba($primary-gold, 0.2);
         cursor: pointer;
         transition: all 0.3s;
-        
+        font-family: $font-body;
+        font-size: 0.8rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+
         &:hover {
-            background: rgba($primary-gold, 0.2);
-            border-color: rgba($primary-gold, 0.5);
+            background: rgba($primary-gold, 0.15);
+            border-color: rgba($primary-gold, 0.4);
         }
-        
+
         &::after {
-            display: none; // Remove the underline effect for dropdown
+            display: none;
         }
-        
+
         .dropdown-arrow {
-            font-size: 0.8rem;
+            font-size: 0.65rem;
             transition: transform 0.3s;
+            opacity: 0.6;
         }
-        
+
         &.active .dropdown-arrow {
             transform: rotate(180deg);
         }
     }
-    
+
     .user-menu {
         position: absolute;
-        top: 100%;
+        top: calc(100% + 8px);
         right: 0;
-        background: rgba(0, 0, 0, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba($primary-gold, 0.3);
-        border-radius: 10px;
-        padding: 0.5rem 0;
-        min-width: 160px;
+        background: rgba(10, 6, 4, 0.95);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba($primary-gold, 0.15);
+        border-radius: 6px;
+        padding: 0.4rem 0;
+        min-width: 170px;
         opacity: 0;
         visibility: hidden;
-        transform: translateY(-10px);
-        transition: all 0.3s;
+        transform: translateY(-8px);
+        transition: all 0.25s;
         z-index: 1000;
-        
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+
         &.active {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
-        
+
         a {
             display: block;
-            padding: 0.75rem 1rem;
-            color: $text-light;
+            padding: 0.65rem 1rem;
+            color: rgba($text-light, 0.7);
             text-decoration: none;
-            transition: all 0.3s;
-            
+            font-family: $font-body;
+            font-size: 0.82rem;
+            letter-spacing: 0.04em;
+            transition: all 0.2s;
+
             &:hover {
-                background: rgba($primary-gold, 0.1);
+                background: rgba($primary-gold, 0.08);
                 color: $primary-gold;
             }
-            
+
             &::after {
-                display: none; // Remove underline effect
+                display: none;
             }
         }
     }
@@ -140,16 +154,19 @@ nav {
     a {
         display: block;
         margin: 1rem 0;
-        color: $text-light;
+        color: rgba($text-light, 0.7);
         text-decoration: none;
-        font-size: 1.5rem;
-        padding: 1.5rem 2rem;
+        font-family: $font-body;
+        font-size: 1.1rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        padding: 1.2rem 2rem;
         transition: $transition;
-        border-radius: 10px;
-        
+        border-radius: 6px;
+
         &:hover {
             color: $primary-gold;
-            background: rgba($primary-gold, 0.1);
+            background: rgba($primary-gold, 0.08);
         }
     }
 }
@@ -160,27 +177,26 @@ nav {
     flex-direction: column;
     cursor: pointer;
     padding: 5px;
-    
+    gap: 5px;
+
     span {
-        width: 25px;
-        height: 3px;
+        width: 22px;
+        height: 1.5px;
         background: $primary-gold;
-        margin: 3px 0;
         transition: 0.3s;
-        border-radius: 2px;
     }
-    
+
     &.active {
         span:nth-child(1) {
-            transform: rotate(-45deg) translate(-5px, 6px);
+            transform: rotate(-45deg) translate(-5px, 5px);
         }
-        
+
         span:nth-child(2) {
             opacity: 0;
         }
-        
+
         span:nth-child(3) {
-            transform: rotate(45deg) translate(-5px, -6px);
+            transform: rotate(45deg) translate(-5px, -5px);
         }
     }
 }
@@ -192,37 +208,40 @@ nav {
     left: 0;
     width: 100%;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(10px);
+    background: rgba(10, 6, 4, 0.97);
+    backdrop-filter: blur(16px);
     z-index: $z-mobile-nav;
     padding-top: 80px;
-    
+
     &.active {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
     }
-    
+
     ul {
         list-style: none;
         text-align: center;
-        
+
         li {
-            margin: 1.5rem 0;
-            
+            margin: 1rem 0;
+
             a {
-                color: $text-light;
+                color: rgba($text-light, 0.7);
                 text-decoration: none;
-                font-size: 1.5rem;
+                font-family: $font-body;
+                font-size: 1.1rem;
+                letter-spacing: 0.2em;
+                text-transform: uppercase;
                 display: block;
-                padding: 1.5rem 2rem;
+                padding: 1.2rem 2rem;
                 transition: $transition;
-                border-radius: 10px;
-                
+                border-radius: 6px;
+
                 &:hover {
                     color: $primary-gold;
-                    background: rgba($primary-gold, 0.1);
+                    background: rgba($primary-gold, 0.08);
                 }
             }
         }
@@ -235,21 +254,21 @@ nav {
     right: 1rem;
     background: none;
     border: none;
-    color: $text-light;
-    font-size: 3rem;
+    color: rgba($text-light, 0.5);
+    font-size: 2.5rem;
     cursor: pointer;
     padding: 1rem;
-    width: 4rem;
-    height: 4rem;
+    width: 3.5rem;
+    height: 3.5rem;
     border-radius: 50%;
     transition: $transition;
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     &:hover {
         color: $primary-gold;
-        background: rgba($primary-gold, 0.1);
+        background: rgba($primary-gold, 0.08);
     }
 }
 
@@ -257,7 +276,7 @@ nav {
     .nav-links {
         display: none;
     }
-    
+
     .mobile-menu-toggle {
         display: flex;
     }
