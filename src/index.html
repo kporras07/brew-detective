@@ -243,194 +243,226 @@
 
     <!-- Submit Page -->
     <div id="submit" class="page">
-        <section class="section">
+        <section class="section submit-page">
             <div class="container">
+                <p class="submit-page__eyebrow">Informe de Investigación</p>
                 <h2 class="section-title">Enviar Respuestas del Caso</h2>
-                
-                <!-- Scoring Information Box -->
-                <div id="scoringInfoBox" class="scoring-info">
-                    <h3 class="scoring-info__title">
-                        <span class="scoring-info__title-icon">🎯</span>
-                        Sistema de Puntuación
-                    </h3>
-                    <div class="scoring-info__grid">
-                        <div>
-                            <h4 class="scoring-info__section-title">📊 Puntos por Café</h4>
-                            <div id="coffeeQuestionsList" class="scoring-info__list">
-                                <div class="scoring-info__list--loading">Cargando preguntas del caso...</div>
-                            </div>
-                        </div>
-                        <div>
-                            <h4 class="scoring-info__section-title">⭐ Puntos Bonus</h4>
-                            <div id="bonusQuestionsList" class="scoring-info__list">
-                                <div class="scoring-info__list--loading">Cargando preguntas bonus...</div>
-                            </div>
-                            <div id="maxScoreDisplay" class="scoring-info__max-score">
-                                <strong>🏆 Máximo: -- puntos</strong>
-                            </div>
-                        </div>
+
+                <!-- Scoring Information Panel -->
+                <div class="submit-page__scoring-panel" id="scoringInfoBox">
+                    <div class="submit-page__scoring-header">
+                        <span class="submit-page__scoring-label">Sistema de Puntuación</span>
                     </div>
-                    <div class="scoring-info__tip">
-                        <p>
-                            <strong>💡 Consejo:</strong> El puntaje se adapta automáticamente según las preguntas habilitadas para este caso. 
-                            ¡Cada respuesta correcta contribuye a tu precisión total!
-                        </p>
+                    <div class="submit-page__scoring-body">
+                        <div class="scoring-info__grid">
+                            <div>
+                                <h4 class="scoring-info__section-title">Puntos por Café</h4>
+                                <div id="coffeeQuestionsList" class="scoring-info__list">
+                                    <div class="scoring-info__list--loading">Cargando preguntas del caso...</div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="scoring-info__section-title">Puntos Bonus</h4>
+                                <div id="bonusQuestionsList" class="scoring-info__list">
+                                    <div class="scoring-info__list--loading">Cargando preguntas bonus...</div>
+                                </div>
+                                <div id="maxScoreDisplay" class="scoring-info__max-score">
+                                    <strong>Máximo: -- puntos</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="scoring-info__tip">
+                            <p>
+                                <strong>Consejo:</strong> El puntaje se adapta automáticamente según las preguntas habilitadas para este caso.
+                                ¡Cada respuesta correcta contribuye a tu precisión total!
+                            </p>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="form-container">
-                    <div class="success-message" id="submitSuccess">
-                        ¡Caso resuelto exitosamente! Tus respuestas han sido enviadas.
+
+                <!-- Case File Form -->
+                <div class="submit-page__form-panel">
+                    <div class="submit-page__form-header">
+                        <span class="submit-page__form-label">Expediente del Caso</span>
                     </div>
-                    <div class="error-message" id="submitError">
-                        Error al enviar respuestas. Por favor intenta nuevamente.
-                    </div>
-                    <div class="form-group">
-                        <label>Caso Activo:</label>
-                        <div id="activeCaseDisplay" class="active-case-display">
-                            <div class="active-case-display__header">
-                                <span class="active-case-display__header-icon">📦</span>
-                                <span id="activeCaseName" class="active-case-display__header-name">Cargando caso activo...</span>
+                    <div class="submit-page__form-body">
+                        <div class="success-message" id="submitSuccess">
+                            ¡Caso resuelto exitosamente! Tus respuestas han sido enviadas.
+                        </div>
+                        <div class="error-message" id="submitError">
+                            Error al enviar respuestas. Por favor intenta nuevamente.
+                        </div>
+                        <div class="form-group">
+                            <label>Caso Activo:</label>
+                            <div id="activeCaseDisplay" class="active-case-display">
+                                <div class="active-case-display__header">
+                                    <span id="activeCaseName" class="active-case-display__header-name">Cargando caso activo...</span>
+                                </div>
+                                <div id="activeCaseDescription" class="active-case-display__description"></div>
                             </div>
-                            <div id="activeCaseDescription" class="active-case-display__description"></div>
                         </div>
+
+                        <form id="submitForm">
+                            <div class="form-group">
+                                <label for="orderId">ID de Orden (6 caracteres):</label>
+                                <input type="text" id="orderId" placeholder="Ej: ABC123" maxlength="6" required class="text-uppercase-input">
+                                <small class="form-helper">
+                                    Este código fue enviado con tu orden de café. Es necesario para validar tu compra.
+                                </small>
+                            </div>
+
+                            <div class="submit-page__coffee-section">
+                                <div class="submit-page__coffee-divider">
+                                    <span class="submit-page__coffee-number">01</span>
+                                    <span class="submit-page__coffee-title">Muestra N.° 1</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee1_region">Región de Costa Rica:</label>
+                                    <select id="coffee1_region" required>
+                                        <option value="">Selecciona una región</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee1_variety">Variedad:</label>
+                                    <select id="coffee1_variety" required>
+                                        <option value="">Selecciona una variedad</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee1_process">Proceso de Beneficiado:</label>
+                                    <select id="coffee1_process" required>
+                                        <option value="">Selecciona un proceso</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee1_note1">Primera Nota de Sabor:</label>
+                                    <input type="text" id="coffee1_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee1_note2">Segunda Nota de Sabor:</label>
+                                    <input type="text" id="coffee1_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
+                                </div>
+                            </div>
+
+                            <div class="submit-page__coffee-section">
+                                <div class="submit-page__coffee-divider">
+                                    <span class="submit-page__coffee-number">02</span>
+                                    <span class="submit-page__coffee-title">Muestra N.° 2</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee2_region">Región de Costa Rica:</label>
+                                    <select id="coffee2_region" required>
+                                        <option value="">Selecciona una región</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee2_variety">Variedad:</label>
+                                    <select id="coffee2_variety" required>
+                                        <option value="">Selecciona una variedad</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee2_process">Proceso de Beneficiado:</label>
+                                    <select id="coffee2_process" required>
+                                        <option value="">Selecciona un proceso</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee2_note1">Primera Nota de Sabor:</label>
+                                    <input type="text" id="coffee2_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee2_note2">Segunda Nota de Sabor:</label>
+                                    <input type="text" id="coffee2_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
+                                </div>
+                            </div>
+
+                            <div class="submit-page__coffee-section">
+                                <div class="submit-page__coffee-divider">
+                                    <span class="submit-page__coffee-number">03</span>
+                                    <span class="submit-page__coffee-title">Muestra N.° 3</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee3_region">Región de Costa Rica:</label>
+                                    <select id="coffee3_region" required>
+                                        <option value="">Selecciona una región</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee3_variety">Variedad:</label>
+                                    <select id="coffee3_variety" required>
+                                        <option value="">Selecciona una variedad</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee3_process">Proceso de Beneficiado:</label>
+                                    <select id="coffee3_process" required>
+                                        <option value="">Selecciona un proceso</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee3_note1">Primera Nota de Sabor:</label>
+                                    <input type="text" id="coffee3_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee3_note2">Segunda Nota de Sabor:</label>
+                                    <input type="text" id="coffee3_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
+                                </div>
+                            </div>
+
+                            <div class="submit-page__coffee-section">
+                                <div class="submit-page__coffee-divider">
+                                    <span class="submit-page__coffee-number">04</span>
+                                    <span class="submit-page__coffee-title">Muestra N.° 4</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee4_region">Región de Costa Rica:</label>
+                                    <select id="coffee4_region" required>
+                                        <option value="">Selecciona una región</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee4_variety">Variedad:</label>
+                                    <select id="coffee4_variety" required>
+                                        <option value="">Selecciona una variedad</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee4_process">Proceso de Beneficiado:</label>
+                                    <select id="coffee4_process" required>
+                                        <option value="">Selecciona un proceso</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee4_note1">Primera Nota de Sabor:</label>
+                                    <input type="text" id="coffee4_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee4_note2">Segunda Nota de Sabor:</label>
+                                    <input type="text" id="coffee4_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
+                                </div>
+                            </div>
+
+                            <div class="submit-page__coffee-section">
+                                <div class="submit-page__coffee-divider">
+                                    <span class="submit-page__coffee-number">+</span>
+                                    <span class="submit-page__coffee-title">Preguntas Bonus</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="favorite_coffee">¿Cuál fue tu café favorito y por qué?</label>
+                                    <textarea id="favorite_coffee" rows="3"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="brewing_method">¿En qué método de preparación lo disfrutaste más?</label>
+                                    <select id="brewing_method">
+                                        <option value="">Selecciona un método</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="cta-button">Enviar Solución del Caso</button>
+                        </form>
                     </div>
-                    
-                    <form id="submitForm">
-                        <div class="form-group">
-                            <label for="orderId">ID de Orden (6 caracteres):</label>
-                            <input type="text" id="orderId" placeholder="Ej: ABC123" maxlength="6" required class="text-uppercase-input">
-                            <small class="form-helper">
-                                Este código fue enviado con tu orden de café. Es necesario para validar tu compra.
-                            </small>
-                        </div>
-                        
-                        <h3 class="coffee-heading">☕ Café #1</h3>
-                        <div class="form-group">
-                            <label for="coffee1_region">Región de Costa Rica:</label>
-                            <select id="coffee1_region" required>
-                                <option value="">Selecciona una región</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee1_variety">Variedad:</label>
-                            <select id="coffee1_variety" required>
-                                <option value="">Selecciona una variedad</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee1_process">Proceso de Beneficiado:</label>
-                            <select id="coffee1_process" required>
-                                <option value="">Selecciona un proceso</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee1_note1">Primera Nota de Sabor:</label>
-                            <input type="text" id="coffee1_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee1_note2">Segunda Nota de Sabor:</label>
-                            <input type="text" id="coffee1_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
-                        </div>
-
-                        <h3 class="coffee-heading">☕ Café #2</h3>
-                        <div class="form-group">
-                            <label for="coffee2_region">Región de Costa Rica:</label>
-                            <select id="coffee2_region" required>
-                                <option value="">Selecciona una región</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee2_variety">Variedad:</label>
-                            <select id="coffee2_variety" required>
-                                <option value="">Selecciona una variedad</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee2_process">Proceso de Beneficiado:</label>
-                            <select id="coffee2_process" required>
-                                <option value="">Selecciona un proceso</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee2_note1">Primera Nota de Sabor:</label>
-                            <input type="text" id="coffee2_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee2_note2">Segunda Nota de Sabor:</label>
-                            <input type="text" id="coffee2_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
-                        </div>
-
-                        <h3 class="coffee-heading">☕ Café #3</h3>
-                        <div class="form-group">
-                            <label for="coffee3_region">Región de Costa Rica:</label>
-                            <select id="coffee3_region" required>
-                                <option value="">Selecciona una región</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee3_variety">Variedad:</label>
-                            <select id="coffee3_variety" required>
-                                <option value="">Selecciona una variedad</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee3_process">Proceso de Beneficiado:</label>
-                            <select id="coffee3_process" required>
-                                <option value="">Selecciona un proceso</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee3_note1">Primera Nota de Sabor:</label>
-                            <input type="text" id="coffee3_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee3_note2">Segunda Nota de Sabor:</label>
-                            <input type="text" id="coffee3_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
-                        </div>
-
-                        <h3 class="coffee-heading">☕ Café #4</h3>
-                        <div class="form-group">
-                            <label for="coffee4_region">Región de Costa Rica:</label>
-                            <select id="coffee4_region" required>
-                                <option value="">Selecciona una región</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee4_variety">Variedad:</label>
-                            <select id="coffee4_variety" required>
-                                <option value="">Selecciona una variedad</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee4_process">Proceso de Beneficiado:</label>
-                            <select id="coffee4_process" required>
-                                <option value="">Selecciona un proceso</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee4_note1">Primera Nota de Sabor:</label>
-                            <input type="text" id="coffee4_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee4_note2">Segunda Nota de Sabor:</label>
-                            <input type="text" id="coffee4_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
-                        </div>
-
-                        <h3 class="coffee-heading">🔍 Preguntas Bonus</h3>
-                        <div class="form-group">
-                            <label for="favorite_coffee">¿Cuál fue tu café favorito y por qué?</label>
-                            <textarea id="favorite_coffee" rows="3"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="brewing_method">¿En qué método de preparación lo disfrutaste más?</label>
-                            <select id="brewing_method">
-                                <option value="">Selecciona un método</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="cta-button">Enviar Solución del Caso</button>
-                    </form>
                 </div>
             </div>
         </section>

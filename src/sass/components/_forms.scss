@@ -12,28 +12,41 @@
 
 .form-group {
     margin-bottom: 1.5rem;
-    
+
     label {
         display: block;
         margin-bottom: 0.5rem;
-        color: $primary-gold;
-        font-weight: bold;
+        color: rgba($primary-gold, 0.85);
+        font-family: $font-body;
+        font-weight: 500;
+        font-size: 0.9rem;
+        letter-spacing: 0.02em;
     }
-    
+
     input, select, textarea {
         width: 100%;
         padding: $form-padding;
-        border: 1px solid rgba($primary-gold, 0.3);
-        border-radius: $input-radius;
-        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba($primary-gold, 0.2);
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.25);
         color: $text-light;
-        font-size: 1rem;
-        
+        font-family: $font-body;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+
         &:focus {
             outline: none;
-            border-color: $primary-gold;
-            box-shadow: 0 0 10px rgba($primary-gold, 0.3);
+            border-color: rgba($primary-gold, 0.6);
+            box-shadow: 0 0 0 2px rgba($primary-gold, 0.1);
         }
+
+        &::placeholder {
+            color: rgba($text-light, 0.3);
+        }
+    }
+
+    select {
+        cursor: pointer;
     }
 }
 
