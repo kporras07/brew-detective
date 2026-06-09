@@ -7,6 +7,8 @@
     align-items: center;
     position: relative;
     overflow: hidden;
+    margin-top: -80px;
+    padding-top: 80px;
     background: radial-gradient(ellipse at 30% 50%, rgba(80, 50, 20, 0.6) 0%, transparent 60%),
                 radial-gradient(ellipse at 70% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
                 $background-darker;

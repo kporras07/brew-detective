@@ -243,194 +243,226 @@
 
     <!-- Submit Page -->
     <div id="submit" class="page">
-        <section class="section">
+        <section class="section submit-page">
             <div class="container">
+                <p class="submit-page__eyebrow">Informe de Investigación</p>
                 <h2 class="section-title">Enviar Respuestas del Caso</h2>
-                
-                <!-- Scoring Information Box -->
-                <div id="scoringInfoBox" class="scoring-info">
-                    <h3 class="scoring-info__title">
-                        <span class="scoring-info__title-icon">🎯</span>
-                        Sistema de Puntuación
-                    </h3>
-                    <div class="scoring-info__grid">
-                        <div>
-                            <h4 class="scoring-info__section-title">📊 Puntos por Café</h4>
-                            <div id="coffeeQuestionsList" class="scoring-info__list">
-                                <div class="scoring-info__list--loading">Cargando preguntas del caso...</div>
-                            </div>
-                        </div>
-                        <div>
-                            <h4 class="scoring-info__section-title">⭐ Puntos Bonus</h4>
-                            <div id="bonusQuestionsList" class="scoring-info__list">
-                                <div class="scoring-info__list--loading">Cargando preguntas bonus...</div>
-                            </div>
-                            <div id="maxScoreDisplay" class="scoring-info__max-score">
-                                <strong>🏆 Máximo: -- puntos</strong>
-                            </div>
-                        </div>
+
+                <!-- Scoring Information Panel -->
+                <div class="submit-page__scoring-panel" id="scoringInfoBox">
+                    <div class="submit-page__scoring-header">
+                        <span class="submit-page__scoring-label">Sistema de Puntuación</span>
                     </div>
-                    <div class="scoring-info__tip">
-                        <p>
-                            <strong>💡 Consejo:</strong> El puntaje se adapta automáticamente según las preguntas habilitadas para este caso. 
-                            ¡Cada respuesta correcta contribuye a tu precisión total!
-                        </p>
+                    <div class="submit-page__scoring-body">
+                        <div class="scoring-info__grid">
+                            <div>
+                                <h4 class="scoring-info__section-title">Puntos por Café</h4>
+                                <div id="coffeeQuestionsList" class="scoring-info__list">
+                                    <div class="scoring-info__list--loading">Cargando preguntas del caso...</div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="scoring-info__section-title">Puntos Bonus</h4>
+                                <div id="bonusQuestionsList" class="scoring-info__list">
+                                    <div class="scoring-info__list--loading">Cargando preguntas bonus...</div>
+                                </div>
+                                <div id="maxScoreDisplay" class="scoring-info__max-score">
+                                    <strong>Máximo: -- puntos</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="scoring-info__tip">
+                            <p>
+                                <strong>Consejo:</strong> El puntaje se adapta automáticamente según las preguntas habilitadas para este caso.
+                                ¡Cada respuesta correcta contribuye a tu precisión total!
+                            </p>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="form-container">
-                    <div class="success-message" id="submitSuccess">
-                        ¡Caso resuelto exitosamente! Tus respuestas han sido enviadas.
+
+                <!-- Case File Form -->
+                <div class="submit-page__form-panel">
+                    <div class="submit-page__form-header">
+                        <span class="submit-page__form-label">Expediente del Caso</span>
                     </div>
-                    <div class="error-message" id="submitError">
-                        Error al enviar respuestas. Por favor intenta nuevamente.
-                    </div>
-                    <div class="form-group">
-                        <label>Caso Activo:</label>
-                        <div id="activeCaseDisplay" class="active-case-display">
-                            <div class="active-case-display__header">
-                                <span class="active-case-display__header-icon">📦</span>
-                                <span id="activeCaseName" class="active-case-display__header-name">Cargando caso activo...</span>
+                    <div class="submit-page__form-body">
+                        <div class="success-message" id="submitSuccess">
+                            ¡Caso resuelto exitosamente! Tus respuestas han sido enviadas.
+                        </div>
+                        <div class="error-message" id="submitError">
+                            Error al enviar respuestas. Por favor intenta nuevamente.
+                        </div>
+                        <div class="form-group">
+                            <label>Caso Activo:</label>
+                            <div id="activeCaseDisplay" class="active-case-display">
+                                <div class="active-case-display__header">
+                                    <span id="activeCaseName" class="active-case-display__header-name">Cargando caso activo...</span>
+                                </div>
+                                <div id="activeCaseDescription" class="active-case-display__description"></div>
                             </div>
-                            <div id="activeCaseDescription" class="active-case-display__description"></div>
                         </div>
+
+                        <form id="submitForm">
+                            <div class="form-group">
+                                <label for="orderId">ID de Orden (6 caracteres):</label>
+                                <input type="text" id="orderId" placeholder="Ej: ABC123" maxlength="6" required class="text-uppercase-input">
+                                <small class="form-helper">
+                                    Este código fue enviado con tu orden de café. Es necesario para validar tu compra.
+                                </small>
+                            </div>
+
+                            <div class="submit-page__coffee-section">
+                                <div class="submit-page__coffee-divider">
+                                    <span class="submit-page__coffee-number">01</span>
+                                    <span class="submit-page__coffee-title">Muestra N.° 1</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee1_region">Región de Costa Rica:</label>
+                                    <select id="coffee1_region" required>
+                                        <option value="">Selecciona una región</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee1_variety">Variedad:</label>
+                                    <select id="coffee1_variety" required>
+                                        <option value="">Selecciona una variedad</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee1_process">Proceso de Beneficiado:</label>
+                                    <select id="coffee1_process" required>
+                                        <option value="">Selecciona un proceso</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee1_note1">Primera Nota de Sabor:</label>
+                                    <input type="text" id="coffee1_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee1_note2">Segunda Nota de Sabor:</label>
+                                    <input type="text" id="coffee1_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
+                                </div>
+                            </div>
+
+                            <div class="submit-page__coffee-section">
+                                <div class="submit-page__coffee-divider">
+                                    <span class="submit-page__coffee-number">02</span>
+                                    <span class="submit-page__coffee-title">Muestra N.° 2</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee2_region">Región de Costa Rica:</label>
+                                    <select id="coffee2_region" required>
+                                        <option value="">Selecciona una región</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee2_variety">Variedad:</label>
+                                    <select id="coffee2_variety" required>
+                                        <option value="">Selecciona una variedad</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee2_process">Proceso de Beneficiado:</label>
+                                    <select id="coffee2_process" required>
+                                        <option value="">Selecciona un proceso</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee2_note1">Primera Nota de Sabor:</label>
+                                    <input type="text" id="coffee2_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee2_note2">Segunda Nota de Sabor:</label>
+                                    <input type="text" id="coffee2_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
+                                </div>
+                            </div>
+
+                            <div class="submit-page__coffee-section">
+                                <div class="submit-page__coffee-divider">
+                                    <span class="submit-page__coffee-number">03</span>
+                                    <span class="submit-page__coffee-title">Muestra N.° 3</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee3_region">Región de Costa Rica:</label>
+                                    <select id="coffee3_region" required>
+                                        <option value="">Selecciona una región</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee3_variety">Variedad:</label>
+                                    <select id="coffee3_variety" required>
+                                        <option value="">Selecciona una variedad</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee3_process">Proceso de Beneficiado:</label>
+                                    <select id="coffee3_process" required>
+                                        <option value="">Selecciona un proceso</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee3_note1">Primera Nota de Sabor:</label>
+                                    <input type="text" id="coffee3_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee3_note2">Segunda Nota de Sabor:</label>
+                                    <input type="text" id="coffee3_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
+                                </div>
+                            </div>
+
+                            <div class="submit-page__coffee-section">
+                                <div class="submit-page__coffee-divider">
+                                    <span class="submit-page__coffee-number">04</span>
+                                    <span class="submit-page__coffee-title">Muestra N.° 4</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee4_region">Región de Costa Rica:</label>
+                                    <select id="coffee4_region" required>
+                                        <option value="">Selecciona una región</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee4_variety">Variedad:</label>
+                                    <select id="coffee4_variety" required>
+                                        <option value="">Selecciona una variedad</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee4_process">Proceso de Beneficiado:</label>
+                                    <select id="coffee4_process" required>
+                                        <option value="">Selecciona un proceso</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee4_note1">Primera Nota de Sabor:</label>
+                                    <input type="text" id="coffee4_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="coffee4_note2">Segunda Nota de Sabor:</label>
+                                    <input type="text" id="coffee4_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
+                                </div>
+                            </div>
+
+                            <div class="submit-page__coffee-section">
+                                <div class="submit-page__coffee-divider">
+                                    <span class="submit-page__coffee-number">+</span>
+                                    <span class="submit-page__coffee-title">Preguntas Bonus</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="favorite_coffee">¿Cuál fue tu café favorito y por qué?</label>
+                                    <textarea id="favorite_coffee" rows="3"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="brewing_method">¿En qué método de preparación lo disfrutaste más?</label>
+                                    <select id="brewing_method">
+                                        <option value="">Selecciona un método</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="cta-button">Enviar Solución del Caso</button>
+                        </form>
                     </div>
-                    
-                    <form id="submitForm">
-                        <div class="form-group">
-                            <label for="orderId">ID de Orden (6 caracteres):</label>
-                            <input type="text" id="orderId" placeholder="Ej: ABC123" maxlength="6" required class="text-uppercase-input">
-                            <small class="form-helper">
-                                Este código fue enviado con tu orden de café. Es necesario para validar tu compra.
-                            </small>
-                        </div>
-                        
-                        <h3 class="coffee-heading">☕ Café #1</h3>
-                        <div class="form-group">
-                            <label for="coffee1_region">Región de Costa Rica:</label>
-                            <select id="coffee1_region" required>
-                                <option value="">Selecciona una región</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee1_variety">Variedad:</label>
-                            <select id="coffee1_variety" required>
-                                <option value="">Selecciona una variedad</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee1_process">Proceso de Beneficiado:</label>
-                            <select id="coffee1_process" required>
-                                <option value="">Selecciona un proceso</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee1_note1">Primera Nota de Sabor:</label>
-                            <input type="text" id="coffee1_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee1_note2">Segunda Nota de Sabor:</label>
-                            <input type="text" id="coffee1_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
-                        </div>
-
-                        <h3 class="coffee-heading">☕ Café #2</h3>
-                        <div class="form-group">
-                            <label for="coffee2_region">Región de Costa Rica:</label>
-                            <select id="coffee2_region" required>
-                                <option value="">Selecciona una región</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee2_variety">Variedad:</label>
-                            <select id="coffee2_variety" required>
-                                <option value="">Selecciona una variedad</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee2_process">Proceso de Beneficiado:</label>
-                            <select id="coffee2_process" required>
-                                <option value="">Selecciona un proceso</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee2_note1">Primera Nota de Sabor:</label>
-                            <input type="text" id="coffee2_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee2_note2">Segunda Nota de Sabor:</label>
-                            <input type="text" id="coffee2_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
-                        </div>
-
-                        <h3 class="coffee-heading">☕ Café #3</h3>
-                        <div class="form-group">
-                            <label for="coffee3_region">Región de Costa Rica:</label>
-                            <select id="coffee3_region" required>
-                                <option value="">Selecciona una región</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee3_variety">Variedad:</label>
-                            <select id="coffee3_variety" required>
-                                <option value="">Selecciona una variedad</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee3_process">Proceso de Beneficiado:</label>
-                            <select id="coffee3_process" required>
-                                <option value="">Selecciona un proceso</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee3_note1">Primera Nota de Sabor:</label>
-                            <input type="text" id="coffee3_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee3_note2">Segunda Nota de Sabor:</label>
-                            <input type="text" id="coffee3_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
-                        </div>
-
-                        <h3 class="coffee-heading">☕ Café #4</h3>
-                        <div class="form-group">
-                            <label for="coffee4_region">Región de Costa Rica:</label>
-                            <select id="coffee4_region" required>
-                                <option value="">Selecciona una región</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee4_variety">Variedad:</label>
-                            <select id="coffee4_variety" required>
-                                <option value="">Selecciona una variedad</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee4_process">Proceso de Beneficiado:</label>
-                            <select id="coffee4_process" required>
-                                <option value="">Selecciona un proceso</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee4_note1">Primera Nota de Sabor:</label>
-                            <input type="text" id="coffee4_note1" placeholder="Ej: Chocolate, Frutal, Floral, Nuez..." maxlength="50">
-                        </div>
-                        <div class="form-group">
-                            <label for="coffee4_note2">Segunda Nota de Sabor:</label>
-                            <input type="text" id="coffee4_note2" placeholder="Ej: Cítrico, Caramelo, Especias, Miel..." maxlength="50">
-                        </div>
-
-                        <h3 class="coffee-heading">🔍 Preguntas Bonus</h3>
-                        <div class="form-group">
-                            <label for="favorite_coffee">¿Cuál fue tu café favorito y por qué?</label>
-                            <textarea id="favorite_coffee" rows="3"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="brewing_method">¿En qué método de preparación lo disfrutaste más?</label>
-                            <select id="brewing_method">
-                                <option value="">Selecciona un método</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="cta-button">Enviar Solución del Caso</button>
-                    </form>
                 </div>
             </div>
         </section>
@@ -438,33 +470,40 @@
 
     <!-- Leaderboard Page -->
     <div id="leaderboard" class="page">
-        <section class="section">
+        <section class="section ranking-page">
             <div class="container">
+                <p class="ranking-page__eyebrow">Tabla de Posiciones</p>
                 <h2 class="section-title">Ranking de Detectives</h2>
-                
+
                 <!-- Current Case Leaderboard -->
-                <div class="card leaderboard-section">
-                    <h3 class="leaderboard-section__title">🏆 Caso Actual</h3>
-                    <div id="currentCaseInfo" class="leaderboard-section__info">
-                        <p>Cargando información del caso...</p>
+                <div class="ranking-panel">
+                    <div class="ranking-panel__header">
+                        <div class="ranking-panel__label">Caso Actual</div>
+                        <div id="currentCaseInfo" class="ranking-panel__info">
+                            <p>Cargando...</p>
+                        </div>
                     </div>
-                    <div id="currentCaseLeaderboard" class="leaderboard">
+                    <div id="currentCaseLeaderboard" class="ranking-panel__list">
                         <!-- Current case leaderboard entries will be loaded dynamically -->
                     </div>
                 </div>
-                
+
                 <!-- Global/Historical Leaderboard -->
-                <div class="card">
-                    <h3 class="leaderboard-section__title">🌟 Ranking Global</h3>
-                    <p class="leaderboard-section__description">Puntuación acumulada de todos los casos resueltos</p>
-                    <div id="globalLeaderboard" class="leaderboard">
+                <div class="ranking-panel">
+                    <div class="ranking-panel__header">
+                        <div class="ranking-panel__label">Ranking Global</div>
+                        <div class="ranking-panel__info">
+                            <p>Puntuación acumulada de todos los casos</p>
+                        </div>
+                    </div>
+                    <div id="globalLeaderboard" class="ranking-panel__list">
                         <!-- Global leaderboard entries will be loaded dynamically -->
                     </div>
                 </div>
-                
-                <div class="leaderboard-footer">
-                    <p class="leaderboard-footer__title">🏆 Rankings actualizados en tiempo real</p>
-                    <p class="leaderboard-footer__description">¡Completa más casos para subir en el ranking!</p>
+
+                <div class="ranking-page__footer">
+                    <p>Rankings actualizados en tiempo real</p>
+                    <p>Completa más casos para subir en el ranking</p>
                 </div>
             </div>
         </section>
@@ -472,13 +511,18 @@
 
     <!-- Profile Page -->
     <div id="profile" class="page">
-        <section class="section">
+        <section class="section profile-page">
             <div class="container">
+                <p class="profile-page__eyebrow">Expediente Personal</p>
                 <h2 class="section-title">Mi Perfil de Detective</h2>
-                <div class="cards-grid">
-                    <div class="card">
-                        <h3>👤 Información Personal</h3>
-                        <div class="form-container profile-form-transparent">
+
+                <div class="profile-page__grid">
+                    <!-- Personal Info Panel -->
+                    <div class="profile-panel">
+                        <div class="profile-panel__header">
+                            <div class="profile-panel__label">Información Personal</div>
+                        </div>
+                        <div class="profile-panel__body">
                             <div class="form-group">
                                 <label for="profileName">Nombre del Detective:</label>
                                 <input type="text" id="profileName" placeholder="Ingresa tu nombre">
@@ -490,71 +534,68 @@
                             <button type="button" class="cta-button" onclick="saveProfile()">Actualizar Perfil</button>
                         </div>
                     </div>
-                    
-                    <div class="card">
-                        <h3>📊 Mis Estadísticas</h3>
-                        
-                        <!-- Global Stats -->
-                        <div class="stats-section">
-                            <h4 class="stats-section__title">🌟 Estadísticas Globales</h4>
-                            <div class="stats-section__container">
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value stats-section__value--large" data-stat="points">0</div>
-                                    <div>Puntos Totales</div>
-                                </div>
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value" data-stat="global-rank"># --</div>
-                                    <div>Ranking Global</div>
-                                </div>
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value" data-stat="cases">0</div>
-                                    <div>Casos Completados</div>
-                                </div>
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value" data-stat="accuracy">0%</div>
-                                    <div>Precisión Promedio</div>
+
+                    <!-- Stats Panel -->
+                    <div class="profile-panel">
+                        <div class="profile-panel__header">
+                            <div class="profile-panel__label">Estadísticas</div>
+                        </div>
+                        <div class="profile-panel__body">
+                            <!-- Global Stats -->
+                            <div class="profile-stats">
+                                <div class="profile-stats__section-label">Global</div>
+                                <div class="profile-stats__grid">
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value profile-stats__value--featured" data-stat="points">0</div>
+                                        <div class="profile-stats__label">Puntos Totales</div>
+                                    </div>
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value" data-stat="global-rank"># --</div>
+                                        <div class="profile-stats__label">Ranking</div>
+                                    </div>
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value" data-stat="cases">0</div>
+                                        <div class="profile-stats__label">Casos</div>
+                                    </div>
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value" data-stat="accuracy">0%</div>
+                                        <div class="profile-stats__label">Precisión</div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- Current Case Stats -->
-                        <div>
-                            <h4 class="stats-section__title">🏆 Caso Actual</h4>
-                            <div class="stats-section__container">
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value" data-stat="current-rank"># --</div>
-                                    <div>Posición en Caso Actual</div>
-                                </div>
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value" data-stat="current-score">--</div>
-                                    <div>Mejor Puntuación</div>
-                                </div>
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value" data-stat="current-accuracy">--%</div>
-                                    <div>Precisión en Caso Actual</div>
+
+                            <!-- Current Case Stats -->
+                            <div class="profile-stats">
+                                <div class="profile-stats__section-label">Caso Actual</div>
+                                <div class="profile-stats__grid profile-stats__grid--three">
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value" data-stat="current-rank"># --</div>
+                                        <div class="profile-stats__label">Posición</div>
+                                    </div>
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value" data-stat="current-score">--</div>
+                                        <div class="profile-stats__label">Puntuación</div>
+                                    </div>
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value" data-stat="current-accuracy">--%</div>
+                                        <div class="profile-stats__label">Precisión</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Badges section temporarily hidden - will be implemented later -->
-                <!-- <div class="card margin-top-2">
-                    <h3>🏅 Mis Insignias</h3>
-                    <div id="userBadgesContainer" class="profile-badges__container">
+                <!-- Case History Panel -->
+                <div class="profile-panel profile-panel--wide">
+                    <div class="profile-panel__header">
+                        <div class="profile-panel__label">Historial de Casos</div>
                     </div>
-                    <div class="profile-badges__upcoming">
-                        <p>Próximas insignias por desbloquear:</p>
-                        <div class="profile-badges__upcoming-title">
-                        </div>
-                    </div>
-                </div> -->
-
-                <div class="card margin-top-2">
-                    <h3>📋 Historial de Casos</h3>
-                    <div id="caseHistoryContainer" class="profile-history__container">
-                        <div class="profile-history__loading">
-                            <p>Cargando historial de casos...</p>
+                    <div class="profile-panel__body">
+                        <div id="caseHistoryContainer" class="profile-history__container">
+                            <div class="profile-history__loading">
+                                <p>Cargando historial de casos...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -564,13 +605,17 @@
 
     <!-- Admin Page -->
     <div id="admin" class="page">
-        <section class="section">
+        <section class="section admin-page">
             <div class="container">
-                <h2 class="section-title">Panel de Administración</h2>
-                
+                <p class="admin-page__eyebrow">Panel de Control</p>
+                <h2 class="section-title">Administración</h2>
+
                 <!-- Case Management -->
-                <div class="card">
-                    <h3>📦 Gestión de Casos</h3>
+                <div class="admin-panel">
+                    <div class="admin-panel__header">
+                        <div class="admin-panel__label">Gestión de Casos</div>
+                    </div>
+                    <div class="admin-panel__body">
                     
                     <!-- Case Creation Form -->
                     <div id="caseManagementSection">
@@ -1099,11 +1144,15 @@
                             <!-- Cases will be loaded here -->
                         </div>
                     </div>
+                    </div>
                 </div>
 
                 <!-- Order Management -->
-                <div class="card">
-                    <h3>📋 Gestión de Órdenes</h3>
+                <div class="admin-panel">
+                    <div class="admin-panel__header">
+                        <div class="admin-panel__label">Gestión de Órdenes</div>
+                    </div>
+                    <div class="admin-panel__body">
                     
                     <!-- Order Creation Form -->
                     <div id="orderManagementSection">
@@ -1154,11 +1203,15 @@
                             <!-- Orders will be loaded here -->
                         </div>
                     </div>
+                    </div>
                 </div>
 
                 <!-- Catalog Management -->
-                <div class="card">
-                    <h3>🗂️ Gestión de Catálogos</h3>
+                <div class="admin-panel">
+                    <div class="admin-panel__header">
+                        <div class="admin-panel__label">Gestión de Catálogos</div>
+                    </div>
+                    <div class="admin-panel__body">
                     
                     <!-- Category Selector -->
                     <div class="form-group">
@@ -1205,6 +1258,7 @@
                     <!-- Catalog Items List -->
                     <div id="catalogItemsList" class="admin-section__list">
                         <!-- Items will be loaded here -->
+                    </div>
                     </div>
                 </div>
 
