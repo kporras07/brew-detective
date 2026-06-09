@@ -479,13 +479,18 @@
 
     <!-- Profile Page -->
     <div id="profile" class="page">
-        <section class="section">
+        <section class="section profile-page">
             <div class="container">
+                <p class="profile-page__eyebrow">Expediente Personal</p>
                 <h2 class="section-title">Mi Perfil de Detective</h2>
-                <div class="cards-grid">
-                    <div class="card">
-                        <h3>👤 Información Personal</h3>
-                        <div class="form-container profile-form-transparent">
+
+                <div class="profile-page__grid">
+                    <!-- Personal Info Panel -->
+                    <div class="profile-panel">
+                        <div class="profile-panel__header">
+                            <div class="profile-panel__label">Información Personal</div>
+                        </div>
+                        <div class="profile-panel__body">
                             <div class="form-group">
                                 <label for="profileName">Nombre del Detective:</label>
                                 <input type="text" id="profileName" placeholder="Ingresa tu nombre">
@@ -497,71 +502,68 @@
                             <button type="button" class="cta-button" onclick="saveProfile()">Actualizar Perfil</button>
                         </div>
                     </div>
-                    
-                    <div class="card">
-                        <h3>📊 Mis Estadísticas</h3>
-                        
-                        <!-- Global Stats -->
-                        <div class="stats-section">
-                            <h4 class="stats-section__title">🌟 Estadísticas Globales</h4>
-                            <div class="stats-section__container">
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value stats-section__value--large" data-stat="points">0</div>
-                                    <div>Puntos Totales</div>
-                                </div>
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value" data-stat="global-rank"># --</div>
-                                    <div>Ranking Global</div>
-                                </div>
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value" data-stat="cases">0</div>
-                                    <div>Casos Completados</div>
-                                </div>
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value" data-stat="accuracy">0%</div>
-                                    <div>Precisión Promedio</div>
+
+                    <!-- Stats Panel -->
+                    <div class="profile-panel">
+                        <div class="profile-panel__header">
+                            <div class="profile-panel__label">Estadísticas</div>
+                        </div>
+                        <div class="profile-panel__body">
+                            <!-- Global Stats -->
+                            <div class="profile-stats">
+                                <div class="profile-stats__section-label">Global</div>
+                                <div class="profile-stats__grid">
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value profile-stats__value--featured" data-stat="points">0</div>
+                                        <div class="profile-stats__label">Puntos Totales</div>
+                                    </div>
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value" data-stat="global-rank"># --</div>
+                                        <div class="profile-stats__label">Ranking</div>
+                                    </div>
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value" data-stat="cases">0</div>
+                                        <div class="profile-stats__label">Casos</div>
+                                    </div>
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value" data-stat="accuracy">0%</div>
+                                        <div class="profile-stats__label">Precisión</div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- Current Case Stats -->
-                        <div>
-                            <h4 class="stats-section__title">🏆 Caso Actual</h4>
-                            <div class="stats-section__container">
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value" data-stat="current-rank"># --</div>
-                                    <div>Posición en Caso Actual</div>
-                                </div>
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value" data-stat="current-score">--</div>
-                                    <div>Mejor Puntuación</div>
-                                </div>
-                                <div class="stats-section__item">
-                                    <div class="stats-section__value" data-stat="current-accuracy">--%</div>
-                                    <div>Precisión en Caso Actual</div>
+
+                            <!-- Current Case Stats -->
+                            <div class="profile-stats">
+                                <div class="profile-stats__section-label">Caso Actual</div>
+                                <div class="profile-stats__grid profile-stats__grid--three">
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value" data-stat="current-rank"># --</div>
+                                        <div class="profile-stats__label">Posición</div>
+                                    </div>
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value" data-stat="current-score">--</div>
+                                        <div class="profile-stats__label">Puntuación</div>
+                                    </div>
+                                    <div class="profile-stats__item">
+                                        <div class="profile-stats__value" data-stat="current-accuracy">--%</div>
+                                        <div class="profile-stats__label">Precisión</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Badges section temporarily hidden - will be implemented later -->
-                <!-- <div class="card margin-top-2">
-                    <h3>🏅 Mis Insignias</h3>
-                    <div id="userBadgesContainer" class="profile-badges__container">
+                <!-- Case History Panel -->
+                <div class="profile-panel profile-panel--wide">
+                    <div class="profile-panel__header">
+                        <div class="profile-panel__label">Historial de Casos</div>
                     </div>
-                    <div class="profile-badges__upcoming">
-                        <p>Próximas insignias por desbloquear:</p>
-                        <div class="profile-badges__upcoming-title">
-                        </div>
-                    </div>
-                </div> -->
-
-                <div class="card margin-top-2">
-                    <h3>📋 Historial de Casos</h3>
-                    <div id="caseHistoryContainer" class="profile-history__container">
-                        <div class="profile-history__loading">
-                            <p>Cargando historial de casos...</p>
+                    <div class="profile-panel__body">
+                        <div id="caseHistoryContainer" class="profile-history__container">
+                            <div class="profile-history__loading">
+                                <p>Cargando historial de casos...</p>
+                            </div>
                         </div>
                     </div>
                 </div>
