@@ -573,13 +573,17 @@
 
     <!-- Admin Page -->
     <div id="admin" class="page">
-        <section class="section">
+        <section class="section admin-page">
             <div class="container">
-                <h2 class="section-title">Panel de Administración</h2>
-                
+                <p class="admin-page__eyebrow">Panel de Control</p>
+                <h2 class="section-title">Administración</h2>
+
                 <!-- Case Management -->
-                <div class="card">
-                    <h3>📦 Gestión de Casos</h3>
+                <div class="admin-panel">
+                    <div class="admin-panel__header">
+                        <div class="admin-panel__label">Gestión de Casos</div>
+                    </div>
+                    <div class="admin-panel__body">
                     
                     <!-- Case Creation Form -->
                     <div id="caseManagementSection">
@@ -1108,11 +1112,15 @@
                             <!-- Cases will be loaded here -->
                         </div>
                     </div>
+                    </div>
                 </div>
 
                 <!-- Order Management -->
-                <div class="card">
-                    <h3>📋 Gestión de Órdenes</h3>
+                <div class="admin-panel">
+                    <div class="admin-panel__header">
+                        <div class="admin-panel__label">Gestión de Órdenes</div>
+                    </div>
+                    <div class="admin-panel__body">
                     
                     <!-- Order Creation Form -->
                     <div id="orderManagementSection">
@@ -1163,11 +1171,15 @@
                             <!-- Orders will be loaded here -->
                         </div>
                     </div>
+                    </div>
                 </div>
 
                 <!-- Catalog Management -->
-                <div class="card">
-                    <h3>🗂️ Gestión de Catálogos</h3>
+                <div class="admin-panel">
+                    <div class="admin-panel__header">
+                        <div class="admin-panel__label">Gestión de Catálogos</div>
+                    </div>
+                    <div class="admin-panel__body">
                     
                     <!-- Category Selector -->
                     <div class="form-group">
@@ -1214,6 +1226,7 @@
                     <!-- Catalog Items List -->
                     <div id="catalogItemsList" class="admin-section__list">
                         <!-- Items will be loaded here -->
+                    </div>
                     </div>
                 </div>
 

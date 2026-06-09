@@ -485,6 +485,47 @@
     }
 }
 
+// Admin page layout
+.admin-page {
+    &__eyebrow {
+        text-align: center;
+        font-family: $font-body;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        font-size: 0.75rem;
+        color: rgba($primary-gold, 0.7);
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+}
+
+.admin-panel {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba($primary-gold, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+
+    &__header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba($primary-gold, 0.1);
+        background: rgba($primary-gold, 0.04);
+    }
+
+    &__label {
+        font-family: $font-body;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-size: 0.7rem;
+        color: rgba($primary-gold, 0.6);
+        font-weight: 500;
+    }
+
+    &__body {
+        padding: 1.5rem;
+    }
+}
+
 // Admin section comprehensive styles
 .admin-section {
     &__buttons {
