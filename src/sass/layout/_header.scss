@@ -2,13 +2,12 @@
 @use '../base/mixins' as *;
 
 header {
-    background: rgba(0, 0, 0, 0.6);
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.4));
     backdrop-filter: blur(12px);
     position: fixed;
     top: 0;
     width: 100%;
     z-index: $z-header;
-    border-bottom: 1px solid rgba($primary-gold, 0.15);
 }
 
 nav {
