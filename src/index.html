@@ -438,33 +438,40 @@
 
     <!-- Leaderboard Page -->
     <div id="leaderboard" class="page">
-        <section class="section">
+        <section class="section ranking-page">
             <div class="container">
+                <p class="ranking-page__eyebrow">Tabla de Posiciones</p>
                 <h2 class="section-title">Ranking de Detectives</h2>
-                
+
                 <!-- Current Case Leaderboard -->
-                <div class="card leaderboard-section">
-                    <h3 class="leaderboard-section__title">🏆 Caso Actual</h3>
-                    <div id="currentCaseInfo" class="leaderboard-section__info">
-                        <p>Cargando información del caso...</p>
+                <div class="ranking-panel">
+                    <div class="ranking-panel__header">
+                        <div class="ranking-panel__label">Caso Actual</div>
+                        <div id="currentCaseInfo" class="ranking-panel__info">
+                            <p>Cargando...</p>
+                        </div>
                     </div>
-                    <div id="currentCaseLeaderboard" class="leaderboard">
+                    <div id="currentCaseLeaderboard" class="ranking-panel__list">
                         <!-- Current case leaderboard entries will be loaded dynamically -->
                     </div>
                 </div>
-                
+
                 <!-- Global/Historical Leaderboard -->
-                <div class="card">
-                    <h3 class="leaderboard-section__title">🌟 Ranking Global</h3>
-                    <p class="leaderboard-section__description">Puntuación acumulada de todos los casos resueltos</p>
-                    <div id="globalLeaderboard" class="leaderboard">
+                <div class="ranking-panel">
+                    <div class="ranking-panel__header">
+                        <div class="ranking-panel__label">Ranking Global</div>
+                        <div class="ranking-panel__info">
+                            <p>Puntuación acumulada de todos los casos</p>
+                        </div>
+                    </div>
+                    <div id="globalLeaderboard" class="ranking-panel__list">
                         <!-- Global leaderboard entries will be loaded dynamically -->
                     </div>
                 </div>
-                
-                <div class="leaderboard-footer">
-                    <p class="leaderboard-footer__title">🏆 Rankings actualizados en tiempo real</p>
-                    <p class="leaderboard-footer__description">¡Completa más casos para subir en el ranking!</p>
+
+                <div class="ranking-page__footer">
+                    <p>Rankings actualizados en tiempo real</p>
+                    <p>Completa más casos para subir en el ranking</p>
                 </div>
             </div>
         </section>
