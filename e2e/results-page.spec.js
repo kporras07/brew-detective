@@ -64,12 +64,12 @@ test.describe('Results page - per-coffee breakdown', () => {
     await expect(revealBtn).toBeVisible();
     await expect(revealBtn).toContainText('Revelar Respuestas Correctas');
 
-    await page.evaluate(() => document.getElementById('revealAnswersBtn').click());
+    await revealBtn.click();
     const firstCorrectAnswer = page.locator('.correct-answer').first();
     await expect(firstCorrectAnswer).toBeVisible();
     await expect(revealBtn).toContainText('Ocultar Respuestas Correctas');
 
-    await page.evaluate(() => document.getElementById('revealAnswersBtn').click());
+    await revealBtn.click();
     await expect(firstCorrectAnswer).not.toBeVisible();
     await expect(revealBtn).toContainText('Revelar Respuestas Correctas');
   });
