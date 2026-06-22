@@ -98,7 +98,53 @@ async function mockAPI(page) {
   // Submissions
   await page.route(`${API_BASE}/api/v1/submissions*`, route => {
     if (route.request().method() === 'POST') {
-      return route.fulfill({ json: { score: 280, accuracy: 0.70, status: 'completed' } });
+      return route.fulfill({ json: {
+        score: 280,
+        accuracy: 0.70,
+        status: 'completed',
+        coffee_results: [
+          {
+            coffee_id: 'c1', coffee_name: 'Café Tarrazú',
+            results: {
+              region: { answer: 'Tarrazú', correct: 'Tarrazú', is_correct: true },
+              variety: { answer: 'Caturra', correct: 'Catuaí', is_correct: false },
+              process: { answer: 'Lavado', correct: 'Lavado', is_correct: true },
+              taste_note_1: { answer: 'Chocolate', correct: 'Chocolate, Caramelo', is_correct: true },
+              taste_note_2: { answer: 'Frutal', correct: 'Chocolate, Caramelo', is_correct: false },
+            },
+          },
+          {
+            coffee_id: 'c2', coffee_name: 'Café Valle Occidental',
+            results: {
+              region: { answer: 'Valle Occidental', correct: 'Valle Central', is_correct: false },
+              variety: { answer: 'Catuaí', correct: 'Catuaí', is_correct: true },
+              process: { answer: 'Natural', correct: 'Natural', is_correct: true },
+              taste_note_1: { answer: 'Miel', correct: 'Nuez, Miel', is_correct: true },
+              taste_note_2: { answer: 'Cítrico', correct: 'Nuez, Miel', is_correct: false },
+            },
+          },
+          {
+            coffee_id: 'c3', coffee_name: 'Café Brunca',
+            results: {
+              region: { answer: 'Tarrazú', correct: 'Brunca', is_correct: false },
+              variety: { answer: 'Caturra', correct: 'Caturra', is_correct: true },
+              process: { answer: 'Lavado', correct: 'Honey', is_correct: false },
+              taste_note_1: { answer: 'Frutal', correct: 'Frutal, Floral', is_correct: true },
+              taste_note_2: { answer: 'Chocolate', correct: 'Frutal, Floral', is_correct: false },
+            },
+          },
+          {
+            coffee_id: 'c4', coffee_name: 'Café Orosi',
+            results: {
+              region: { answer: 'Tarrazú', correct: 'Orosi', is_correct: false },
+              variety: { answer: 'Catuaí', correct: 'Geisha', is_correct: false },
+              process: { answer: 'Natural', correct: 'Natural', is_correct: true },
+              taste_note_1: { answer: 'Floral', correct: 'Floral, Jazmín', is_correct: true },
+              taste_note_2: { answer: 'Miel', correct: 'Floral, Jazmín', is_correct: false },
+            },
+          },
+        ],
+      }});
     }
     return route.fulfill({ json: { submissions: [] } });
   });

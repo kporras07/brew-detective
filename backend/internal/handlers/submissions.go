@@ -68,11 +68,14 @@ func (h *Handler) SubmitCase(c *gin.Context) {
 	// Update user stats
 	go h.updateUserStats(submission.UserID, score, accuracy)
 
+	coffeeResults := buildCoffeeResults(&submission, activeCase)
+
 	c.JSON(http.StatusCreated, gin.H{
-		"message":       "Submission successful",
-		"submission_id": submission.ID,
-		"score":         score,
-		"accuracy":      accuracy,
+		"message":        "Submission successful",
+		"submission_id":  submission.ID,
+		"score":          score,
+		"accuracy":       accuracy,
+		"coffee_results": coffeeResults,
 	})
 }
 
@@ -437,4 +440,117 @@ func getMatchedTastingNote(userNote, correctNotes string) string {
 // matchesTastingNotes checks if a user's tasting note matches any of the comma-separated correct notes
 func matchesTastingNotes(userNote, correctNotes string) bool {
 	return getMatchedTastingNote(userNote, correctNotes) != ""
+}
+
+type QuestionResult struct {
+	Answer    string `json:"answer"`
+	Correct   string `json:"correct"`
+	IsCorrect bool   `json:"is_correct"`
+}
+
+type AdditionalResult struct {
+	Question  string `json:"question"`
+	Answer    string `json:"answer"`
+	Correct   string `json:"correct"`
+	IsCorrect bool   `json:"is_correct"`
+	Points    int    `json:"points"`
+}
+
+type CoffeeResult struct {
+	CoffeeID          string                    `json:"coffee_id"`
+	CoffeeName        string                    `json:"coffee_name"`
+	Results           map[string]QuestionResult  `json:"results"`
+	AdditionalResults []AdditionalResult         `json:"additional_results,omitempty"`
+}
+
+func buildCoffeeResults(submission *models.Submission, activeCase *models.CoffeeCase) []CoffeeResult {
+	if activeCase == nil {
+		return nil
+	}
+
+	var results []CoffeeResult
+
+	for _, answer := range submission.CoffeeAnswers {
+		var correctCoffee *models.CoffeeItem
+		for i := range activeCase.Coffees {
+			if activeCase.Coffees[i].ID == answer.CoffeeID {
+				correctCoffee = &activeCase.Coffees[i]
+				break
+			}
+		}
+
+		if correctCoffee == nil {
+			continue
+		}
+
+		eq := getEffectiveEnabledQuestions(correctCoffee, activeCase.EnabledQuestions)
+		qResults := make(map[string]QuestionResult)
+
+		if eq.Region {
+			qResults["region"] = QuestionResult{
+				Answer:    answer.Region,
+				Correct:   correctCoffee.Region,
+				IsCorrect: strings.EqualFold(strings.TrimSpace(answer.Region), strings.TrimSpace(correctCoffee.Region)),
+			}
+		}
+
+		if eq.Variety {
+			qResults["variety"] = QuestionResult{
+				Answer:    answer.Variety,
+				Correct:   correctCoffee.Variety,
+				IsCorrect: strings.EqualFold(strings.TrimSpace(answer.Variety), strings.TrimSpace(correctCoffee.Variety)),
+			}
+		}
+
+		if eq.Process {
+			qResults["process"] = QuestionResult{
+				Answer:    answer.Process,
+				Correct:   correctCoffee.Process,
+				IsCorrect: strings.EqualFold(strings.TrimSpace(answer.Process), strings.TrimSpace(correctCoffee.Process)),
+			}
+		}
+
+		if eq.TasteNote1 {
+			qResults["taste_note_1"] = QuestionResult{
+				Answer:    answer.TasteNote1,
+				Correct:   correctCoffee.TastingNotes,
+				IsCorrect: getMatchedTastingNote(answer.TasteNote1, correctCoffee.TastingNotes) != "",
+			}
+		}
+
+		if eq.TasteNote2 {
+			qResults["taste_note_2"] = QuestionResult{
+				Answer:    answer.TasteNote2,
+				Correct:   correctCoffee.TastingNotes,
+				IsCorrect: getMatchedTastingNote(answer.TasteNote2, correctCoffee.TastingNotes) != "",
+			}
+		}
+
+		cr := CoffeeResult{
+			CoffeeID:   correctCoffee.ID,
+			CoffeeName: correctCoffee.Name,
+			Results:    qResults,
+		}
+
+		for _, aq := range correctCoffee.AdditionalQuestions {
+			ar := AdditionalResult{
+				Question:  aq.Question,
+				Correct:   aq.CorrectOption,
+				IsCorrect: false,
+				Points:    aq.Points,
+			}
+			for _, aa := range answer.AdditionalAnswers {
+				if aa.QuestionID == aq.ID {
+					ar.Answer = aa.Answer
+					ar.IsCorrect = strings.EqualFold(strings.TrimSpace(aa.Answer), strings.TrimSpace(aq.CorrectOption))
+					break
+				}
+			}
+			cr.AdditionalResults = append(cr.AdditionalResults, ar)
+		}
+
+		results = append(results, cr)
+	}
+
+	return results
 }

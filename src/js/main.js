@@ -630,6 +630,9 @@ document.getElementById('submitForm').addEventListener('submit', async function(
             sessionStorage.setItem('lastSubmissionScore', response.score);
             sessionStorage.setItem('lastSubmissionAccuracy', response.accuracy);
         }
+        if (response.coffee_results) {
+            sessionStorage.setItem('lastCoffeeResults', JSON.stringify(response.coffee_results));
+        }
         
         // Show success message briefly
         document.getElementById('submitSuccess').style.display = 'block';
@@ -661,14 +664,106 @@ document.getElementById('submitForm').addEventListener('submit', async function(
 function populateThankYouPage(submissionResponse) {
     const finalScoreElement = document.getElementById('finalScore');
     const finalAccuracyElement = document.getElementById('finalAccuracy');
-    
+
     if (finalScoreElement && finalAccuracyElement) {
-        // Use response data if available, otherwise try sessionStorage
         const score = submissionResponse?.score ?? sessionStorage.getItem('lastSubmissionScore') ?? '--';
         const accuracy = submissionResponse?.accuracy ?? sessionStorage.getItem('lastSubmissionAccuracy') ?? 0;
-        
+
         finalScoreElement.textContent = score;
         finalAccuracyElement.textContent = accuracy !== '--' ? `${Math.round(accuracy * 100)}%` : '--%';
+    }
+
+    const coffeeResults = submissionResponse?.coffee_results ?? JSON.parse(sessionStorage.getItem('lastCoffeeResults') || 'null');
+    if (coffeeResults) {
+        sessionStorage.setItem('lastCoffeeResults', JSON.stringify(coffeeResults));
+        renderCoffeeResults(coffeeResults);
+    }
+}
+
+const questionLabels = {
+    region: 'Región',
+    variety: 'Variedad',
+    process: 'Proceso',
+    taste_note_1: 'Nota de Cata 1',
+    taste_note_2: 'Nota de Cata 2'
+};
+
+function createQuestionResultRow(indicatorClass, icon, label, answer, correct) {
+    const row = document.createElement('div');
+    row.className = 'question-result';
+
+    const indicatorSpan = document.createElement('span');
+    indicatorSpan.className = indicatorClass;
+    indicatorSpan.textContent = icon;
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'question-label';
+    labelSpan.textContent = label;
+
+    const answerSpan = document.createElement('span');
+    answerSpan.className = 'question-answer';
+    answerSpan.textContent = answer || '—';
+
+    const correctSpan = document.createElement('span');
+    correctSpan.className = 'correct-answer';
+    correctSpan.textContent = correct;
+
+    row.appendChild(indicatorSpan);
+    row.appendChild(labelSpan);
+    row.appendChild(answerSpan);
+    row.appendChild(correctSpan);
+
+    return row;
+}
+
+function renderCoffeeResults(coffeeResults) {
+    const container = document.getElementById('coffeeResultsContainer');
+    const revealBtn = document.getElementById('revealAnswersBtn');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    coffeeResults.forEach((coffee, index) => {
+        const card = document.createElement('div');
+        card.className = 'coffee-result-card';
+
+        const title = document.createElement('h4');
+        title.className = 'coffee-result-card__title';
+        title.textContent = `Café ${index + 1}${coffee.coffee_name ? ': ' + coffee.coffee_name : ''}`;
+        card.appendChild(title);
+
+        const questionsDiv = document.createElement('div');
+        questionsDiv.className = 'coffee-result-card__questions';
+
+        const orderedKeys = ['region', 'variety', 'process', 'taste_note_1', 'taste_note_2'];
+        for (const key of orderedKeys) {
+            if (!coffee.results[key]) continue;
+            const result = coffee.results[key];
+            const icon = result.is_correct ? '✓' : '✗';
+            const indicatorClass = result.is_correct ? 'correct-indicator' : 'incorrect-indicator';
+            questionsDiv.appendChild(createQuestionResultRow(indicatorClass, icon, questionLabels[key] || key, result.answer, result.correct));
+        }
+
+        if (coffee.additional_results) {
+            for (const ar of coffee.additional_results) {
+                const icon = ar.is_correct ? '✓' : '✗';
+                const indicatorClass = ar.is_correct ? 'correct-indicator' : 'incorrect-indicator';
+                questionsDiv.appendChild(createQuestionResultRow(indicatorClass, icon, `${ar.question} (${ar.points}pts)`, ar.answer, ar.correct));
+            }
+        }
+
+        card.appendChild(questionsDiv);
+        container.appendChild(card);
+    });
+
+    if (revealBtn) {
+        revealBtn.style.display = 'block';
+        revealBtn.addEventListener('click', function() {
+            container.classList.toggle('show-answers');
+            this.textContent = container.classList.contains('show-answers')
+                ? 'Ocultar Respuestas Correctas'
+                : 'Revelar Respuestas Correctas';
+        });
     }
 }
 
