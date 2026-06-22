@@ -519,6 +519,107 @@
     margin: 0 auto;
 }
 
+// Coffee results breakdown on thank-you page
+.coffee-results-container {
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.coffee-result-card {
+    background: rgba($primary-gold, 0.08);
+    border: 1px solid rgba($primary-gold, 0.2);
+    border-radius: $border-radius;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+
+    &__title {
+        color: $primary-gold;
+        font-family: $font-display;
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+    }
+
+    &__questions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+.question-result {
+    display: grid;
+    grid-template-columns: 1.5rem 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba($text-light, 0.08);
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.question-label {
+    color: rgba($text-light, 0.7);
+    font-size: 0.85rem;
+}
+
+.question-answer {
+    color: $text-light;
+    font-weight: 500;
+    text-align: right;
+}
+
+.correct-answer {
+    display: none;
+    grid-column: 2 / -1;
+    color: rgba($success-green, 0.9);
+    font-size: 0.82rem;
+    padding-left: 0;
+
+    &::before {
+        content: 'Correcto: ';
+        font-weight: 600;
+    }
+}
+
+.coffee-results-container.show-answers .correct-answer {
+    display: block;
+}
+
+.correct-indicator {
+    color: $success-green;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.incorrect-indicator {
+    color: $error-red;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.reveal-answers-btn {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 1.5rem auto;
+    padding: 0.8rem 1.5rem;
+    background: transparent;
+    border: 2px solid rgba($primary-gold, 0.5);
+    border-radius: $button-radius;
+    color: $primary-gold;
+    font-family: $font-body;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: $transition;
+
+    &:hover {
+        background: rgba($primary-gold, 0.15);
+        border-color: $primary-gold;
+    }
+}
+
 // Profile page - badges styles
 .profile-badges {
     &__container {

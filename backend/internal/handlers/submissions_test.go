@@ -895,3 +895,205 @@ func containsBadge(badges []string, target string) bool {
 	}
 	return false
 }
+
+func TestBuildCoffeeResults(t *testing.T) {
+	t.Run("nil case returns nil", func(t *testing.T) {
+		submission := &models.Submission{
+			CoffeeAnswers: []models.CoffeeAnswer{
+				{CoffeeID: "c1", Region: "R"},
+			},
+		}
+		results := buildCoffeeResults(submission, nil)
+		if results != nil {
+			t.Errorf("expected nil, got %v", results)
+		}
+	})
+
+	t.Run("correct and incorrect answers are flagged", func(t *testing.T) {
+		coffees := []models.CoffeeItem{
+			{ID: "c1", Name: "Cafe Uno", Region: "Tarrazú", Variety: "Caturra", Process: "Lavado", TastingNotes: "chocolate, caramelo"},
+		}
+		testCase := makeTestCase(coffees)
+		testCase.EnabledQuestions.FavoriteCoffee = false
+		testCase.EnabledQuestions.BrewingMethod = false
+
+		submission := &models.Submission{
+			CoffeeAnswers: []models.CoffeeAnswer{
+				{CoffeeID: "c1", Region: "Tarrazú", Variety: "Geisha", Process: "Lavado", TasteNote1: "chocolate", TasteNote2: "frutal"},
+			},
+		}
+
+		results := buildCoffeeResults(submission, testCase)
+		if len(results) != 1 {
+			t.Fatalf("expected 1 result, got %d", len(results))
+		}
+
+		cr := results[0]
+		if cr.CoffeeName != "Cafe Uno" {
+			t.Errorf("expected coffee name 'Cafe Uno', got %q", cr.CoffeeName)
+		}
+
+		if !cr.Results["region"].IsCorrect {
+			t.Error("expected region to be correct")
+		}
+		if cr.Results["variety"].IsCorrect {
+			t.Error("expected variety to be incorrect")
+		}
+		if !cr.Results["process"].IsCorrect {
+			t.Error("expected process to be correct")
+		}
+		if !cr.Results["taste_note_1"].IsCorrect {
+			t.Error("expected taste_note_1 to be correct")
+		}
+		if cr.Results["taste_note_2"].IsCorrect {
+			t.Error("expected taste_note_2 to be incorrect")
+		}
+
+		if cr.Results["region"].Correct != "Tarrazú" {
+			t.Errorf("expected correct answer 'Tarrazú', got %q", cr.Results["region"].Correct)
+		}
+		if cr.Results["variety"].Answer != "Geisha" {
+			t.Errorf("expected user answer 'Geisha', got %q", cr.Results["variety"].Answer)
+		}
+	})
+
+	t.Run("respects per-coffee enabled questions", func(t *testing.T) {
+		regionOnly := models.EnabledQuestions{Region: true}
+		coffees := []models.CoffeeItem{
+			{ID: "c1", Name: "Cafe Uno", Region: "R1", Variety: "V1", EnabledQuestions: &regionOnly},
+		}
+		testCase := makeTestCase(coffees)
+
+		submission := &models.Submission{
+			CoffeeAnswers: []models.CoffeeAnswer{
+				{CoffeeID: "c1", Region: "R1", Variety: "Wrong"},
+			},
+		}
+
+		results := buildCoffeeResults(submission, testCase)
+		if len(results) != 1 {
+			t.Fatalf("expected 1 result, got %d", len(results))
+		}
+
+		if _, exists := results[0].Results["variety"]; exists {
+			t.Error("variety should not be in results when disabled by override")
+		}
+		if _, exists := results[0].Results["region"]; !exists {
+			t.Error("region should be in results")
+		}
+	})
+
+	t.Run("unknown coffee ID is skipped", func(t *testing.T) {
+		coffees := []models.CoffeeItem{
+			{ID: "c1", Name: "Cafe Uno", Region: "R1"},
+		}
+		testCase := makeTestCase(coffees)
+
+		submission := &models.Submission{
+			CoffeeAnswers: []models.CoffeeAnswer{
+				{CoffeeID: "unknown", Region: "R1"},
+			},
+		}
+
+		results := buildCoffeeResults(submission, testCase)
+		if len(results) != 0 {
+			t.Errorf("expected 0 results for unknown coffee, got %d", len(results))
+		}
+	})
+
+	t.Run("multiple coffees return multiple results", func(t *testing.T) {
+		coffees := []models.CoffeeItem{
+			{ID: "c1", Name: "Cafe Uno", Region: "R1"},
+			{ID: "c2", Name: "Cafe Dos", Region: "R2"},
+		}
+		testCase := makeTestCase(coffees)
+		testCase.EnabledQuestions = models.EnabledQuestions{Region: true}
+
+		submission := &models.Submission{
+			CoffeeAnswers: []models.CoffeeAnswer{
+				{CoffeeID: "c1", Region: "R1"},
+				{CoffeeID: "c2", Region: "Wrong"},
+			},
+		}
+
+		results := buildCoffeeResults(submission, testCase)
+		if len(results) != 2 {
+			t.Fatalf("expected 2 results, got %d", len(results))
+		}
+
+		if !results[0].Results["region"].IsCorrect {
+			t.Error("expected first coffee region correct")
+		}
+		if results[1].Results["region"].IsCorrect {
+			t.Error("expected second coffee region incorrect")
+		}
+	})
+
+	t.Run("additional questions included in results", func(t *testing.T) {
+		coffees := []models.CoffeeItem{
+			{
+				ID: "c1", Name: "Cafe Uno", Region: "R",
+				AdditionalQuestions: []models.AdditionalQuestion{
+					{ID: "aq1", Question: "Altitude?", Options: []string{"High", "Low"}, CorrectOption: "High", Points: 25},
+					{ID: "aq2", Question: "Roast?", Options: []string{"Light", "Dark"}, CorrectOption: "Light", Points: 10},
+				},
+			},
+		}
+		testCase := &models.CoffeeCase{
+			ID: "test", Coffees: coffees,
+			EnabledQuestions: models.EnabledQuestions{Region: true},
+		}
+
+		submission := &models.Submission{
+			CoffeeAnswers: []models.CoffeeAnswer{
+				{
+					CoffeeID: "c1", Region: "R",
+					AdditionalAnswers: []models.AdditionalAnswer{
+						{QuestionID: "aq1", Answer: "High"},
+						{QuestionID: "aq2", Answer: "Dark"},
+					},
+				},
+			},
+		}
+
+		results := buildCoffeeResults(submission, testCase)
+		if len(results) != 1 {
+			t.Fatalf("expected 1 result, got %d", len(results))
+		}
+
+		if len(results[0].AdditionalResults) != 2 {
+			t.Fatalf("expected 2 additional results, got %d", len(results[0].AdditionalResults))
+		}
+
+		aq1 := results[0].AdditionalResults[0]
+		if !aq1.IsCorrect || aq1.Answer != "High" || aq1.Correct != "High" || aq1.Points != 25 {
+			t.Errorf("unexpected aq1 result: %+v", aq1)
+		}
+
+		aq2 := results[0].AdditionalResults[1]
+		if aq2.IsCorrect || aq2.Answer != "Dark" || aq2.Correct != "Light" || aq2.Points != 10 {
+			t.Errorf("unexpected aq2 result: %+v", aq2)
+		}
+	})
+
+	t.Run("case insensitive matching in results", func(t *testing.T) {
+		coffees := []models.CoffeeItem{
+			{ID: "c1", Name: "Cafe", Region: "Central Valley"},
+		}
+		testCase := &models.CoffeeCase{
+			ID: "test", Coffees: coffees,
+			EnabledQuestions: models.EnabledQuestions{Region: true},
+		}
+
+		submission := &models.Submission{
+			CoffeeAnswers: []models.CoffeeAnswer{
+				{CoffeeID: "c1", Region: "central valley"},
+			},
+		}
+
+		results := buildCoffeeResults(submission, testCase)
+		if !results[0].Results["region"].IsCorrect {
+			t.Error("expected case-insensitive region match to be correct")
+		}
+	})
+}

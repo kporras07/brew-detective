@@ -67,6 +67,7 @@
         background: linear-gradient(45deg, transparent, rgba($primary-gold, 0.1), transparent);
         opacity: 0;
         transition: opacity 0.3s;
+        pointer-events: none;
     }
     
     &:hover::before {
